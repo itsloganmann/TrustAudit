@@ -6,6 +6,8 @@
 
 # TrustAudit -- Tax Shield
 
+> **Live Demo:** [https://trustaudit-demo.fly.dev](https://trustaudit-demo.fly.dev)
+
 **Real-time 43B(h) compliance engine that turns WhatsApp challan photos into tax deduction shields.**
 
 TrustAudit automates the critical "Date of Acceptance" extraction from paper challans sent via WhatsApp, ensuring MSME payments comply with India's Section 43B(h) -- the provision that disallows entire deductions if payments exceed 45 days.
