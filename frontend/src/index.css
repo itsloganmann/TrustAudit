@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "system-ui", -apple-system, sans-serif;
+  --color-bg: #020617;
+  --color-surface: #0f172a;
+  --color-surface-2: #1e293b;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-light: rgba(255, 255, 255, 0.1);
+  --color-text: #f8fafc;
+  --color-text-2: #94a3b8;
+  --color-text-3: #64748b;
+  --color-text-4: #475569;
+  --color-accent: #3b82f6;
+  --color-green: #10b981;
+  --color-green-dim: #059669;
+  --color-red: #f43f5e;
+  --color-red-dim: #e11d48;
+  --color-amber: #f59e0b;
+  --color-violet: #8b5cf6;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #020617;
+  color: #94a3b8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+}
+
+/* ── Minimal Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+/* ── Glassmorphism base ── */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Glow Effects ── */
+.glow-emerald {
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.15);
+}
+
+.glow-rose {
+  text-shadow: 0 0 20px rgba(244, 63, 94, 0.4), 0 0 40px rgba(244, 63, 94, 0.15);
+}
+
+.glow-blue {
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+}
+
+/* ── Transitions ── */
+.row-transition { transition: background 0.2s ease, transform 0.15s ease; }
+.row-transition:hover { background: rgba(59, 130, 246, 0.04); }
+.fade-in { animation: fadeIn 0.3s ease forwards; }
+.slide-up { animation: slideUp 0.25s ease forwards; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* ── Live Ring ── */
+@keyframes live-ring {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.live-ring {
+  position: relative;
+}
+.live-ring::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1.5px solid #10b981;
+  animation: live-ring 1.8s ease-out infinite;
+}
+
+/* ── Ticker ── */
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker-scroll { animation: ticker 60s linear infinite; }
+.ticker-scroll:hover { animation-play-state: paused; }
+
+/* ── Custom Range Slider ── */
+.slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  outline: none;
+  opacity: 0.9;
+  transition: opacity 0.15s ease;
+}
+.slider-input:hover { opacity: 1; }
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f8fafc;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6), 0 0 0 4px rgba(248, 250, 252, 0.08);
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+.slider-input::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.7), 0 0 0 6px rgba(248, 250, 252, 0.12);
+  transform: scale(1.1);
+}
+.slider-input::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+.slider-input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f8fafc;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Sonner toast overrides ── */
+[data-sonner-toaster] {
+  --normal-bg: #0f172a !important;
+  --normal-border: rgba(255,255,255,0.08) !important;
+  --normal-text: #f8fafc !important;
+}
+
+/* ── Evidence drawer overlay ── */
+.drawer-overlay {
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ── Gradient border effect ── */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(16, 185, 129, 0.2), rgba(244, 63, 94, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}

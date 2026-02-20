@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Node
+node_modules/
+.npm
+
+# Vite build output (rebuilt on deploy)
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Uploads (demo artifacts)
+backend/uploads/*.jpg
+backend/uploads/*.png
+
+# Cline / Roo
+.clinerules
+.roomodes
+
+# OS
+Thumbs.db
