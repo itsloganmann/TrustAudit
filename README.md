@@ -6,7 +6,7 @@
 
 # TrustAudit -- Tax Shield
 
-> **Live Demo:** [https://trustaudit-demo.fly.dev](https://trustaudit-demo.fly.dev)
+> **Live Demo:** [https://trustaudit.onrender.com](https://trustaudit.onrender.com)
 
 **Real-time 43B(h) compliance engine that turns WhatsApp challan photos into tax deduction shields.**
 
@@ -38,7 +38,7 @@ TrustAudit provides a CFO dashboard that:
 | **Animations** | Framer Motion |
 | **Icons** | Lucide React |
 | **Toasts** | Sonner |
-| **Deployment** | Render.com (free tier) |
+| **Deployment** | [Render.com](https://trustaudit.onrender.com) (free tier) |
 
 ---
 

@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Seed the database
 RUN python seed.py
 
-# Expose port
-EXPOSE 8080
+# Expose port (Render uses 10000 by default)
+EXPOSE 10000
 
-# Start FastAPI
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Start FastAPI — use $PORT env var for platform portability
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}
