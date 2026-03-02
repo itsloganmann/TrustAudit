@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Toaster, toast } from "sonner";
 import { Shield, Search, Activity } from "lucide-react";
 import Dashboard from "./components/Dashboard";
+import ExamplePipeline from "./components/ExamplePipeline";
 import InvoiceDetailSheet from "./components/InvoiceDetailSheet";
 import AnimatedCounter from "./components/AnimatedCounter";
 
@@ -220,11 +221,10 @@ function App() {
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all flex items-center gap-1.5 ${
-                    tab === t.key
+                  className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all flex items-center gap-1.5 ${tab === t.key
                       ? "bg-white/[0.08] text-white border border-white/[0.1]"
                       : "text-slate-500 hover:text-slate-300 border border-transparent"
-                  }`}
+                    }`}
                 >
                   {t.color && (
                     <span
@@ -234,9 +234,8 @@ function App() {
                   )}
                   {t.label}
                   <span
-                    className={`text-[10px] tabular-nums ${
-                      tab === t.key ? "text-slate-400" : "text-slate-600"
-                    }`}
+                    className={`text-[10px] tabular-nums ${tab === t.key ? "text-slate-400" : "text-slate-600"
+                      }`}
                   >
                     {tabCounts[t.key]}
                   </span>
@@ -266,6 +265,8 @@ function App() {
             loading={loading}
             onSelectInvoice={setSelectedInvoice}
           />
+
+          <ExamplePipeline />
         </div>
       </main>
 
@@ -287,9 +288,8 @@ function Metric({ label, value, prefix = "", color, glow }) {
       <AnimatedCounter
         value={value}
         prefix={prefix}
-        className={`text-[18px] font-bold tabular-nums leading-tight tracking-tight ${
-          glow === "emerald" ? "glow-emerald" : glow === "rose" ? "glow-rose" : ""
-        }`}
+        className={`text-[18px] font-bold tabular-nums leading-tight tracking-tight ${glow === "emerald" ? "glow-emerald" : glow === "rose" ? "glow-rose" : ""
+          }`}
         style={{ color: color || "#f8fafc" }}
         duration={1200}
       />
