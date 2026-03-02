@@ -165,8 +165,31 @@ function WhatsAppView() {
   );
 }
 
-/* CSS-rendered crumpled purchase order */
-function PurchaseOrderImage() {
+/* Inline highlight span helper */
+function HLSpan({ children, color }) {
+  return (
+    <span
+      className="relative inline px-0.5 rounded-sm"
+      style={{
+        background: `${color}25`,
+        border: `1.5px solid ${color}90`,
+        borderRadius: "3px",
+        boxShadow: `0 0 6px ${color}20`,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* CSS-rendered crumpled purchase order — accepts `highlights` prop for key field highlighting */
+function PurchaseOrderImage({ highlights = false }) {
+  const HL = highlights ? HLSpan : ({ children }) => <>{children}</>;
+  const green = "#10b981";
+  const blue = "#3b82f6";
+  const amber = "#f59e0b";
+  const violet = "#8b5cf6";
+
   return (
     <div className="relative" style={{ fontFamily: "'Courier New', monospace" }}>
       {/* Paper texture */}
@@ -218,10 +241,10 @@ function PurchaseOrderImage() {
         <div className="relative z-10">
           <p className="text-center font-bold text-[12px] mb-0.5 tracking-wide">PURCHASE ORDER</p>
           <div className="border-b border-[#c0b8a0] mb-2" />
-          <p className="font-bold text-[11px]">Rajesh Steel Works</p>
-          <p className="text-[9px] text-[#5a5040]">GSTIN: 27AADCR4328K1ZG</p>
-          <p className="text-[9px] text-[#5a5040]">Invoice No: INV-2024-0847</p>
-          <p className="text-[9px] text-[#5a5040] mb-2">Date: 14-Jan-2025</p>
+          <p className="font-bold text-[11px]"><HL color={green}>Rajesh Steel Works</HL></p>
+          <p className="text-[9px] text-[#5a5040]">GSTIN: <HL color={green}>27AADCR4328K1ZG</HL></p>
+          <p className="text-[9px] text-[#5a5040]">Invoice No: <HL color={blue}>INV-2024-0847</HL></p>
+          <p className="text-[9px] text-[#5a5040] mb-2">Date: <HL color={blue}>14-Jan-2025</HL></p>
           <div className="border-t border-dashed border-[#c0b8a0] pt-1.5 mb-1.5">
             <div className="flex justify-between text-[9px] font-bold text-[#3a3020] mb-1">
               <span className="w-[40%]">Item</span>
@@ -239,11 +262,11 @@ function PurchaseOrderImage() {
             ))}
           </div>
           <div className="border-t border-dashed border-[#c0b8a0] pt-1.5">
-            <p className="text-right font-bold text-[11px]">Total: ₹4,50,000</p>
+            <p className="text-right font-bold text-[11px]">Total: <HL color={green}>₹4,50,000</HL></p>
           </div>
           <div className="mt-2 pt-1.5 border-t border-[#c0b8a0]">
-            <p className="text-[9px]"><span className="font-bold">Date of Acceptance:</span> 14-Jan-2025</p>
-            <p className="text-[9px] text-[#5a5040]">MSME Reg: UDYAM-MH-26-0012345</p>
+            <p className="text-[9px]"><span className="font-bold">Date of Acceptance:</span> <HL color={amber}>14-Jan-2025</HL></p>
+            <p className="text-[9px] text-[#5a5040]">MSME Reg: <HL color={violet}>UDYAM-MH-26-0012345</HL></p>
           </div>
           {/* Stamp */}
           <div
@@ -282,20 +305,7 @@ function HighlightedView() {
       </div>
       <div className="flex-1 p-4 overflow-auto">
         <div className="relative rounded-lg overflow-hidden">
-          <PurchaseOrderImage />
-          {/* Green highlight overlays */}
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Vendor name highlight */}
-            <div className="absolute" style={{ top: "25%", left: "5%", width: "55%", height: "9%", background: "rgba(16, 185, 129, 0.2)", border: "1.5px solid rgba(16, 185, 129, 0.6)", borderRadius: "3px" }} />
-            {/* GSTIN highlight */}
-            <div className="absolute" style={{ top: "34%", left: "5%", width: "70%", height: "7%", background: "rgba(16, 185, 129, 0.15)", border: "1.5px solid rgba(16, 185, 129, 0.5)", borderRadius: "3px" }} />
-            {/* Invoice & Date highlight */}
-            <div className="absolute" style={{ top: "41%", left: "5%", width: "65%", height: "12%", background: "rgba(59, 130, 246, 0.15)", border: "1.5px solid rgba(59, 130, 246, 0.5)", borderRadius: "3px" }} />
-            {/* Total highlight */}
-            <div className="absolute" style={{ top: "76%", left: "40%", width: "55%", height: "8%", background: "rgba(16, 185, 129, 0.2)", border: "1.5px solid rgba(16, 185, 129, 0.6)", borderRadius: "3px" }} />
-            {/* Date of Acceptance highlight */}
-            <div className="absolute" style={{ top: "85%", left: "5%", width: "75%", height: "7%", background: "rgba(245, 158, 11, 0.2)", border: "1.5px solid rgba(245, 158, 11, 0.5)", borderRadius: "3px" }} />
-          </div>
+          <PurchaseOrderImage highlights={true} />
         </div>
         {/* Legend */}
         <div className="mt-3 flex flex-wrap gap-2">
@@ -303,6 +313,7 @@ function HighlightedView() {
             { label: "Identity", color: "#10b981" },
             { label: "Invoice Data", color: "#3b82f6" },
             { label: "Compliance Critical", color: "#f59e0b" },
+            { label: "Registration", color: "#8b5cf6" },
           ].map((l) => (
             <span key={l.label} className="flex items-center gap-1.5 text-[10px] text-slate-400">
               <span className="w-2 h-2 rounded-sm" style={{ background: l.color, opacity: 0.7 }} />
@@ -597,22 +608,20 @@ export default function ExamplePipeline() {
               <button
                 key={step.id}
                 onClick={() => handleStepClick(i)}
-                className={`group relative flex items-center gap-2 px-4 py-3 text-[11px] font-medium transition-all whitespace-nowrap ${
-                  isActive
+                className={`group relative flex items-center gap-2 px-4 py-3 text-[11px] font-medium transition-all whitespace-nowrap ${isActive
                     ? "text-white bg-white/[0.04]"
                     : isPast
-                    ? "text-slate-400"
-                    : "text-slate-600 hover:text-slate-400"
-                }`}
+                      ? "text-slate-400"
+                      : "text-slate-600 hover:text-slate-400"
+                  }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
-                    isActive
+                  className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${isActive
                       ? "bg-white/10"
                       : isPast
-                      ? "bg-white/[0.04]"
-                      : "bg-white/[0.02]"
-                  }`}
+                        ? "bg-white/[0.04]"
+                        : "bg-white/[0.02]"
+                    }`}
                   style={isActive ? { boxShadow: `0 0 12px ${step.color}30` } : {}}
                 >
                   {isPast ? (
@@ -641,11 +650,10 @@ export default function ExamplePipeline() {
           <div className="ml-auto px-3 flex items-center">
             <button
               onClick={() => setAutoPlay(!autoPlay)}
-              className={`text-[9px] px-2 py-1 rounded-md border transition-all ${
-                autoPlay
+              className={`text-[9px] px-2 py-1 rounded-md border transition-all ${autoPlay
                   ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/[0.05]"
                   : "text-slate-600 border-white/[0.06] hover:text-slate-400"
-              }`}
+                }`}
             >
               {autoPlay ? "● Auto" : "○ Paused"}
             </button>
