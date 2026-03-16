@@ -3,6 +3,7 @@ import { Toaster, toast } from "sonner";
 import { Shield, Search, Activity } from "lucide-react";
 import Dashboard from "./components/Dashboard";
 import ExamplePipeline from "./components/ExamplePipeline";
+import SupplierNetwork from "./components/SupplierNetwork";
 import InvoiceDetailSheet from "./components/InvoiceDetailSheet";
 import AnimatedCounter from "./components/AnimatedCounter";
 
@@ -265,6 +266,8 @@ function App() {
             loading={loading}
             onSelectInvoice={setSelectedInvoice}
           />
+
+          <SupplierNetwork />
 
           <ExamplePipeline />
         </div>

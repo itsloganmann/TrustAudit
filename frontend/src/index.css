@@ -165,3 +165,12 @@ body {
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* ── Network Visualization ── */
+@keyframes network-pulse {
+  0% { r: 24; opacity: 0.3; }
+  100% { r: 32; opacity: 0; }
+}
+.network-pulse {
+  animation: network-pulse 1.5s ease-out infinite;
+}
