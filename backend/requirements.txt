@@ -5,7 +5,11 @@ pydantic>=2.5.3
 python-multipart>=0.0.18
 Pillow>=10.2.0
 httpx>=0.26.0
-# Auth + identity (added by manager from W1 + W4 requests)
+# Auth + identity (added by manager from W1 + W5 + W6 requests)
+# NOTE: W5 uses `bcrypt` directly (not via passlib) because passlib 1.7.4
+# and bcrypt 5.0.0 have a known incompatibility. passlib[bcrypt] is kept
+# for seed.py's fallback path.
+bcrypt>=4.1.0
 passlib[bcrypt]>=1.7.4
 python-jose[cryptography]>=3.3.0
 PyJWT>=2.9.0
