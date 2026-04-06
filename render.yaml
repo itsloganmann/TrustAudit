@@ -1,9 +1,72 @@
-# Render.com Blueprint — Single Web Service (Docker)
-# Uses Dockerfile that bundles Node.js + Python for reliable builds
+# Render.com Blueprint -- Single Web Service (Docker)
+#
+# Builds the multi-stage Dockerfile, then runs uvicorn behind Render's L7
+# health check at /health. All secrets are marked ``sync: false`` so they
+# are pasted into the Render dashboard rather than committed to git.
+#
+# After editing this file, push to main and Render will auto-redeploy.
+
 services:
   - type: web
     name: trustaudit
     runtime: docker
     plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
+    autoDeploy: true
 
+    envVars:
+      # ---------------- Core app ----------------
+      - key: APP_ENV
+        value: production
+      - key: BASE_URL
+        value: https://trustaudit.onrender.com
+      - key: JWT_SECRET
+        sync: false                       # set in Render dashboard
+      - key: SUBMIT_CONFIDENCE_THRESHOLD
+        value: "0.85"
+
+      # ---------------- Vision (Gemini) ----------------
+      - key: VISION_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false                       # set in Render dashboard
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+
+      # ---------------- WhatsApp (Twilio sandbox) ----------------
+      - key: WHATSAPP_PROVIDER
+        value: twilio
+      - key: TWILIO_ACCOUNT_SID
+        sync: false                       # set in Render dashboard
+      - key: TWILIO_AUTH_TOKEN
+        sync: false                       # set in Render dashboard (re-paste after rotate)
+      - key: TWILIO_PHONE_NUMBER
+        value: "+18788801359"
+      - key: TWILIO_WHATSAPP_FROM
+        value: "whatsapp:+14155238886"
+      - key: TWILIO_SANDBOX_JOIN_CODE
+        value: crop-conversation
+      - key: TWILIO_VALIDATE_SIGNATURE
+        value: "1"
+
+      # ---------------- Email ----------------
+      - key: EMAIL_PROVIDER
+        value: mock
+      # - key: RESEND_API_KEY
+      #   sync: false                     # uncomment + paste when EMAIL_PROVIDER=resend
+
+      # ---------------- OAuth ----------------
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        value: 166888028367-86gi8h6lttlepkhl0ri7dqcllk53l8vk.apps.googleusercontent.com
+      # - key: FACEBOOK_APP_ID
+      #   sync: false                     # uncomment + paste once Facebook app exists
+
+      # ---------------- Optional fallback LLM ----------------
+      # - key: ANTHROPIC_API_KEY
+      #   sync: false
+
+      # ---------------- Demo gating ----------------
+      - key: DEMO_AT
+        value: "2026-04-07T09:00+05:30"

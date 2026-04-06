@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Ravi Industries",
+  "gstin": "06AAACR7777P1Z9",
+  "invoice_number": "RI/2026/221",
+  "invoice_amount": 560000.0,
+  "invoice_date": "2026-03-05",
+  "date_of_acceptance": "2026-03-06",
+  "confidence": 0.68,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "multi_stamp_overlap"
+  ],
+  "text_quality": "poor",
+  "orientation": "ok"
+}

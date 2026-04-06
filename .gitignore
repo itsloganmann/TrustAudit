@@ -38,3 +38,9 @@ backend/uploads/*.png
 
 # OS
 Thumbs.db
+.fleet/
+uploads/*
+!uploads/.gitkeep
+backend/services/whatsapp_sidecar/sessions/
+*.db-shm
+*.db-wal

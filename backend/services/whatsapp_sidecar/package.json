@@ -1,0 +1,19 @@
+{
+  "name": "trustaudit-whatsapp-sidecar",
+  "version": "0.1.0",
+  "description": "Node baileys bridge for TrustAudit's WhatsApp integration. Runs alongside the Python backend and exposes a tiny REST API for sending and receiving messages over a real WhatsApp account.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.0",
+    "express": "^4.19.2",
+    "pino": "^9.0.0",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

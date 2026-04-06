@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Arjun Steels",
+  "gstin": "27AAACA5555L1Z2",
+  "invoice_number": "AS/2026/201",
+  "invoice_amount": 1250000.0,
+  "invoice_date": "2026-03-11",
+  "date_of_acceptance": "2026-03-12",
+  "confidence": 0.88,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "digital_rephoto"
+  ],
+  "text_quality": "good",
+  "orientation": "ok"
+}

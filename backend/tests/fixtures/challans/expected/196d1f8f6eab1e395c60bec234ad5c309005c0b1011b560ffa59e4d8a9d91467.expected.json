@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Bharat Fasteners",
+  "gstin": "24AAACB1122Q1Z3",
+  "invoice_number": "BF/26/1005",
+  "invoice_amount": 238500.0,
+  "invoice_date": "2026-03-01",
+  "date_of_acceptance": "2026-03-02",
+  "confidence": 0.74,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "crumpled"
+  ],
+  "text_quality": "poor",
+  "orientation": "ok"
+}
