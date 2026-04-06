@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Sharma Packaging",
+  "gstin": "09AAACS9999K2Z5",
+  "invoice_number": "SP/INV/2026/015",
+  "invoice_amount": 75000.0,
+  "invoice_date": "2026-02-28",
+  "date_of_acceptance": null,
+  "confidence": 0.72,
+  "is_challan": true,
+  "missing_fields": [
+    "date_of_acceptance"
+  ],
+  "detected_edge_cases": [],
+  "text_quality": "good",
+  "orientation": "ok"
+}

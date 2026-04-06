@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Shine Metals",
+  "gstin": "27AAACS4444K1Z5",
+  "invoice_number": "SM/2026/118",
+  "invoice_amount": 315000.0,
+  "invoice_date": "2026-03-14",
+  "date_of_acceptance": "2026-03-15",
+  "confidence": 0.66,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "glare"
+  ],
+  "text_quality": "poor",
+  "orientation": "ok"
+}

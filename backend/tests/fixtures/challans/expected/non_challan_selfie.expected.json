@@ -1,0 +1,23 @@
+{
+  "vendor_name": null,
+  "gstin": null,
+  "invoice_number": null,
+  "invoice_amount": null,
+  "invoice_date": null,
+  "date_of_acceptance": null,
+  "confidence": 0.0,
+  "is_challan": false,
+  "missing_fields": [
+    "vendor_name",
+    "gstin",
+    "invoice_number",
+    "invoice_amount",
+    "invoice_date",
+    "date_of_acceptance"
+  ],
+  "detected_edge_cases": [
+    "non_challan"
+  ],
+  "text_quality": "good",
+  "orientation": "ok"
+}

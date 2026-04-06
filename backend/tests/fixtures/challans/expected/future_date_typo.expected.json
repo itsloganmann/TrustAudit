@@ -1,0 +1,14 @@
+{
+  "vendor_name": "Tomorrow Traders",
+  "gstin": "27AAACT6666R1Z8",
+  "invoice_number": "TT/2099/001",
+  "invoice_amount": 55000.0,
+  "invoice_date": "2099-05-15",
+  "date_of_acceptance": "2099-05-15",
+  "confidence": 0.89,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [],
+  "text_quality": "good",
+  "orientation": "ok"
+}

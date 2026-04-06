@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Priya Textiles",
+  "gstin": "27AABCP5678N1ZK",
+  "invoice_number": "PT-2026-033",
+  "invoice_amount": 185000.0,
+  "invoice_date": "2026-03-15",
+  "date_of_acceptance": "2026-03-16",
+  "confidence": 0.82,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "handwritten"
+  ],
+  "text_quality": "good",
+  "orientation": "ok"
+}

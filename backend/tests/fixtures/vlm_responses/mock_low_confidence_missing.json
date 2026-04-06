@@ -1,0 +1,23 @@
+{
+  "vendor_name": "Sharma Packaging",
+  "gstin": "09AAACS9999K2Z5",
+  "invoice_number": null,
+  "invoice_amount": 75000.0,
+  "invoice_date": "2026-02-28",
+  "date_of_acceptance": null,
+  "currency": "INR",
+  "confidence": 0.58,
+  "field_confidences": {
+    "vendor_name": 0.72,
+    "gstin": 0.65,
+    "invoice_number": 0.20,
+    "invoice_amount": 0.70,
+    "invoice_date": 0.68,
+    "date_of_acceptance": 0.15
+  },
+  "missing_fields": ["invoice_number", "date_of_acceptance"],
+  "detected_edge_cases": ["handwritten", "low_light"],
+  "is_challan": true,
+  "orientation": "ok",
+  "text_quality": "poor"
+}

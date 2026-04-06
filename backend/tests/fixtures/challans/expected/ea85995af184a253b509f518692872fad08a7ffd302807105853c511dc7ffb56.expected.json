@@ -1,0 +1,14 @@
+{
+  "vendor_name": "Gupta Steel Works",
+  "gstin": "27AAFCG1234H1Z9",
+  "invoice_number": "GSW/2026/0412",
+  "invoice_amount": 412000.0,
+  "invoice_date": "2026-03-21",
+  "date_of_acceptance": "2026-03-21",
+  "confidence": 0.97,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [],
+  "text_quality": "good",
+  "orientation": "ok"
+}

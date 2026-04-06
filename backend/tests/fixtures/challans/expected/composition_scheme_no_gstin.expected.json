@@ -1,0 +1,18 @@
+{
+  "vendor_name": "Small Farm Supplies (Composition)",
+  "gstin": null,
+  "invoice_number": "SFS/2026/0033",
+  "invoice_amount": 22000.0,
+  "invoice_date": "2026-03-08",
+  "date_of_acceptance": "2026-03-09",
+  "confidence": 0.85,
+  "is_challan": true,
+  "missing_fields": [
+    "gstin"
+  ],
+  "detected_edge_cases": [
+    "composition_scheme"
+  ],
+  "text_quality": "good",
+  "orientation": "ok"
+}
