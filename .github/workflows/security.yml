@@ -63,7 +63,7 @@ jobs:
           cat bandit-report.txt
       - name: Upload bandit report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bandit-report-${{ github.sha }}
           path: bandit-report.txt
