@@ -29,11 +29,14 @@ from sqlalchemy.orm import Session as DBSession
 from ...database import get_db
 from ...models import User
 from ...services import rate_limit
+from ...auth.dependencies import set_session_cookie
+from ...auth.sessions import create_session
 from ...auth.providers.whatsapp_otp import (
     InvalidOTP,
     WhatsAppOtpError,
     send_whatsapp_otp,
     verify_whatsapp_otp,
+    _normalize_phone,
 )
 from ...auth.providers.phone_otp import (
     InvalidPhoneOTP,
@@ -49,27 +52,17 @@ router = APIRouter()
 
 VALID_ROLES = frozenset(("vendor", "driver"))
 
-SESSION_COOKIE_NAME = "trustaudit_session"
-SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
-
 
 def _issue_session_cookie(
     db: DBSession, response: Response, user: User, request: Request
 ) -> None:
-    from ...auth.sessions import create_session  # BLOCKED_ON_W5
-
+    """Create a session row + attach the canonical session cookie
+    (Secure in prod — adversary 7926af6 #2).
+    """
     ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
     raw_token, _session = create_session(db, user, ip=ip, user_agent=user_agent)
-    response.set_cookie(
-        key=SESSION_COOKIE_NAME,
-        value=raw_token,
-        max_age=SESSION_COOKIE_MAX_AGE,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        path="/",
-    )
+    set_session_cookie(response, raw_token)
 
 
 def _serialize_user(user: User) -> dict:
@@ -83,7 +76,19 @@ def _serialize_user(user: User) -> dict:
     }
 
 
-def _enforce_rate_limit(kind_label: str, phone: str) -> None:
+def _enforce_rate_limit(kind_label: str, raw_phone: str) -> None:
+    """Rate-limit OTP requests by *normalized* phone (adversary 7926af6 #9).
+
+    Without normalization an attacker can rotate ``+919999999999``,
+    ``+91 9999999999``, ``+91-9999999999`` and bypass the bucket.
+    """
+    try:
+        phone = _normalize_phone(raw_phone)
+    except Exception:
+        # Malformed input will be rejected downstream — still rate-limit
+        # the malformed-input attempts on the raw value so brute-forcers
+        # don't get free passes.
+        phone = (raw_phone or "").strip()
     ok = rate_limit.check(
         "phone",
         f"{kind_label}:{phone}",

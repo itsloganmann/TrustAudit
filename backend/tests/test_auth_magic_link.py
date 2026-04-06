@@ -91,35 +91,75 @@ def app_client(shared_engine):
 # Provider-level tests
 # ---------------------------------------------------------------------
 class TestRequestMagicLink:
-    def test_request_creates_user_code_and_sends_email(self, shared_session):
+    def test_request_unknown_email_silently_drops(self, shared_session):
+        """Adversary 7926af6 #10 — unknown emails must NOT auto-create
+        user rows or send email. Silently no-op so we don't pollute the
+        users table or spam strangers' inboxes.
+        """
         request_magic_link(shared_session, "new@bharat.demo", "vendor")
         shared_session.commit()
 
-        # New user created with the requested role.
-        user = (
+        users = (
             shared_session.query(User)
             .filter_by(primary_email="new@bharat.demo")
-            .one()
+            .all()
         )
-        assert user.role == "vendor"
-        assert user.email_verified is False
+        assert users == []
 
-        # Verification code row exists.
-        code_row = (
+        codes = (
             shared_session.query(VerificationCode)
             .filter_by(purpose="email_magic", destination="new@bharat.demo")
+            .all()
+        )
+        assert codes == []
+
+        sent = get_sent_emails()
+        assert sent == []
+
+    def test_request_existing_user_sends_email(self, shared_session):
+        """Existing users get a magic link without duplication of the
+        user row.
+        """
+        existing = User(
+            role="vendor",
+            primary_email="known@bharat.demo",
+            email_verified=False,
+        )
+        shared_session.add(existing)
+        shared_session.commit()
+
+        request_magic_link(shared_session, "known@bharat.demo", "vendor")
+        shared_session.commit()
+
+        users = (
+            shared_session.query(User)
+            .filter_by(primary_email="known@bharat.demo")
+            .all()
+        )
+        assert len(users) == 1
+
+        code_row = (
+            shared_session.query(VerificationCode)
+            .filter_by(purpose="email_magic", destination="known@bharat.demo")
             .one()
         )
         assert code_row.consumed_at is None
-        assert len(code_row.code_hash) == 64  # sha256 hex
+        assert len(code_row.code_hash) == 64
 
-        # Mock email sent with the magic-link URL.
         sent = get_sent_emails()
         assert len(sent) == 1
-        assert sent[0].to == "new@bharat.demo"
+        assert sent[0].to == "known@bharat.demo"
         assert "/auth/magic/consume?token=" in sent[0].html
 
     def test_request_existing_user_same_role_reuses(self, shared_session):
+        existing = User(
+            role="vendor",
+            primary_email="same@bharat.demo",
+            email_verified=False,
+        )
+        shared_session.add(existing)
+        shared_session.commit()
+
         request_magic_link(shared_session, "same@bharat.demo", "vendor")
         shared_session.commit()
         request_magic_link(shared_session, "same@bharat.demo", "vendor")
@@ -140,7 +180,12 @@ class TestRequestMagicLink:
         assert len(codes) == 2  # one per request
 
     def test_request_wrong_role_raises(self, shared_session):
-        request_magic_link(shared_session, "mix@bharat.demo", "vendor")
+        existing = User(
+            role="vendor",
+            primary_email="mix@bharat.demo",
+            email_verified=False,
+        )
+        shared_session.add(existing)
         shared_session.commit()
         with pytest.raises(WrongRoleError):
             request_magic_link(shared_session, "mix@bharat.demo", "driver")
@@ -219,7 +264,14 @@ class TestConsumeMagicLink:
 # HTTP route integration
 # ---------------------------------------------------------------------
 class TestMagicLinkRoutes:
-    def test_request_happy_path(self, app_client):
+    def test_request_happy_path(self, app_client, shared_session):
+        # Seed an existing user — request_magic_link no longer
+        # auto-creates rows (adversary 7926af6 #10).
+        shared_session.add(
+            User(role="vendor", primary_email="alice@bharat.demo", email_verified=False)
+        )
+        shared_session.commit()
+
         resp = app_client.post(
             "/api/auth/magic/request",
             json={"email": "alice@bharat.demo", "role": "vendor"},
@@ -227,6 +279,17 @@ class TestMagicLinkRoutes:
         assert resp.status_code == 200, resp.text
         assert resp.json()["sent"] is True
         assert len(get_sent_emails()) == 1
+
+    def test_request_unknown_email_returns_200_but_sends_nothing(self, app_client):
+        """Silent no-op for unknown emails so the endpoint isn't a
+        presence oracle (adversary 7926af6 #10)."""
+        resp = app_client.post(
+            "/api/auth/magic/request",
+            json={"email": "ghost@nowhere.demo", "role": "vendor"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["sent"] is True
+        assert get_sent_emails() == []
 
     def test_request_invalid_role_422(self, app_client):
         resp = app_client.post(
@@ -236,16 +299,23 @@ class TestMagicLinkRoutes:
         # Pydantic pattern validator returns 422.
         assert resp.status_code == 422
 
-    def test_consume_endpoint_sets_session_cookie(self, app_client, shared_session):
-        # Request a magic link for a brand-new email.
-        app_client.post(
-            "/api/auth/magic/request",
-            json={"email": "click@bharat.demo", "role": "vendor"},
+    def test_consume_get_returns_html_landing_no_session(self, app_client):
+        """Adversary 7926af6 #3 — GET must NOT consume the token. It
+        returns a static HTML confirmation page only.
+        """
+        resp = app_client.get("/api/auth/magic/consume?token=anything-12345")
+        assert resp.status_code == 200
+        assert "text/html" in resp.headers.get("content-type", "")
+        assert "Sign me in" in resp.text
+        # No session cookie — GET is idempotent.
+        assert "trustaudit_session" not in resp.cookies
+
+    def test_consume_post_sets_session_cookie(self, app_client, shared_session):
+        """The POST path is the one that actually consumes the token."""
+        shared_session.add(
+            User(role="vendor", primary_email="click@bharat.demo", email_verified=False)
         )
-        # Retrieve the raw token by regenerating one ourselves — the mock
-        # provider never stores the raw token, only the hash, so we issue
-        # a fresh code directly via the provider layer.
-        shared_session.expire_all()
+        shared_session.commit()
         user = (
             shared_session.query(User)
             .filter_by(primary_email="click@bharat.demo")
@@ -260,7 +330,10 @@ class TestMagicLinkRoutes:
         )
         shared_session.commit()
 
-        resp = app_client.get(f"/api/auth/magic/consume?token={raw}")
+        resp = app_client.post(
+            "/api/auth/magic/consume",
+            json={"token": raw},
+        )
         assert resp.status_code == 200, resp.text
         assert "trustaudit_session" in resp.cookies
         assert resp.json()["user"]["email"] == "click@bharat.demo"
@@ -270,6 +343,9 @@ class TestMagicLinkRoutes:
         assert me.status_code == 200
         assert me.json()["email_verified"] is True
 
-    def test_consume_bad_token_400(self, app_client):
-        resp = app_client.get("/api/auth/magic/consume?token=definitely-bad-token")
+    def test_consume_post_bad_token_400(self, app_client):
+        resp = app_client.post(
+            "/api/auth/magic/consume",
+            json={"token": "definitely-bad-token"},
+        )
         assert resp.status_code == 400

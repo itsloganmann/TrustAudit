@@ -33,8 +33,17 @@ from typing import Dict, List, Optional
 # Tunables
 # ---------------------------------------------------------------------------
 
-SESSION_ID_BYTES = 3  # 3 bytes -> 6 hex chars, plenty for a demo namespace
+SESSION_ID_BYTES = 8  # 8 bytes -> 16 hex chars (~64 bits) — adversary 7926af6 #20
 DEFAULT_MAX_AGE_SECONDS = 600  # 10 minutes — matches the plan spec
+MAX_INVOICES_PER_SESSION = 500  # adversary 7926af6 #21
+
+
+class SessionAlreadyExists(ValueError):
+    """Raised by ``create_session`` when a custom_id is already in use.
+
+    Adversary 7926af6 #7 — silently handing out the same session bucket
+    to two callers leaks invoices across CFO demos.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -110,14 +119,28 @@ def _anonymize(invoices: List[Dict]) -> List[Dict]:
 def create_session(session_id: Optional[str] = None) -> str:
     """Create a new demo session and return its id.
 
-    If ``session_id`` is provided we use it as-is (useful for tests and
-    for letting a CFO pick a human-readable id like ``acme-corp``).
-    Otherwise we generate a 6-char hex id.
+    Adversary 7926af6 #7 — when a caller passes ``session_id`` (custom
+    id), we refuse to create-or-reuse: if the id already exists we raise
+    ``SessionAlreadyExists`` so the route layer can return 409. The
+    server-generated path stays loop-until-unique because the 64-bit
+    namespace makes collisions astronomically unlikely.
     """
     with _lock:
-        sid = session_id or secrets.token_hex(SESSION_ID_BYTES)
-        if sid not in _sessions:
-            _sessions[sid] = SessionState(session_id=sid, created_at=time.time())
+        if session_id:
+            if session_id in _sessions:
+                raise SessionAlreadyExists(
+                    f"demo session {session_id!r} is already in use"
+                )
+            sid = session_id
+        else:
+            for _ in range(8):
+                candidate = secrets.token_hex(SESSION_ID_BYTES)
+                if candidate not in _sessions:
+                    sid = candidate
+                    break
+            else:  # pragma: no cover - astronomically unlikely
+                raise RuntimeError("could not allocate a unique session id")
+        _sessions[sid] = SessionState(session_id=sid, created_at=time.time())
         return sid
 
 
@@ -154,6 +177,10 @@ def append_invoice(session_id: str, invoice: Dict) -> None:
                 invoices=[],
             )
             _sessions[session_id] = state
+        # Cap rows per session (adversary 7926af6 #21) so a flaky
+        # webhook can't grow one bucket unbounded.
+        if len(state.invoices) >= MAX_INVOICES_PER_SESSION:
+            state.invoices.pop(0)
         state.invoices.append(entry)
 
 

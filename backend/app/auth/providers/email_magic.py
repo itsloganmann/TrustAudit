@@ -49,33 +49,35 @@ class InvalidMagicLinkToken(MagicLinkError):
 _ALLOWED_ROLES = frozenset({"vendor", "driver"})
 
 
-def _find_or_create_user(db: DBSession, email: str, role: str) -> User:
+def _find_existing_user(db: DBSession, email: str, role: str) -> Optional[User]:
+    """Locate an existing user for a magic-link request.
+
+    Adversary 7926af6 #10 — we MUST NOT auto-create a user row inside
+    ``request_magic_link``. An attacker can otherwise pollute the
+    ``users`` table with arbitrary email addresses (spam, occupying
+    namespaces, denial-of-signup). The user is created lazily during
+    ``consume_magic_link`` if and only if a real user clicks the link.
+    """
     normalized = _normalize_email(email)
     existing = (
         db.query(User)
         .filter(User.primary_email == normalized)
         .one_or_none()
     )
-    if existing is not None:
-        if existing.role != role:
-            raise WrongRoleError(
-                f"account role is {existing.role!r}; please use the {existing.role} sign-in"
-            )
-        return existing
-
-    user = User(
-        role=role,
-        primary_email=normalized,
-        full_name=None,
-        email_verified=False,
-    )
-    db.add(user)
-    db.flush()
-    return user
+    if existing is not None and existing.role != role:
+        raise WrongRoleError(
+            f"account role is {existing.role!r}; please use the {existing.role} sign-in"
+        )
+    return existing
 
 
 def request_magic_link(db: DBSession, email: str, role: str) -> None:
     """Send a passwordless sign-in link to ``email``.
+
+    Adversary 7926af6 #10 — we silently no-op for unknown emails
+    instead of creating a user row. This trades email enumeration
+    (already exposed by the signup flow) for not letting attackers
+    pollute the users table with arbitrary addresses.
 
     Raises:
         InvalidRoleError: role isn't ``vendor`` or ``driver``.
@@ -89,7 +91,12 @@ def request_magic_link(db: DBSession, email: str, role: str) -> None:
     if not normalized:
         raise AuthError("email is required")
 
-    user = _find_or_create_user(db, normalized, role)
+    user = _find_existing_user(db, normalized, role)
+    if user is None:
+        # No row exists for this email — silently succeed so the API
+        # doesn't act as a presence oracle. The user must sign up first.
+        logger.info("magic-link request for unknown email %s — silently dropped", normalized)
+        return
 
     raw_code = generate_code(
         db,

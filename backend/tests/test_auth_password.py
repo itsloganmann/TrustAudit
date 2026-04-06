@@ -403,7 +403,11 @@ class TestRoutes:
         me = app_client.get("/api/auth/me")
         assert me.status_code == 401
 
-    def test_wrong_role_signin_returns_403(self, app_client, shared_session):
+    def test_wrong_role_signin_returns_401(self, app_client, shared_session):
+        """Adversary 7926af6 #13 — wrong-role signin must collapse into
+        the same 401 as a bad password so the endpoint isn't a
+        password-correctness oracle for accounts in the *other* role.
+        """
         app_client.post(
             "/api/auth/driver/signup",
             json={
@@ -422,9 +426,12 @@ class TestRoutes:
         shared_session.add(user)
         shared_session.commit()
 
-        # Attempt to sign in on the vendor endpoint — should 403.
+        # Attempt to sign in on the vendor endpoint — collapses to 401
+        # so an attacker can't use this as a "valid password / wrong
+        # role" oracle.
         resp = app_client.post(
             "/api/auth/vendor/signin",
             json={"email": "driver@bharat.demo", "password": "longpassword1"},
         )
-        assert resp.status_code == 403
+        assert resp.status_code == 401
+        assert resp.json()["detail"] == "Invalid email or password"

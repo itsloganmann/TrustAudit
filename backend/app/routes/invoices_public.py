@@ -11,14 +11,21 @@ this module having any side effects at import time.
 """
 from __future__ import annotations
 
+import hmac
+import os
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
 from ..services import demo_sessions
 
 router = APIRouter()
+
+
+def _ct_eq(a: str, b: str) -> bool:
+    """Constant-time string compare for the demo-seed token check."""
+    return hmac.compare_digest(a.encode("utf-8"), b.encode("utf-8"))
 
 
 # ---------------------------------------------------------------------------
@@ -90,14 +97,20 @@ def list_public_invoices(
 
 
 @router.post("/live/invoices/{session}/_seed_demo")
-def seed_demo_row(session: str) -> dict:
-    """Dev-only helper: push a synthetic row into a session.
+def seed_demo_row(session: str, request: Request) -> dict:
+    """Env-gated synthetic seed (adversary 7926af6 #4).
 
-    Lets a CFO on a Zoom call with a flaky WhatsApp provider still see
-    motion on the dashboard. Intentionally unauthenticated because the
-    whole demo surface is public. W10 can gate this behind an env var
-    in production if needed.
+    Disabled by default. Enabled only when ``DEMO_SEED_ENABLED=true`` AND
+    the request carries a matching ``X-Demo-Seed-Token`` header. Without
+    these guards an unauthenticated attacker could brute-force session
+    ids and spam fake rows into a CFO's live demo dashboard.
     """
+    if os.environ.get("DEMO_SEED_ENABLED", "").lower() not in ("1", "true", "yes"):
+        raise HTTPException(status_code=404, detail="Not found")
+    expected = os.environ.get("DEMO_SEED_TOKEN", "")
+    provided = request.headers.get("x-demo-seed-token", "")
+    if not expected or not provided or not _ct_eq(expected, provided):
+        raise HTTPException(status_code=401, detail="missing or invalid demo seed token")
     if not session:
         raise HTTPException(status_code=400, detail="session is required")
     import random
@@ -109,6 +122,9 @@ def seed_demo_row(session: str) -> dict:
         "Hyderabad Pharma",
         "Alpha Textiles",
         "Delta Logistics",
+        "भारत इंडस्ट्रीज",
+        "गुप्ता स्टील",
+        "हैदराबाद फार्मा",
     ]
     demo_sessions.append_invoice(
         session,

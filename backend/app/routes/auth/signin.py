@@ -88,10 +88,15 @@ def _do_signin(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
-    except WrongRoleError as exc:
+    except WrongRoleError:
+        # Adversary 7926af6 #13 — collapse role-mismatch into the same
+        # 401 as a bad password so the endpoint is not a password-
+        # correctness oracle for accounts in the *other* role. The
+        # `/me` page on a successful signin is the right place to
+        # surface "wrong page" guidance.
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=str(exc),
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
         )
     except EmailNotVerified as exc:
         raise HTTPException(

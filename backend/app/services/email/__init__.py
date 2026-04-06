@@ -12,6 +12,7 @@ Public API:
 """
 from __future__ import annotations
 
+import html as _html
 import logging
 import os
 from pathlib import Path
@@ -43,11 +44,22 @@ def _build_provider(name: str) -> EmailProvider:
     return MockEmailClient()
 
 
+def _is_prod() -> bool:
+    env = os.environ.get("APP_ENV", "").strip().lower()
+    if env in {"prod", "production"}:
+        return True
+    if os.environ.get("RENDER") == "true":
+        return True
+    return False
+
+
 def get_email_provider() -> EmailProvider:
     """Return a cached email provider.
 
-    Call ``reset_email_provider()`` in tests to clear the cache between
-    runs.
+    Adversary 7926af6 #12 — in production we MUST fail closed if the
+    requested provider is misconfigured. Falling back to a mock that
+    silently logs would mean the CFO never receives magic-link / verify
+    emails and there is no alarm.
     """
     global _cached_provider
     with _provider_lock:
@@ -57,6 +69,13 @@ def get_email_provider() -> EmailProvider:
         try:
             provider = _build_provider(requested)
         except EmailProviderNotConfigured as exc:
+            if _is_prod() and (requested or "mock").lower() != "mock":
+                logger.error(
+                    "Email provider %r not configured in production: %s",
+                    requested,
+                    exc,
+                )
+                raise
             logger.warning(
                 "Email provider %r not configured (%s) — falling back to mock",
                 requested,
@@ -74,12 +93,30 @@ def reset_email_provider() -> None:
         _cached_provider = None
 
 
-def render_template(name: str, **values: Any) -> str:
-    """Load ``templates/<name>`` and substitute ``{{ placeholders }}``.
+_RAW_PREFIX = "raw_"
+_URL_KEYS = frozenset({"verify_url", "magic_url", "dashboard_url"})
 
-    We use a tiny pseudo-Jinja approach: HTML literals keep their curly
-    braces by being templated, and we only expand double-brace tokens
-    so there's no collision with CSS ``{``/``}``.
+
+def _is_safe_url(value: str) -> bool:
+    """Allow only http(s) URLs without control characters or quotes that
+    could break out of an HTML attribute.
+    """
+    if not isinstance(value, str) or not value:
+        return False
+    if any(c in value for c in ("\r", "\n", "\t", '"', "'", "<", ">", " ")):
+        return False
+    return value.startswith(("http://", "https://", "/"))
+
+
+def render_template(name: str, **values: Any) -> str:
+    """Load ``templates/<name>`` and substitute ``{{ placeholders }}``,
+    HTML-escaping every value to prevent stored XSS in email clients
+    (adversary 7926af6 #6).
+
+    URL-shaped placeholders (``verify_url``, ``magic_url``,
+    ``dashboard_url``) are validated against an http(s)/path-only
+    allowlist BEFORE being escaped, so an attacker cannot smuggle a
+    ``javascript:`` href or break out of the surrounding ``href=""``.
     """
     path = _TEMPLATES_DIR / name
     if not path.exists():
@@ -87,8 +124,14 @@ def render_template(name: str, **values: Any) -> str:
     raw = path.read_text(encoding="utf-8")
     out = raw
     for key, val in values.items():
-        out = out.replace("{{" + key + "}}", str(val))
-        out = out.replace("{{ " + key + " }}", str(val))
+        text_val = "" if val is None else str(val)
+        if key in _URL_KEYS:
+            if not _is_safe_url(text_val):
+                logger.warning("Refusing unsafe URL in email template %s.%s", name, key)
+                text_val = ""
+        safe = _html.escape(text_val, quote=True)
+        out = out.replace("{{" + key + "}}", safe)
+        out = out.replace("{{ " + key + " }}", safe)
     return out
 
 

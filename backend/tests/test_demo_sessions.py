@@ -30,10 +30,12 @@ def _reset_store():
 # ---------------------------------------------------------------------------
 
 
-def test_create_session_generates_six_char_hex_id():
+def test_create_session_generates_high_entropy_hex_id():
+    """Adversary 7926af6 #20 — id namespace must be ≥ 64 bits to defeat
+    brute-force enumeration of /api/live/invoices."""
     sid = demo_sessions.create_session()
     assert isinstance(sid, str)
-    assert len(sid) == 6
+    assert len(sid) == 16  # 8 bytes hex
     int(sid, 16)  # valid hex
 
 
@@ -50,13 +52,13 @@ def test_get_session_returns_none_for_unknown_id():
     assert demo_sessions.get_session("does-not-exist") is None
 
 
-def test_create_session_is_idempotent_for_same_id():
-    sid1 = demo_sessions.create_session("shared")
-    demo_sessions.append_invoice("shared", {"vendor_name": "Alpha Corp", "state": "PENDING"})
-    sid2 = demo_sessions.create_session("shared")
-    assert sid1 == sid2
-    meta = demo_sessions.get_session("shared")
-    assert meta["invoice_count"] == 1
+def test_create_session_with_duplicate_custom_id_raises():
+    """Adversary 7926af6 #7 — refuse to silently share a session bucket
+    between two callers, otherwise CFOs in different Zoom calls would
+    see each other's invoices."""
+    demo_sessions.create_session("shared-id")
+    with pytest.raises(demo_sessions.SessionAlreadyExists):
+        demo_sessions.create_session("shared-id")
 
 
 # ---------------------------------------------------------------------------
@@ -222,9 +224,12 @@ def test_concurrent_appends_do_not_corrupt_state():
 
 
 def test_concurrent_appends_across_sessions():
+    # Pre-allocate the 10 distinct sessions so workers only append.
+    for i in range(10):
+        demo_sessions.create_session(f"s{i}")
+
     def worker(i: int) -> None:
         sid = f"s{i % 10}"
-        demo_sessions.create_session(sid)
         demo_sessions.append_invoice(sid, {"vendor_name": f"V-{i}"})
 
     threads = [threading.Thread(target=worker, args=(i,)) for i in range(100)]

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
 import secrets
 
 import bcrypt
@@ -66,6 +67,14 @@ def verify_password(raw: str, hashed: str | None) -> bool:
         return False
     try:
         if hashed.startswith(_DEV_PREFIX):
+            # Adversary 7926af6 #8 — refuse the dev fallback in
+            # production no matter how it landed in the DB. Even if a
+            # corrupted seed or restored backup ships ``sha256-dev$``
+            # rows, we will not bypass bcrypt for them in prod.
+            env = os.environ.get("APP_ENV", "").strip().lower()
+            if env in ("prod", "production") or os.environ.get("RENDER") == "true":
+                logger.error("Refusing to verify sha256-dev hash in production")
+                return False
             want = hashed[len(_DEV_PREFIX):]
             got = hashlib.sha256(raw.encode("utf-8")).hexdigest()
             return secrets.compare_digest(want, got)

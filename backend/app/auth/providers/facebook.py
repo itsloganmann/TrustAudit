@@ -192,13 +192,26 @@ def signin_with_facebook(
         db.flush()
 
     # 2. Existing user by email?
+    #
+    # SECURITY (adversary review 7926af6, finding #1): Facebook /me's email
+    # field is NOT a strong identity claim — Facebook does not perform
+    # mailbox-ownership re-verification on every login. Auto-linking by
+    # email match is therefore an account-takeover vector. We refuse it
+    # outright. The only way to attach a Facebook identity to an existing
+    # account is to be signed in to that account already and call
+    # POST /api/auth/identities/facebook (account-linking endpoint).
     user: Optional[User] = None
     if email:
-        user = (
+        existing_by_email = (
             db.query(User)
             .filter(User.primary_email == email)
             .one_or_none()
         )
+        if existing_by_email is not None:
+            raise FacebookAuthError(
+                "An account with this email already exists. "
+                "Sign in with your existing method and link Facebook from settings."
+            )
 
     created = False
     if user is None:
@@ -208,8 +221,10 @@ def signin_with_facebook(
             role=default_role,
             primary_email=email,
             full_name=full_name,
-            # Facebook has verified the email IFF they return it at all.
-            email_verified=bool(email),
+            # Facebook /me email is not strongly verified; do NOT mark
+            # the user as email_verified. They can verify via the standard
+            # flow if they want password-style features.
+            email_verified=False,
         )
         db.add(user)
         db.flush()

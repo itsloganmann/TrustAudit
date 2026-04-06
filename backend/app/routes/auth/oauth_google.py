@@ -32,16 +32,13 @@ from sqlalchemy.orm import Session as DBSession
 
 from ...database import get_db
 from ...models import User
+from ...auth.dependencies import set_session_cookie
+from ...auth.sessions import create_session
 from ...auth.providers.google import (
     GoogleAuthError,
     GoogleNotConfigured,
     signin_with_google,
 )
-
-# Cookie + session name is shared across all auth routes in this partition.
-# Keep in sync with W5's cookie reader in ``auth/dependencies.py``.
-SESSION_COOKIE_NAME = "trustaudit_session"
-SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 30  # 30 days — matches sessions.SESSION_TTL
 
 
 def _issue_session_cookie(
@@ -50,25 +47,14 @@ def _issue_session_cookie(
     user: User,
     request: Request,
 ) -> None:
-    """Create a DB session row and attach the httpOnly cookie to ``response``.
-
-    Delegates to W5's ``auth.sessions.create_session``. Lazy-imported to
-    avoid blowing up this module's import if W5 hasn't landed it yet.
+    """Create a DB session row and attach the httpOnly cookie via the
+    canonical helper from ``auth.dependencies`` (which sets ``Secure``
+    correctly in production — adversary review 7926af6 #2).
     """
-    from ...auth.sessions import create_session  # BLOCKED_ON_W5
-
     ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
     raw_token, _session = create_session(db, user, ip=ip, user_agent=user_agent)
-    response.set_cookie(
-        key=SESSION_COOKIE_NAME,
-        value=raw_token,
-        max_age=SESSION_COOKIE_MAX_AGE,
-        httponly=True,
-        secure=False,  # dev — W5 flips to True when BASE_URL is https
-        samesite="lax",
-        path="/",
-    )
+    set_session_cookie(response, raw_token)
 
 logger = logging.getLogger(__name__)
 

@@ -26,6 +26,8 @@ from sqlalchemy.orm import Session as DBSession
 
 from ...database import get_db
 from ...models import User
+from ...auth.dependencies import set_session_cookie
+from ...auth.sessions import create_session
 from ...auth.providers.facebook import (
     FacebookAuthError,
     FacebookNotConfigured,
@@ -38,28 +40,17 @@ router = APIRouter()
 
 VALID_ROLES = frozenset(("vendor", "driver"))
 
-SESSION_COOKIE_NAME = "trustaudit_session"
-SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 30  # 30 days
-
 
 def _issue_session_cookie(
     db: DBSession, response: Response, user: User, request: Request
 ) -> None:
-    """Create a session row (via W5's sessions module) and attach the cookie."""
-    from ...auth.sessions import create_session  # BLOCKED_ON_W5
-
+    """Create a DB session row and attach the httpOnly cookie via the
+    canonical helper (sets ``Secure`` in prod — adversary 7926af6 #2).
+    """
     ip = request.client.host if request.client else None
     user_agent = request.headers.get("user-agent")
     raw_token, _session = create_session(db, user, ip=ip, user_agent=user_agent)
-    response.set_cookie(
-        key=SESSION_COOKIE_NAME,
-        value=raw_token,
-        max_age=SESSION_COOKIE_MAX_AGE,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        path="/",
-    )
+    set_session_cookie(response, raw_token)
 
 
 class FacebookSigninRequest(BaseModel):

@@ -20,6 +20,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from ..services import demo_sessions
+from ..services.demo_sessions import SessionAlreadyExists
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +79,14 @@ def new_session(custom_id: Optional[str] = Query(default=None, max_length=64)) -
     """Create a new demo session id.
 
     Accepts an optional ``custom_id`` query param so a Zoom host can
-    pin a human-readable id like ``acme-corp``. Otherwise we generate
-    a 6-char hex id.
+    pin a human-readable id like ``acme-corp``. Adversary 7926af6 #7 —
+    a duplicate ``custom_id`` returns 409 instead of silently sharing
+    the same in-memory bucket between two CFOs.
     """
-    sid = demo_sessions.create_session(custom_id)
+    try:
+        sid = demo_sessions.create_session(custom_id)
+    except SessionAlreadyExists as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     return NewSessionResponse(
         session_id=sid,
         wa_link=_build_wa_link(WHATSAPP_JOIN_CODE),
@@ -91,22 +96,34 @@ def new_session(custom_id: Optional[str] = Query(default=None, max_length=64)) -
     )
 
 
+_QR_ALLOWED_PREFIXES = (
+    "https://wa.me/",
+    "https://trustaudit.in/",
+    "https://www.trustaudit.in/",
+    "https://trustaudit.onrender.com/",
+    "https://trustaudit-wxd7.onrender.com/",
+    "/live?session=",
+    "/auth/",
+)
+
+
 @router.get("/demo/qr")
 def demo_qr(
-    text: str = Query(..., min_length=1, max_length=2048, description="Payload to encode"),
-    box_size: int = Query(default=10, ge=2, le=40),
-    border: int = Query(default=2, ge=0, le=10),
+    text: str = Query(..., min_length=1, max_length=512, description="Payload to encode"),
+    box_size: int = Query(default=10, ge=2, le=20),
+    border: int = Query(default=2, ge=0, le=8),
 ) -> Response:
     """Render ``text`` as a QR code PNG.
 
-    Uses ``qrcode[pil]`` which is pulled in through the existing
-    backend requirements. If the import fails (e.g. on a stripped-down
-    deployment) we return a 501 with a clear error.
-
-    TODO: If qrcode[pil] is not present in ``backend/requirements.txt``
-    in a future deploy, file a manager-queue request to add it — but
-    as of this ticket it is already available in the venv.
+    Adversary 7926af6 #11 — the QR text is restricted to a known-good
+    prefix list so an attacker can't host a phishing QR on our domain
+    pointing at their own URL.
     """
+    if not text.startswith(_QR_ALLOWED_PREFIXES):
+        raise HTTPException(
+            status_code=400,
+            detail="QR text must point at TrustAudit, a TrustAudit auth path, or wa.me/",
+        )
     try:
         import qrcode  # type: ignore
         from qrcode.image.pil import PilImage  # type: ignore

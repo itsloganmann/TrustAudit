@@ -287,34 +287,122 @@ class TestSigninWithGoogle:
         )
         assert len(identities) == 1
 
-    def test_email_match_links_to_existing_user(
+    def test_email_match_with_password_account_is_rejected(
         self, db_session, rsa_keypair, patched_jwks
     ):
-        # Pre-existing user with no Google identity (e.g. signed up with password).
+        """Adversary review 7926af6 #1 — auto-linking a Google identity to
+        an existing password account is an account takeover vector. The
+        provider must refuse and direct the user to sign in with password
+        first, then link Google from settings.
+        """
         existing = User(
             role="vendor",
             primary_email="linkme@example.com",
-            email_verified=False,
+            email_verified=True,
+        )
+        db_session.add(existing)
+        db_session.flush()
+        # Pre-existing password identity is the strong-account anchor.
+        db_session.add(
+            UserIdentity(
+                user_id=existing.id,
+                provider="password",
+                email="linkme@example.com",
+            )
+        )
+        db_session.flush()
+
+        token = _make_id_token(rsa_keypair, sub="g-3", email="linkme@example.com")
+        with pytest.raises(GoogleAuthError, match="password sign-in"):
+            signin_with_google(db_session, token)
+
+        # No Google identity must have been created.
+        google_identities = (
+            db_session.query(UserIdentity)
+            .filter(
+                UserIdentity.user_id == existing.id,
+                UserIdentity.provider == "google",
+            )
+            .all()
+        )
+        assert google_identities == []
+
+    def test_email_match_without_password_requires_verified_on_both_sides(
+        self, db_session, rsa_keypair, patched_jwks
+    ):
+        """Auto-link is allowed only when both Google AND TrustAudit have
+        verified the email AND the existing account has no password
+        identity.
+        """
+        existing = User(
+            role="vendor",
+            primary_email="linkok@example.com",
+            email_verified=True,
         )
         db_session.add(existing)
         db_session.flush()
         existing_id = existing.id
 
-        token = _make_id_token(rsa_keypair, sub="g-3", email="linkme@example.com")
+        token = _make_id_token(
+            rsa_keypair,
+            sub="g-3-ok",
+            email="linkok@example.com",
+            email_verified=True,
+        )
         user, created = signin_with_google(db_session, token)
 
         assert created is False
         assert user.id == existing_id
-        # Now email_verified should be True (Google verified it).
-        assert user.email_verified is True
 
-        identities = (
+        google_identities = (
             db_session.query(UserIdentity)
-            .filter(UserIdentity.user_id == existing_id)
+            .filter(
+                UserIdentity.user_id == existing_id,
+                UserIdentity.provider == "google",
+            )
             .all()
         )
-        assert len(identities) == 1
-        assert identities[0].provider == "google"
+        assert len(google_identities) == 1
+
+    def test_email_match_unverified_google_is_rejected(
+        self, db_session, rsa_keypair, patched_jwks
+    ):
+        existing = User(
+            role="vendor",
+            primary_email="unv@example.com",
+            email_verified=True,
+        )
+        db_session.add(existing)
+        db_session.flush()
+
+        token = _make_id_token(
+            rsa_keypair,
+            sub="g-unv",
+            email="unv@example.com",
+            email_verified=False,
+        )
+        with pytest.raises(GoogleAuthError, match="not verified"):
+            signin_with_google(db_session, token)
+
+    def test_email_match_unverified_trustaudit_is_rejected(
+        self, db_session, rsa_keypair, patched_jwks
+    ):
+        existing = User(
+            role="vendor",
+            primary_email="unv2@example.com",
+            email_verified=False,
+        )
+        db_session.add(existing)
+        db_session.flush()
+
+        token = _make_id_token(
+            rsa_keypair,
+            sub="g-unv2",
+            email="unv2@example.com",
+            email_verified=True,
+        )
+        with pytest.raises(GoogleAuthError, match="not verified"):
+            signin_with_google(db_session, token)
 
     def test_new_user_with_driver_role(self, db_session, rsa_keypair, patched_jwks):
         token = _make_id_token(rsa_keypair, sub="g-4", email="driver@example.com")
@@ -400,25 +488,58 @@ class TestOAuthGoogleRoute:
         assert "trustaudit_session" in cookies
 
     def test_role_mismatch_returns_403(
+        self, app_client, rsa_keypair, patched_jwks
+    ):
+        """User signs up via Google as a driver, then later tries to sign
+        in on the vendor page with the same Google identity. Step 2 of
+        ``signin_with_google`` returns the existing user (existing
+        identity short-circuit), and the route layer's role guard fires
+        and returns 403 — the canonical wrong-page error path.
+        """
+        token = _make_id_token(rsa_keypair, sub="g-route-2", email="driver-rt@example.com")
+        first = app_client.post(
+            "/api/auth/oauth/google",
+            json={"id_token": token, "role": "driver"},
+        )
+        assert first.status_code == 200, first.text
+
+        second = app_client.post(
+            "/api/auth/oauth/google",
+            json={"id_token": token, "role": "vendor"},
+        )
+        assert second.status_code == 403
+        assert "driver" in second.json()["detail"].lower()
+
+    def test_link_to_password_account_returns_401(
         self, app_client, shared_session, rsa_keypair, patched_jwks
     ):
-        # Pre-seed a driver user via the shared session.
+        """Adversary review 7926af6 #1 — Google sign-in must refuse to
+        auto-link to an existing password account. The route should
+        return 401 (not 200, not a session cookie).
+        """
         existing = User(
-            role="driver",
-            primary_email="driver@example.com",
-            email_verified=False,
+            role="vendor",
+            primary_email="hasppw@example.com",
+            email_verified=True,
         )
         shared_session.add(existing)
         shared_session.flush()
+        shared_session.add(
+            UserIdentity(
+                user_id=existing.id,
+                provider="password",
+                email="hasppw@example.com",
+            )
+        )
         shared_session.commit()
 
-        token = _make_id_token(rsa_keypair, sub="g-route-2", email="driver@example.com")
+        token = _make_id_token(rsa_keypair, sub="g-takeover", email="hasppw@example.com")
         response = app_client.post(
             "/api/auth/oauth/google",
             json={"id_token": token, "role": "vendor"},
         )
-        assert response.status_code == 403
-        assert "driver" in response.json()["detail"].lower()
+        assert response.status_code == 401, response.text
+        assert "trustaudit_session" not in response.cookies
 
     def test_invalid_token_returns_401(self, app_client, patched_jwks):
         response = app_client.post(

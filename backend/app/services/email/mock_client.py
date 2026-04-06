@@ -62,8 +62,8 @@ class MockEmailClient:
             from_addr=from_addr,
         )
         SENT_EMAILS.append(entry)
-        # Dev convenience: short stdout line so a magic link is greppable.
-        print(f"[email:mock] to={to} subject={subject!r}")
+        # Dev convenience: short log line so a magic link is greppable.
+        logger.info("[email:mock] to=%s subject=%r", to, subject)
         return EmailSendResult(
             provider="mock",
             message_id=f"mock-{len(SENT_EMAILS)}",

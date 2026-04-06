@@ -263,6 +263,21 @@ def signin_with_google(
         db.flush()
 
     # 2. Existing user by email?
+    #
+    # SECURITY (adversary review 7926af6, finding #1): we MUST NOT auto-link
+    # a new Google identity to a pre-existing user account just because the
+    # emails match. That is an account-takeover vector — anyone who can get
+    # Google to issue an ID token for an email address that already exists
+    # in our database would inherit that user's session.
+    #
+    # The only time auto-link is safe:
+    #   (a) Google's own ``email_verified`` claim is True (so Google has
+    #       proof the OAuth user controls the mailbox), AND
+    #   (b) the existing TrustAudit user has already verified their email
+    #       (so we have proof THEY control the mailbox), AND
+    #   (c) the existing user does NOT have a password identity (a password
+    #       account is a stronger anchor — refuse to auto-link, force the
+    #       user to sign in with password and link Google from settings).
     user: Optional[User] = None
     if email:
         user = (
@@ -286,10 +301,33 @@ def signin_with_google(
         db.flush()
         created = True
     else:
-        # Existing user — bump verified flag if Google has verified the email.
-        if email_verified and not user.email_verified:
-            user.email_verified = True
-            db.add(user)
+        # Account-linking gate (see SECURITY note above).
+        has_password_identity = (
+            db.query(UserIdentity)
+            .filter(
+                UserIdentity.user_id == user.id,
+                UserIdentity.provider == "password",
+            )
+            .first()
+        ) is not None
+        if has_password_identity:
+            raise GoogleAuthError(
+                "An account with this email already exists with password sign-in. "
+                "Sign in with your password, then link Google from settings."
+            )
+        if not (email_verified and user.email_verified):
+            raise GoogleAuthError(
+                "Cannot link Google to this account because the email is not verified "
+                "on both sides. Please verify your email first."
+            )
+        # Belt-and-braces: the role must already match. Mismatched roles are
+        # rejected at the route layer too, but we refuse to flush an
+        # identity row before that check (adversary finding #15).
+        if user.role != default_role:
+            raise GoogleAuthError(
+                f"Account already exists with role {user.role!r}; "
+                f"please sign in on the {user.role} page."
+            )
 
     # Attach the google identity to this user.
     identity = UserIdentity(
