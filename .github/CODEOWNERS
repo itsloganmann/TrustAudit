@@ -1,0 +1,9 @@
+# Default code owner — every PR auto-requests review from Logan.
+* @logandmann
+
+# Security-sensitive areas always require an explicit reviewer.
+/.github/                @logandmann
+/backend/app/auth/       @logandmann
+/backend/app/services/whatsapp/  @logandmann
+/render.yaml             @logandmann
+/Dockerfile              @logandmann

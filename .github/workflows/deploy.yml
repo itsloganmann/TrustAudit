@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  render-deploy:
+    name: Trigger Render deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://trustaudit-wxd7.onrender.com
+    steps:
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::warning::RENDER_DEPLOY_HOOK_URL secret not set — skipping deploy."
+            exit 0
+          fi
+          curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL" | tee deploy-trigger.json
+
+      - name: Wait for service to come back online
+        run: |
+          URL="https://trustaudit-wxd7.onrender.com/health"
+          for i in $(seq 1 60); do
+            if curl -fsSL --max-time 5 "$URL" > /dev/null; then
+              echo "Service is healthy after ${i} attempts."
+              exit 0
+            fi
+            echo "Waiting for ${URL} (attempt ${i}/60)..."
+            sleep 10
+          done
+          echo "::error::Service did not become healthy within 10 minutes."
+          exit 1
+
+      - name: Post-deploy smoke test
+        run: |
+          curl -fsSL https://trustaudit-wxd7.onrender.com/health
+          curl -fsSL https://trustaudit-wxd7.onrender.com/api/stats || echo "::warning::/api/stats not reachable"

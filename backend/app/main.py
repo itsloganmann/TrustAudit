@@ -17,6 +17,9 @@ from .routes.webhook_whatsapp import router as whatsapp_webhook_router
 from .routes.auth import router as auth_router
 from .routes.demo import router as demo_router
 from .routes.invoices_public import router as invoices_public_router
+from .routes.disputes import router as disputes_router
+from .routes.compliance import router as compliance_router
+from .routes.verification import router as verification_router
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -47,6 +50,9 @@ app.include_router(whatsapp_webhook_router, prefix="/api")  # new: /api/webhook/
 app.include_router(auth_router, prefix="/api/auth")  # signup, signin, magic, oauth, otp, identities, me, signout
 app.include_router(demo_router, prefix="/api")  # /api/demo/new-session, /api/demo/qr, /api/demo/health
 app.include_router(invoices_public_router, prefix="/api")  # /api/live/invoices (anonymized)
+app.include_router(disputes_router, prefix="/api")  # /api/disputes (vendor/admin scoped, W9)
+app.include_router(compliance_router, prefix="/api")  # /api/invoices/{id}/compliance.pdf, /submit-to-gov (W9)
+app.include_router(verification_router, prefix="/api")  # /api/verify/{id} (PUBLIC, no auth, W9)
 
 # Resolve the frontend dist directory
 FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
