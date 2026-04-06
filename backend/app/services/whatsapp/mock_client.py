@@ -91,13 +91,40 @@ class MockClient:
         return _PLACEHOLDER_JPEG
 
     def parse_inbound(self, payload: dict) -> InboundMessage:
+        # Accept both canonical mock keys AND the Twilio-shaped keys
+        # (``MessageSid``, ``From``, ``Body``, ``MediaUrl0``,
+        # ``MediaContentType0``). This lets MockClient gracefully handle
+        # Twilio-shaped payloads when a test or fallback path routes them
+        # here. Adversary review of 6293462 (P1 #5) flagged that the
+        # previous lowercase-only lookup silently regenerated a fresh UUID
+        # every call, defeating idempotency on Twilio retries.
+        from_value = (
+            payload.get("from")
+            or payload.get("From")
+            or ""
+        )
+        # Twilio prefixes WhatsApp phones with ``whatsapp:`` — strip it so
+        # the rate limiter and audit log see canonical E.164.
+        from_str = str(from_value)
+        if from_str.lower().startswith("whatsapp:"):
+            from_str = from_str.split(":", 1)[1]
+
+        sid = (
+            payload.get("message_sid")
+            or payload.get("MessageSid")
+            or f"mock-{uuid.uuid4().hex}"
+        )
+
         return InboundMessage(
             provider="mock",
-            from_phone_e164=str(payload.get("from", "")),
-            message_sid=str(payload.get("message_sid") or f"mock-{uuid.uuid4().hex}"),
-            text=payload.get("text"),
-            media_url=payload.get("media_url"),
-            media_content_type=payload.get("media_content_type"),
+            from_phone_e164=from_str,
+            message_sid=str(sid),
+            text=payload.get("text") or payload.get("Body"),
+            media_url=payload.get("media_url") or payload.get("MediaUrl0"),
+            media_content_type=(
+                payload.get("media_content_type")
+                or payload.get("MediaContentType0")
+            ),
             received_at_iso=_now_iso(),
         )
 

@@ -43,9 +43,19 @@ def _hash_password(password: str) -> str:
 
         return bcrypt.hash(password)
     except Exception as exc:  # pragma: no cover - depends on env
+        # Hard-fail in production so a missing system-level libffi/openssl
+        # never silently ships sha256-dev$ hashes to a real user database.
+        # See adversary review of 6293462 (P1 #11).
+        env_name = os.environ.get("APP_ENV", os.environ.get("TRUSTAUDIT_ENV", "development")).lower()
+        if env_name in ("production", "prod"):
+            raise RuntimeError(
+                "passlib[bcrypt] is required in production — refusing to seed "
+                "with sha256-dev$ fallback. Install passlib[bcrypt] in the "
+                "container image."
+            ) from exc
         logger.warning(
             "passlib[bcrypt] unavailable (%s) — falling back to sha256-dev hash. "
-            "DO NOT ship this to production; waiting on W10 to add the dependency.",
+            "DEV ONLY. Will raise in production (APP_ENV=production).",
             exc,
         )
         return "sha256-dev$" + hashlib.sha256(password.encode("utf-8")).hexdigest()
@@ -176,8 +186,14 @@ def run() -> None:
         seen.add(name)
         unique_vendors.append((name, gstin))
 
+    # Build one MSME row per unique vendor so every invoice maps to a distinct
+    # supplier. The previous slice of ``unique_vendors[::2][:25]`` (only every
+    # other vendor, capped at 25) meant half the invoices fell back to
+    # Gupta Steel, which made the SupplierNetwork visualization show one
+    # vendor with 26 invoices and every other vendor with 1 — a skew the CFO
+    # audience would notice. See adversary review of 6293462 (P1 #6).
     msme_rows: list[MSME] = []
-    for i, (name, gstin) in enumerate(unique_vendors[::2][:25]):
+    for i, (name, gstin) in enumerate(unique_vendors):
         msme_rows.append(
             MSME(
                 enterprise_id=enterprise.id,
@@ -193,6 +209,9 @@ def run() -> None:
     print(f"  MSMEs created:   {len(msme_rows)}")
 
     msme_by_name: dict[str, MSME] = {m.vendor_name: m for m in msme_rows}
+    # Round-robin fallback id in case a vendor name somehow doesn't match (it
+    # always should now that every unique vendor gets an MSME row, but we
+    # keep this for defensive purposes).
     fallback_msme_id = msme_rows[0].id
 
     # -------------------------------------------------------------------
