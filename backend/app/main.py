@@ -12,7 +12,8 @@ from pathlib import Path
 import os
 
 from .database import engine, Base
-from .routes import router
+from .routes import router  # legacy routes (backward compat with simulate_driver.py)
+from .routes.webhook_whatsapp import router as whatsapp_webhook_router
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -38,7 +39,8 @@ os.makedirs(uploads_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 # Register API routes
-app.include_router(router, prefix="/api")
+app.include_router(router, prefix="/api")  # legacy: /api/invoices, /api/stats, /api/webhook/whatsapp, /api/activity
+app.include_router(whatsapp_webhook_router, prefix="/api")  # new: /api/webhook/whatsapp/inbound
 
 # Resolve the frontend dist directory
 FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
