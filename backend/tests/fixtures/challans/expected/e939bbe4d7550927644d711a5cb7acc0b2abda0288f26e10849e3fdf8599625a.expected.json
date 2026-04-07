@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Lakshmi Enterprises",
+  "gstin": "07AAACL8888M1Z1",
+  "invoice_number": "LE/2026/042",
+  "invoice_amount": 128000.0,
+  "invoice_date": "2026-03-12",
+  "date_of_acceptance": "2026-03-13",
+  "confidence": 0.86,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "bilingual"
+  ],
+  "text_quality": "good",
+  "orientation": "ok"
+}

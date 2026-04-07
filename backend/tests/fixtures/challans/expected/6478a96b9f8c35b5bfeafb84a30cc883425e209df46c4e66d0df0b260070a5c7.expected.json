@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Mixed Vendors",
+  "gstin": "27AAACX0000X1Z1",
+  "invoice_number": "STACK-01",
+  "invoice_amount": 50000.0,
+  "invoice_date": "2026-03-20",
+  "date_of_acceptance": "2026-03-20",
+  "confidence": 0.7,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "multi_invoice"
+  ],
+  "text_quality": "good",
+  "orientation": "ok"
+}

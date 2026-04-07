@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Kamal Traders",
+  "gstin": null,
+  "invoice_number": "KT/2026/0017",
+  "invoice_amount": 34500.0,
+  "invoice_date": "2026-03-10",
+  "date_of_acceptance": "2026-03-11",
+  "confidence": 0.78,
+  "is_challan": true,
+  "missing_fields": [
+    "gstin"
+  ],
+  "detected_edge_cases": [],
+  "text_quality": "good",
+  "orientation": "ok"
+}

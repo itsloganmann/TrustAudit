@@ -1,0 +1,16 @@
+{
+  "vendor_name": "Night Shift Traders",
+  "gstin": "19AAACN3333D1ZX",
+  "invoice_number": "NST/2026/009",
+  "invoice_amount": 42500.0,
+  "invoice_date": "2026-03-22",
+  "date_of_acceptance": "2026-03-22",
+  "confidence": 0.61,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [
+    "low_light"
+  ],
+  "text_quality": "poor",
+  "orientation": "ok"
+}

@@ -1,0 +1,14 @@
+{
+  "vendor_name": "Mehta Hardware",
+  "gstin": "27AAACM1010L1ZQ",
+  "invoice_number": "MH-2026-077",
+  "invoice_amount": 98000.0,
+  "invoice_date": "2026-03-18",
+  "date_of_acceptance": "2026-03-19",
+  "confidence": 0.81,
+  "is_challan": true,
+  "missing_fields": [],
+  "detected_edge_cases": [],
+  "text_quality": "good",
+  "orientation": "rotated_180"
+}
