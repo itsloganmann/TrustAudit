@@ -6,9 +6,12 @@ Covers:
 * Deterministic anonymization across calls within a session.
 * Concurrent appends don't corrupt state.
 * Prune logic keeps recent rows and removes expired ones.
+* Phase I pub/sub — emit/subscribe fan-out, wildcard stream, queue
+  overflow, cancellation.
 """
 from __future__ import annotations
 
+import asyncio
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -243,3 +246,159 @@ def test_concurrent_appends_across_sessions():
         len(demo_sessions.list_recent(f"s{i}")) for i in range(10)
     )
     assert total == 100
+
+
+# ---------------------------------------------------------------------------
+# Phase I — pub/sub for the SSE stream
+# ---------------------------------------------------------------------------
+
+
+def _drain_once(aiter) -> dict:
+    """Pull exactly one frame from a subscribe() async generator."""
+    return asyncio.get_event_loop().run_until_complete(aiter.__anext__())
+
+
+@pytest.mark.asyncio
+async def test_emit_delivers_to_matching_subscriber():
+    received: list[dict] = []
+    ready = asyncio.Event()
+
+    async def consumer():
+        ready.set()
+        async for frame in demo_sessions.subscribe("live-phone-5551230001"):
+            received.append(frame)
+            break
+
+    task = asyncio.create_task(consumer())
+    await ready.wait()
+    # Give the subscriber a tick to register its queue.
+    await asyncio.sleep(0)
+
+    delivered = demo_sessions.emit(
+        "live-phone-5551230001",
+        "invoice.extracted",
+        {"invoice_id": 42, "state": "VERIFIED"},
+    )
+
+    await asyncio.wait_for(task, timeout=1.0)
+
+    assert delivered == 1
+    assert len(received) == 1
+    frame = received[0]
+    assert frame["event"] == "invoice.extracted"
+    assert frame["session_id"] == "live-phone-5551230001"
+    assert frame["data"]["invoice_id"] == 42
+    assert frame["data"]["state"] == "VERIFIED"
+
+
+@pytest.mark.asyncio
+async def test_emit_does_not_cross_sessions():
+    received_a: list[dict] = []
+    received_b: list[dict] = []
+    started = asyncio.Event()
+
+    async def consumer_a():
+        started.set()
+        async for frame in demo_sessions.subscribe("sid-A"):
+            received_a.append(frame)
+            break
+
+    async def consumer_b():
+        async for frame in demo_sessions.subscribe("sid-B"):
+            received_b.append(frame)
+            break
+
+    task_a = asyncio.create_task(consumer_a())
+    task_b = asyncio.create_task(consumer_b())
+    await started.wait()
+    await asyncio.sleep(0)
+
+    # Emit to A only — B should not receive anything.
+    delivered = demo_sessions.emit("sid-A", "invoice.ingested", {"i": 1})
+    assert delivered == 1
+
+    await asyncio.wait_for(task_a, timeout=1.0)
+    assert len(received_a) == 1
+    assert received_a[0]["data"]["i"] == 1
+
+    # Clean up: emit to B so its consumer exits.
+    demo_sessions.emit("sid-B", "noise", {"x": 0})
+    await asyncio.wait_for(task_b, timeout=1.0)
+
+
+@pytest.mark.asyncio
+async def test_emit_wildcard_broadcasts_to_star_subscribers():
+    received: list[dict] = []
+    started = asyncio.Event()
+
+    async def consumer():
+        started.set()
+        async for frame in demo_sessions.subscribe("*"):
+            received.append(frame)
+            break
+
+    task = asyncio.create_task(consumer())
+    await started.wait()
+    await asyncio.sleep(0)
+
+    delivered = demo_sessions.emit("*", "invoice.extracted", {"n": 9})
+    assert delivered == 1
+
+    await asyncio.wait_for(task, timeout=1.0)
+    assert received[0]["data"]["n"] == 9
+
+
+def test_emit_with_no_subscribers_is_zero():
+    delivered = demo_sessions.emit("nobody", "invoice.ingested", {"x": 1})
+    assert delivered == 0
+
+
+@pytest.mark.asyncio
+async def test_subscribe_unregisters_on_cancel():
+    """Cancelling the consumer task must remove its queue from the
+    subscriber set so subsequent emits don't silently grow memory."""
+    assert demo_sessions.subscriber_count("cleanup-sid") == 0
+
+    async def consumer():
+        async for _ in demo_sessions.subscribe("cleanup-sid"):
+            return
+
+    task = asyncio.create_task(consumer())
+    await asyncio.sleep(0)  # let the generator register
+    assert demo_sessions.subscriber_count("cleanup-sid") == 1
+
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+    # After cancellation the finally-block in subscribe() should have
+    # discarded the queue.
+    await asyncio.sleep(0)
+    assert demo_sessions.subscriber_count("cleanup-sid") == 0
+
+
+@pytest.mark.asyncio
+async def test_emit_does_not_block_when_queue_full():
+    """A stalled consumer must not wedge emit(). The oldest frame gets
+    dropped so the latest one still lands."""
+    # Manually plant a tiny queue so we can exhaust it deterministically.
+    tiny: asyncio.Queue = asyncio.Queue(maxsize=2)
+    with demo_sessions._subscribers_lock:  # noqa: SLF001 — test white-box
+        demo_sessions._subscribers.setdefault("slow-sid", set()).add(tiny)  # noqa: SLF001
+
+    try:
+        for i in range(5):
+            demo_sessions.emit("slow-sid", "invoice.ingested", {"i": i})
+
+        # Queue must not exceed its cap; oldest frame should be evicted
+        # so the newest still arrives.
+        assert tiny.qsize() <= 2
+        # Pull the remaining frames and assert the last emit is one of them.
+        seen_indexes = []
+        while not tiny.empty():
+            seen_indexes.append(tiny.get_nowait()["data"]["i"])
+        assert 4 in seen_indexes
+    finally:
+        with demo_sessions._subscribers_lock:  # noqa: SLF001
+            demo_sessions._subscribers.get("slow-sid", set()).discard(tiny)  # noqa: SLF001

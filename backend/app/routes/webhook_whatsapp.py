@@ -333,24 +333,35 @@ def _persist_pipeline_result(
     # short-circuit via the existing dedup layer.
     webhook_idempotency.record_image_hash(image_sha256, invoice.id)
 
-    # Push to the public live demo session feed so /live reacts.
+    # Push to the public live demo session feed so /live reacts, and
+    # fan out an SSE frame to every subscribed dashboard.
     try:
         session_id = _phone_to_session_id(inbound.from_phone_e164)
         # The session might not exist yet — append_invoice auto-creates.
         days_remaining = (deadline - today).days
-        demo_sessions.append_invoice(
-            session_id,
-            {
-                "invoice_id": invoice.id,
-                "vendor_name": invoice.vendor_name,
-                "state": invoice.state or invoice.status,
-                "confidence": round(invoice.confidence_score or 0.0, 4),
-                "amount": invoice.invoice_amount,
-                "days_remaining": days_remaining,
-                "invoice_number": invoice.invoice_number,
-                "gstin": invoice.gstin,
-            },
+        feed_entry = {
+            "invoice_id": invoice.id,
+            "vendor_name": invoice.vendor_name,
+            "state": invoice.state or invoice.status,
+            "confidence": round(invoice.confidence_score or 0.0, 4),
+            "amount": invoice.invoice_amount,
+            "days_remaining": days_remaining,
+            "invoice_number": invoice.invoice_number,
+            "gstin": invoice.gstin,
+        }
+        demo_sessions.append_invoice(session_id, feed_entry)
+        # SSE event name: ``invoice.extracted`` when we have a
+        # confident extraction, ``invoice.ingested`` otherwise. Both
+        # events share the same payload shape so the frontend can just
+        # upsert into its table.
+        event_name = (
+            "invoice.extracted"
+            if (invoice.confidence_score or 0.0) >= 0.5
+            else "invoice.ingested"
         )
+        demo_sessions.emit(session_id, event_name, feed_entry)
+        # Admin/ops wildcard stream — same payload to ``*``.
+        demo_sessions.emit("*", event_name, dict(feed_entry, session_id=session_id))
     except Exception as exc:  # noqa: BLE001 — best-effort
         logger.warning("failed to push invoice %s to demo session: %s", invoice.id, exc)
 

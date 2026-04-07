@@ -6,7 +6,11 @@ import { openEventStream } from "../lib/sse.js";
  *
  * @param {object} opts
  * @param {string|null} opts.url - The SSE URL. If null/empty, the hook is idle.
- * @param {(data:any)=>void} [opts.onMessage] - Called for each parsed event.
+ * @param {(data:any)=>void} [opts.onMessage] - Fires on every frame (default or
+ *   named) with the parsed JSON payload.
+ * @param {Record<string,(data:any)=>void>} [opts.events] - Per-named-event handlers
+ *   that fire with just the parsed payload. Example:
+ *   `{ "invoice.extracted": (row) => ... }`.
  * @param {() => Promise<any>} [opts.fallback] - Called every `pollMs` if SSE fails.
  * @param {number} [opts.pollMs=2000] - Fallback polling interval.
  * @param {boolean} [opts.enabled=true] - Disable to skip stream + polling.
@@ -15,6 +19,7 @@ import { openEventStream } from "../lib/sse.js";
 export function useSSE({
   url,
   onMessage,
+  events,
   fallback,
   pollMs = 2000,
   enabled = true,
@@ -22,11 +27,16 @@ export function useSSE({
   const [status, setStatus] = useState("idle");
   const [lastEvent, setLastEvent] = useState(null);
   const callbackRef = useRef(onMessage);
+  const eventsRef = useRef(events);
   const fallbackRef = useRef(fallback);
 
   useEffect(() => {
     callbackRef.current = onMessage;
   }, [onMessage]);
+
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
 
   useEffect(() => {
     fallbackRef.current = fallback;
@@ -62,12 +72,25 @@ export function useSSE({
       pollTimer = setInterval(tick, pollMs);
     };
 
+    // Bind every named-event handler through a stable dispatcher so
+    // the underlying EventSource can keep long-lived listeners across
+    // renders. The dispatcher always reads from ``eventsRef.current``.
+    const eventsProxy = {};
+    const currentEvents = eventsRef.current || {};
+    for (const name of Object.keys(currentEvents)) {
+      eventsProxy[name] = (data) => {
+        const handler = eventsRef.current?.[name];
+        if (typeof handler === "function") handler(data);
+      };
+    }
+
     let close = () => {};
     try {
       close = openEventStream(url, {
         onOpen: () => {
           if (!cancelled) setStatus("open");
         },
+        events: eventsProxy,
         onMessage: (data) => {
           if (cancelled) return;
           setLastEvent(data);
@@ -92,6 +115,7 @@ export function useSSE({
       }
       if (pollTimer) clearInterval(pollTimer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, enabled, pollMs]);
 
   return { status, lastEvent };

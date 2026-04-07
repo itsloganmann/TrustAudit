@@ -11,6 +11,7 @@ import {
   Clock,
   ShieldCheck,
 } from "lucide-react";
+import { useSSE } from "../hooks/useSSE.js";
 
 /**
  * Public, read-only /live dashboard. Streams anonymized rows from the
@@ -193,103 +194,81 @@ export default function LiveDemo() {
     }
   }, [sessionId]);
 
-  // Fetch loop + SSE attempt.
+  // Canonical list fetch. Used both as the initial prime after an SSE
+  // event lands AND as the polling fallback when SSE is unavailable.
   const fetchOnce = useCallback(async () => {
-    if (!sessionId) return;
+    if (!sessionId) return null;
     try {
       const resp = await fetch(
         `/api/live/invoices?session=${encodeURIComponent(sessionId)}&max_age=${MAX_AGE_SECONDS}`,
       );
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
-      setInvoices(Array.isArray(data.invoices) ? data.invoices : []);
+      const list = Array.isArray(data.invoices) ? data.invoices : [];
+      setInvoices(list);
       setConnected(true);
       lastFetchRef.current = Date.now();
+      return data;
     } catch {
       setConnected(false);
-      // Swallow — the dashboard stays usable with the last-known state.
+      return null;
     }
   }, [sessionId]);
 
+  // Prime the list once per session change. The SSE subscription
+  // below keeps it fresh on every `invoice.*` frame, and the useSSE
+  // hook will fall back to polling if the stream fails.
   useEffect(() => {
-    if (!sessionId) return undefined;
-
-    let es = null;
-    let pollTimer = null;
-    let cancelled = false;
-
-    const startPolling = () => {
-      setTransport("poll");
-      fetchOnce();
-      pollTimer = setInterval(fetchOnce, POLL_INTERVAL_MS);
-    };
-
-    const tryStream = () => {
-      if (typeof EventSource === "undefined") {
-        startPolling();
-        return;
-      }
-      try {
-        es = new EventSource(`/api/stream/events?session=${encodeURIComponent(sessionId)}`);
-      } catch {
-        startPolling();
-        return;
-      }
-      let streamOk = false;
-      const fallbackTimer = setTimeout(() => {
-        if (!streamOk && !cancelled) {
-          // Never got an event — fall back to polling, but still do an
-          // initial fetch so the UI isn't empty.
-          try {
-            es?.close();
-          } catch {
-            /* ignore */
-          }
-          es = null;
-          startPolling();
-        }
-      }, 3000);
-
-      es.onopen = () => {
-        streamOk = true;
-        setTransport("sse");
-        setConnected(true);
-        // Prime the initial state via a single REST call, then rely
-        // on the SSE feed for deltas.
-        fetchOnce();
-      };
-      es.onmessage = () => {
-        // The stream is a bump-signal. We re-pull the canonical list
-        // from the REST endpoint to keep anonymization + filtering in
-        // one place.
-        fetchOnce();
-      };
-      es.onerror = () => {
-        clearTimeout(fallbackTimer);
-        try {
-          es?.close();
-        } catch {
-          /* ignore */
-        }
-        es = null;
-        if (!cancelled) startPolling();
-      };
-    };
-
-    tryStream();
-
-    return () => {
-      cancelled = true;
-      if (es) {
-        try {
-          es.close();
-        } catch {
-          /* ignore */
-        }
-      }
-      if (pollTimer) clearInterval(pollTimer);
-    };
+    if (!sessionId) return;
+    fetchOnce();
   }, [sessionId, fetchOnce]);
+
+  // SSE + polling fallback. On every named event from the backend
+  // (`invoice.ingested`, `invoice.extracted`) we re-pull the canonical
+  // anonymized list — the stream is just a "something changed" bump
+  // signal, while `/api/live/invoices` is the authoritative view.
+  const streamUrl = sessionId
+    ? `/api/live/stream?session=${encodeURIComponent(sessionId)}`
+    : null;
+
+  const handleStreamOpen = useCallback(() => {
+    setTransport("sse");
+    setConnected(true);
+  }, []);
+
+  const streamEvents = useMemo(
+    () => ({
+      "stream.open": () => {
+        handleStreamOpen();
+      },
+      "invoice.ingested": () => {
+        fetchOnce();
+      },
+      "invoice.extracted": () => {
+        fetchOnce();
+      },
+    }),
+    [fetchOnce, handleStreamOpen],
+  );
+
+  const { status: sseStatus } = useSSE({
+    url: streamUrl,
+    events: streamEvents,
+    fallback: fetchOnce,
+    pollMs: POLL_INTERVAL_MS,
+    enabled: Boolean(sessionId),
+  });
+
+  useEffect(() => {
+    if (sseStatus === "open") {
+      setTransport("sse");
+      setConnected(true);
+    } else if (sseStatus === "polling") {
+      setTransport("poll");
+    } else if (sseStatus === "idle") {
+      setTransport("idle");
+    }
+  }, [sseStatus]);
 
   // "Start new session" — mint a new id and reload with it.
   const handleNewSession = useCallback(async () => {
