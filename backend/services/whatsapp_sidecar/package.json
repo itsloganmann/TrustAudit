@@ -8,8 +8,9 @@
     "dev": "node index.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.0",
+    "baileys": "^7.0.0-rc.9",
     "express": "^4.19.2",
+    "localtunnel": "^2.0.2",
     "pino": "^9.0.0",
     "qrcode-terminal": "^0.12.0"
   },

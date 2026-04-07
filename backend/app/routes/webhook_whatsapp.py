@@ -130,6 +130,15 @@ def _pick_provider(detected: str) -> WhatsAppProvider:
     configured = os.environ.get("WHATSAPP_PROVIDER", "mock").lower()
     if configured == detected:
         return get_whatsapp_provider()
+    # Multipart-shaped payloads are unambiguously the local demo / fixture
+    # path (the frontend drag-and-drop uploader and the in-repo smoke tests
+    # both use this). Always route them to MockClient so ``mock://fixture/``
+    # URLs resolve from disk regardless of which real provider the env is
+    # configured for. Without this, a server running with
+    # ``WHATSAPP_PROVIDER=baileys`` tries to fetch fixture URLs from the
+    # baileys sidecar's pendingMedia map and 404s.
+    if detected == "mock":
+        return MockClient()
     # If the env says mock but the payload is clearly Twilio, parse it with Twilio.
     if detected == "twilio":
         from ..services.whatsapp.twilio_client import TwilioClient
