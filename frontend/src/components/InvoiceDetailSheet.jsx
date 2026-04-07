@@ -1,3 +1,4 @@
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -10,8 +11,24 @@ import {
   AlertTriangle,
   ArrowRight,
   Scan,
+  Sparkles,
 } from "lucide-react";
 import AnnotationOverlay from "./AnnotationOverlay";
+import { api, ApiError } from "../lib/api";
+
+// Lazy-loaded so the three.js / @react-three/fiber bundle only ships when
+// a user actually opens an invoice drawer. Keeps the main chunk lean.
+const JustificationCanvas = lazy(() => import("./JustificationCanvas.jsx"));
+
+function CanvasFallback() {
+  return (
+    <div className="w-full h-[360px] rounded-xl border border-white/[0.06] bg-slate-900/40 flex items-center justify-center">
+      <span className="text-[11px] text-slate-500 uppercase tracking-[0.18em]">
+        Initializing 3D scene...
+      </span>
+    </div>
+  );
+}
 
 /* ─────────────────────────────────────────────
    Evidence Drawer — slides from right on row click.
@@ -32,8 +49,54 @@ const panel = {
 };
 
 export default function InvoiceDetailSheet({ invoice, onClose }) {
+  // Justification fetch + per-invoice cache. Hooks must run on every render.
+  // We keep a ref-backed cache and a single state object keyed by invoice id
+  // so the derived render values don't need synchronous setState in effects.
+  const cacheRef = useRef(new Map());
+  const [fetchState, setFetchState] = useState({ id: null, status: "idle", payload: null });
+  const invoiceId = invoice?.id ?? null;
+
+  useEffect(() => {
+    if (!invoiceId) return undefined;
+
+    // Cache hit — emit synchronously inside the effect (one render cycle).
+    if (cacheRef.current.has(invoiceId)) {
+      setFetchState({ id: invoiceId, status: "ready", payload: cacheRef.current.get(invoiceId) });
+      return undefined;
+    }
+
+    let cancelled = false;
+    setFetchState({ id: invoiceId, status: "loading", payload: null });
+
+    api(`/invoices/${invoiceId}/justification`)
+      .then((payload) => {
+        if (cancelled) return;
+        cacheRef.current.set(invoiceId, payload);
+        setFetchState({ id: invoiceId, status: "ready", payload });
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const httpStatus = err instanceof ApiError ? err.status : 0;
+        // Auth/404/etc — silently fall back so the rest of the drawer still renders.
+        setFetchState({
+          id: invoiceId,
+          status: httpStatus === 401 || httpStatus === 403 ? "unauthorized" : "error",
+          payload: null,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [invoiceId]);
+
   if (!invoice) return null;
   const ok = invoice.status === "VERIFIED";
+
+  // Only show data for the currently-open invoice. Stale entries (from a
+  // prior selection still in flight) are ignored.
+  const justification = fetchState.id === invoiceId ? fetchState.payload : null;
+  const justificationStatus = fetchState.id === invoiceId ? fetchState.status : "idle";
 
   return (
     <AnimatePresence>
@@ -94,8 +157,41 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
               </button>
             </div>
 
-            {/* ── Body: Two columns ── */}
+            {/* ── Body: Justification canvas + two columns ── */}
             <div className="flex-1 overflow-y-auto">
+              {/* 3D justification canvas */}
+              <div className="px-5 pt-5">
+                <div className="flex items-center justify-between mb-3">
+                  <SectionHeader icon={Sparkles} title="Justification Intelligence" />
+                  {justificationStatus === "loading" && (
+                    <span className="text-[10px] text-slate-500 uppercase tracking-wider">
+                      Loading...
+                    </span>
+                  )}
+                  {justificationStatus === "error" && (
+                    <span className="text-[10px] text-rose-400 uppercase tracking-wider">
+                      Unavailable
+                    </span>
+                  )}
+                  {justificationStatus === "unauthorized" && (
+                    <span className="text-[10px] text-amber-400 uppercase tracking-wider">
+                      Sign in to view
+                    </span>
+                  )}
+                </div>
+                <Suspense fallback={<CanvasFallback />}>
+                  <JustificationCanvas
+                    invoiceId={invoice.id}
+                    confidence={justification?.confidence_score ?? 0}
+                    deductionInr={justification?.deduction_estimate_inr ?? 0}
+                    totalRecoverableInr={justification?.total_recoverable_inr ?? 0}
+                    availableFields={justification?.available_fields ?? []}
+                    missingFields={justification?.missing_fields ?? []}
+                    recommendations={justification?.recommendations ?? []}
+                  />
+                </Suspense>
+              </div>
+
               <div className="grid grid-cols-2 gap-0 h-full">
                 {/* LEFT: WhatsApp Chat Simulation */}
                 <div className="border-r border-white/[0.06] p-5 flex flex-col">
