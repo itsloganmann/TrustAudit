@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
@@ -10,6 +10,9 @@ import {
   MessageCircle,
   Clock,
   ShieldCheck,
+  ChevronRight,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
 
 /**
@@ -223,6 +226,7 @@ export default function LiveDemo() {
   const [creating, setCreating] = useState(false);
   const [phoneInput, setPhoneInput] = useState("");
   const [linkError, setLinkError] = useState("");
+  const [expandedKey, setExpandedKey] = useState(null);
   const lastFetchRef = useRef(0);
 
   // Bootstrap: pick the right session id on mount.
@@ -512,61 +516,163 @@ export default function LiveDemo() {
                     const key =
                       inv.invoice_number ||
                       `${inv.vendor_display_name}-${inv.created_at}`;
+                    const isExpanded = expandedKey === key;
+                    const missingFields = Array.isArray(inv.missing_fields)
+                      ? inv.missing_fields
+                      : [];
+                    const extractedFields = Array.isArray(inv.extracted_fields)
+                      ? inv.extracted_fields
+                      : [];
                     return (
-                      <motion.tr
-                        key={key}
-                        layout
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                        className="row-transition border-b border-white/[0.04]"
-                      >
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2.5">
-                            <div
-                              className="w-1 h-8 rounded-full"
-                              style={{
-                                background:
-                                  inv.state === "VERIFIED"
-                                    ? "#10b981"
-                                    : inv.state === "NEEDS_INFO" || inv.state === "VERIFYING"
-                                    ? "#f59e0b"
-                                    : "#f43f5e",
-                              }}
-                            />
-                            <div>
-                              <p className="text-[13px] text-white font-medium tracking-tight leading-tight">
-                                {inv.vendor_display_name || "Vendor ?"}
-                              </p>
-                              <p className="text-[10px] text-slate-600 font-mono mt-0.5">
-                                {inv.gstin || "GSTIN hidden"}
-                              </p>
+                      <Fragment key={key}>
+                        <motion.tr
+                          layout
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                          onClick={() => setExpandedKey(isExpanded ? null : key)}
+                          className={`row-transition border-b border-white/[0.04] cursor-pointer ${
+                            isExpanded ? "bg-white/[0.03]" : ""
+                          }`}
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className="w-1 h-8 rounded-full"
+                                style={{
+                                  background:
+                                    inv.state === "VERIFIED"
+                                      ? "#34d399"
+                                      : inv.state === "NEEDS_INFO" || inv.state === "VERIFYING"
+                                      ? "#fbbf24"
+                                      : "#fb7185",
+                                }}
+                              />
+                              <div>
+                                <p className="text-[13px] text-white font-medium tracking-tight leading-tight flex items-center gap-1.5">
+                                  {inv.vendor_display_name || "Vendor ?"}
+                                  <ChevronRight
+                                    size={11}
+                                    className={`text-slate-600 transition-transform ${
+                                      isExpanded ? "rotate-90" : ""
+                                    }`}
+                                  />
+                                </p>
+                                <p className="text-[10px] text-slate-600 font-mono mt-0.5">
+                                  {inv.gstin || "GSTIN hidden"}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-3 py-3">
-                          <span className="text-[12px] text-slate-400 font-mono">
-                            {inv.invoice_number || "—"}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <span className="text-[13px] text-white font-semibold tabular-nums tracking-tight">
-                            {inv.amount
-                              ? `INR ${Number(inv.amount).toLocaleString("en-IN")}`
-                              : "—"}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-right">
-                          <ConfidenceBar value={inv.confidence} />
-                        </td>
-                        <td className="px-3 py-3 text-center">
-                          <RelativeTime timestamp={inv.created_at} />
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <StateBadge state={inv.state} />
-                        </td>
-                      </motion.tr>
+                          </td>
+                          <td className="px-3 py-3">
+                            <span className="text-[12px] text-slate-400 font-mono">
+                              {inv.invoice_number || "—"}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-right">
+                            <span className="text-[13px] text-white font-semibold tabular-nums tracking-tight">
+                              {inv.amount
+                                ? `INR ${Number(inv.amount).toLocaleString("en-IN")}`
+                                : "—"}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-right">
+                            <ConfidenceBar value={inv.confidence} />
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            <RelativeTime timestamp={inv.created_at} />
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <StateBadge state={inv.state} />
+                          </td>
+                        </motion.tr>
+                        {isExpanded && (
+                          <motion.tr
+                            key={`${key}-expand`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.18 }}
+                            className="border-b border-white/[0.04] bg-white/[0.015]"
+                          >
+                            <td colSpan={6} className="px-4 py-5">
+                              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-5">
+                                {/* Thumbnail */}
+                                <div className="rounded-lg overflow-hidden border border-white/[0.06] bg-slate-900/40 aspect-[3/4]">
+                                  {inv.image_url ? (
+                                    <img
+                                      src={inv.image_url}
+                                      alt="Challan"
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-600 uppercase tracking-wider">
+                                      No image
+                                    </div>
+                                  )}
+                                </div>
+                                {/* Field chips */}
+                                <div className="space-y-4">
+                                  {missingFields.length > 0 && (
+                                    <div>
+                                      <p className="text-[10px] text-rose-400/90 font-mono uppercase tracking-[0.18em] mb-2">
+                                        Missing ({missingFields.length})
+                                      </p>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {missingFields.map((label) => (
+                                          <span
+                                            key={`m-${label}`}
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/8 border border-rose-500/30 text-[11px] text-rose-300 font-medium"
+                                          >
+                                            <AlertTriangle size={10} />
+                                            {label}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {extractedFields.length > 0 && (
+                                    <div>
+                                      <p className="text-[10px] text-emerald-400/90 font-mono uppercase tracking-[0.18em] mb-2">
+                                        Extracted ({extractedFields.length})
+                                      </p>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {extractedFields.map((label) => (
+                                          <span
+                                            key={`e-${label}`}
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/8 border border-emerald-500/30 text-[11px] text-emerald-300 font-medium"
+                                          >
+                                            <CheckCircle2 size={10} />
+                                            {label}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {missingFields.length === 0 &&
+                                    extractedFields.length === 0 && (
+                                      <p className="text-[12px] text-slate-500">
+                                        No field detail available for this row.
+                                      </p>
+                                    )}
+                                  {missingFields.length > 0 && (
+                                    <div className="pt-2 border-t border-white/[0.06]">
+                                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                                        Send a follow-up message to the
+                                        WhatsApp bot with the missing
+                                        information (e.g. "GSTIN
+                                        29ABCDE1234F1Z5") and the row will
+                                        re-process automatically.
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        )}
+                      </Fragment>
                     );
                   })}
                 </AnimatePresence>

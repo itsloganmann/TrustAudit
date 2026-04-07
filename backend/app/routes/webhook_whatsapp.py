@@ -339,6 +339,33 @@ def _persist_pipeline_result(
         session_id = _phone_to_session_id(inbound.from_phone_e164)
         # The session might not exist yet — append_invoice auto-creates.
         days_remaining = (deadline - today).days
+
+        # Pretty-label what we got vs what's missing so the public /live
+        # row can render readable chips on click. Source of truth is the
+        # extraction's missing_fields list — we invert it to derive the
+        # extracted set so the two lists always sum to the full schema.
+        _FIELD_LABELS = {
+            "vendor_name": "Vendor name",
+            "gstin": "GSTIN",
+            "invoice_number": "Invoice number",
+            "invoice_amount": "Amount",
+            "invoice_date": "Invoice date",
+            "date_of_acceptance": "Acceptance date",
+        }
+        _missing_set = {
+            f for f in (extraction.missing_fields or []) if f in _FIELD_LABELS
+        }
+        missing_labels = [_FIELD_LABELS[f] for f in _FIELD_LABELS if f in _missing_set]
+        extracted_labels = [
+            _FIELD_LABELS[f] for f in _FIELD_LABELS if f not in _missing_set
+        ]
+
+        # Public image URL: the file is already mounted under /uploads.
+        try:
+            image_url = f"/uploads/{Path(saved_path).name}"
+        except Exception:  # noqa: BLE001
+            image_url = None
+
         feed_entry = {
             "invoice_id": invoice.id,
             "vendor_name": invoice.vendor_name,
@@ -348,6 +375,13 @@ def _persist_pipeline_result(
             "days_remaining": days_remaining,
             "invoice_number": invoice.invoice_number,
             "gstin": invoice.gstin,
+            # Public-feed enrichment so the /live row can expand on click
+            # and explain WHY it's NEEDS_INFO. Stored alongside the raw
+            # PII; the public anonymizer keeps these but strips gstin +
+            # invoice_number before they leave the server.
+            "missing_fields": missing_labels,
+            "extracted_fields": extracted_labels,
+            "image_url": image_url,
         }
         demo_sessions.append_invoice(session_id, feed_entry)
         # SSE event name: ``invoice.extracted`` when we have a
