@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import SidebarNav from "./SidebarNav.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
+import LiveInvoiceStream from "../LiveInvoiceStream.jsx";
+import { VendorLiveStatusContext } from "./vendorLiveStatus.js";
 
 /**
  * Authenticated shell for `/vendor/*` routes.
@@ -25,6 +27,7 @@ export default function VendorShell() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [liveStatus, setLiveStatus] = useState("idle");
 
   const navItems = [
     { to: "/vendor", end: true, label: "Dashboard", icon: <LayoutDashboard size={14} /> },
@@ -39,6 +42,8 @@ export default function VendorShell() {
   };
 
   return (
+    <VendorLiveStatusContext.Provider value={liveStatus}>
+      <LiveInvoiceStream onStatus={setLiveStatus} />
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans antialiased">
       {/* Top bar */}
       <header className="border-b border-white/[0.06] bg-slate-950/60 backdrop-blur-xl sticky top-0 z-40">
@@ -72,7 +77,11 @@ export default function VendorShell() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            Live · auto-refresh 2s
+            {liveStatus === "open"
+              ? "Live · SSE stream"
+              : liveStatus === "polling"
+                ? "Live · polling 2s"
+                : "Live · auto-refresh 2s"}
           </div>
 
           <div className="relative">
@@ -148,5 +157,6 @@ export default function VendorShell() {
         </main>
       </div>
     </div>
+    </VendorLiveStatusContext.Provider>
   );
 }

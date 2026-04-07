@@ -6,8 +6,15 @@ import ExamplePipeline from "./components/ExamplePipeline";
 import SupplierNetwork from "./components/SupplierNetwork";
 import InvoiceDetailSheet from "./components/InvoiceDetailSheet";
 import AnimatedCounter from "./components/AnimatedCounter";
+import { useVendorLiveStatus } from "./components/shell/vendorLiveStatus.js";
 
 const API = "/api";
+// When the Phase I SSE stream is open we slow the REST poll way down because
+// the stream itself pushes near-real-time deltas. If SSE is unavailable (or
+// the route is mounted outside VendorShell, e.g. during tests) we keep the
+// original 2-second cadence so nothing regresses.
+const POLL_INTERVAL_FAST_MS = 2000;
+const POLL_INTERVAL_SSE_MS = 15000;
 
 function App() {
   const [invoices, setInvoices] = useState([]);
@@ -17,6 +24,13 @@ function App() {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [tab, setTab] = useState("all");
   const [search, setSearch] = useState("");
+
+  // When mounted inside VendorShell this returns the SSE status; when mounted
+  // standalone the default context value ("idle") falls through and polling
+  // stays at its original 2s cadence.
+  const liveStatus = useVendorLiveStatus();
+  const pollIntervalMs =
+    liveStatus === "open" ? POLL_INTERVAL_SSE_MS : POLL_INTERVAL_FAST_MS;
 
   // Track previous invoice statuses for toast detection
   const prevStatusMap = useRef({});
@@ -64,9 +78,9 @@ function App() {
 
   useEffect(() => {
     fetchData();
-    const i = setInterval(fetchData, 2000);
+    const i = setInterval(fetchData, pollIntervalMs);
     return () => clearInterval(i);
-  }, [fetchData]);
+  }, [fetchData, pollIntervalMs]);
 
   // Filter logic
   const filtered = invoices.filter((inv) => {
