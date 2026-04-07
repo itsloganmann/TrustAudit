@@ -1,5 +1,5 @@
 import { Suspense, lazy, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Shield, ArrowRight, Menu, X } from "lucide-react";
 
 import ParticleField from "../components/landing/ParticleField";
@@ -11,6 +11,7 @@ import Testimonials from "../components/landing/Testimonials";
 import FAQSection from "../components/landing/FAQSection";
 import Footer from "../components/landing/Footer";
 import ProductPitchScroll from "../components/landing/ProductPitchScroll";
+import MagneticCTA from "../components/effects/MagneticCTA";
 
 // Lazy load the hero visual so first paint isn't blocked by its SVG cost.
 const ShieldHero3D = lazy(() => import("../components/landing/ShieldHero3D"));
@@ -202,19 +203,23 @@ function Hero() {
             transition={{ duration: 0.7, delay: 0.24 }}
             className="mt-8 flex flex-wrap items-center gap-3"
           >
-            <a
-              href="#try-live"
-              className="inline-flex items-center gap-2 px-6 h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-[14px] tracking-tight transition-all shadow-[0_14px_48px_-12px_rgba(16,185,129,0.7)]"
-            >
-              Try the live demo
-              <ArrowRight size={15} strokeWidth={2.5} />
-            </a>
-            <a
-              href="/auth/vendor/signin"
-              className="inline-flex items-center gap-2 px-6 h-12 rounded-xl frost-card text-white font-semibold text-[14px] tracking-tight"
-            >
-              <span className="relative">Sign in as CFO</span>
-            </a>
+            <MagneticCTA strength={0.4} radius={120}>
+              <a
+                href="#try-live"
+                className="inline-flex items-center gap-2 px-6 h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-[14px] tracking-tight transition-all shadow-[0_14px_48px_-12px_rgba(16,185,129,0.7)]"
+              >
+                Try the live demo
+                <ArrowRight size={15} strokeWidth={2.5} />
+              </a>
+            </MagneticCTA>
+            <MagneticCTA strength={0.3} radius={100}>
+              <a
+                href="/auth/vendor/signin"
+                className="inline-flex items-center gap-2 px-6 h-12 rounded-xl frost-card glass-shimmer text-white font-semibold text-[14px] tracking-tight"
+              >
+                <span className="relative">Sign in as CFO</span>
+              </a>
+            </MagneticCTA>
           </motion.div>
 
           <motion.div

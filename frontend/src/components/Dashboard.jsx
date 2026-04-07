@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   FileText,
@@ -11,6 +12,7 @@ import AnimatedCounter from "./AnimatedCounter";
 import ComplianceChart from "./ComplianceChart";
 import ActivityTicker from "./ActivityTicker";
 import TaxSimulator from "./TaxSimulator";
+import TiltCard from "./effects/TiltCard";
 
 /* Shared spring presets — used across components for consistency */
 const SPRING_CARD = { type: "spring", stiffness: 180, damping: 22 };
@@ -115,33 +117,36 @@ const STAT_ICONS = {
 function StatCard({ label, value, color, iconKey, index = 0 }) {
   const Icon = STAT_ICONS[iconKey] || FileText;
   const shouldReduceMotion = useReducedMotion();
-  const hoverProps = shouldReduceMotion
-    ? {}
-    : { whileHover: { y: -3, transition: SPRING_HOVER } };
   return (
     <motion.div
       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       transition={{ ...SPRING_CARD, delay: index * 0.04 }}
-      {...hoverProps}
-      className="frost-card rounded-xl px-4 py-3 group will-change-transform"
+      className="will-change-transform"
     >
-      <div className="flex items-center justify-between mb-1 relative">
-        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">{label}</p>
-        <Icon
-          size={13}
-          className="opacity-30 group-hover:opacity-60 transition-opacity"
-          style={{ color: color || "#94a3b8" }}
-        />
-      </div>
-      <div className="relative">
-        <AnimatedCounter
-          value={value}
-          className="text-[22px] font-bold tabular-nums leading-tight tracking-tight"
-          style={{ color: color || "#f8fafc" }}
-          duration={700}
-        />
-      </div>
+      <TiltCard
+        glare
+        maxTilt={6}
+        scale={1.025}
+        className="frost-card rounded-xl px-4 py-3 group block"
+      >
+        <div className="flex items-center justify-between mb-1 relative">
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">{label}</p>
+          <Icon
+            size={13}
+            className="opacity-30 group-hover:opacity-60 transition-opacity"
+            style={{ color: color || "#94a3b8" }}
+          />
+        </div>
+        <div className="relative">
+          <AnimatedCounter
+            value={value}
+            className="text-[22px] font-bold tabular-nums leading-tight tracking-tight inline-block"
+            style={{ color: color || "#f8fafc" }}
+            duration={700}
+          />
+        </div>
+      </TiltCard>
     </motion.div>
   );
 }
@@ -156,6 +161,147 @@ const rowVariants = {
   }),
   exit: { opacity: 0, x: 8, transition: { duration: 0.18 } },
 };
+
+/**
+ * VerifiedBurst — emits 10 small emerald dots from the row's left edge
+ * that drift up + outward and fade over ~720 ms. Pure SVG, runs once
+ * per mount, GPU-cheap. Hidden under prefers-reduced-motion.
+ */
+function VerifiedBurst() {
+  const shouldReduceMotion = useReducedMotion();
+  if (shouldReduceMotion) return null;
+  // Deterministic angle/distance per dot so the burst feels designed,
+  // not random. Each dot has its own delay so they fan out.
+  const dots = Array.from({ length: 10 }).map((_, i) => {
+    const angle = (-Math.PI / 2) + ((i - 4.5) / 9) * (Math.PI * 0.85);
+    const dist = 22 + (i % 3) * 6;
+    return {
+      id: i,
+      tx: Math.cos(angle) * dist,
+      ty: Math.sin(angle) * dist,
+      delay: i * 0.025,
+    };
+  });
+  return (
+    <svg
+      aria-hidden
+      className="pointer-events-none absolute left-0 top-0 h-full w-16 overflow-visible"
+      viewBox="0 0 64 48"
+    >
+      {dots.map((d) => (
+        <motion.circle
+          key={d.id}
+          cx={6}
+          cy={24}
+          r={2.2}
+          fill="#10b981"
+          initial={{ opacity: 0, x: 0, y: 0, scale: 0.6 }}
+          animate={{
+            opacity: [0, 0.95, 0],
+            x: [0, d.tx],
+            y: [0, d.ty],
+            scale: [0.6, 1.1, 0.4],
+          }}
+          transition={{ duration: 0.72, delay: d.delay, ease: [0.22, 1, 0.36, 1] }}
+          style={{ filter: "drop-shadow(0 0 6px rgba(16,185,129,0.8))" }}
+        />
+      ))}
+    </svg>
+  );
+}
+
+/**
+ * InvoiceRow — wraps the table row so we can detect the moment a row
+ * transitions PENDING → VERIFIED and trigger the particle burst exactly
+ * once. The previous status lives in a ref so re-renders from polling
+ * don't re-trigger the burst.
+ */
+function InvoiceRow({ inv, i, onSelect }) {
+  const prevStatusRef = useRef(inv.status);
+  const [showBurst, setShowBurst] = useState(false);
+
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    if (prev !== "VERIFIED" && inv.status === "VERIFIED") {
+      // Defer the setState into a RAF so it doesn't trigger a cascading
+      // render synchronously inside the effect body.
+      const startId = requestAnimationFrame(() => setShowBurst(true));
+      const timeoutId = setTimeout(() => setShowBurst(false), 800);
+      prevStatusRef.current = inv.status;
+      return () => {
+        cancelAnimationFrame(startId);
+        clearTimeout(timeoutId);
+      };
+    }
+    prevStatusRef.current = inv.status;
+    return undefined;
+  }, [inv.status]);
+
+  return (
+    <motion.tr
+      custom={i}
+      variants={rowVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      layout
+      onClick={() => onSelect(inv)}
+      whileHover={{
+        backgroundColor: "rgba(255,255,255,0.02)",
+        transition: { type: "spring", stiffness: 320, damping: 26 },
+      }}
+      className="row-transition border-b border-white/[0.04] cursor-pointer group relative"
+    >
+      {/* Risk indicator + vendor */}
+      <td className="px-4 py-3 relative">
+        {showBurst && <VerifiedBurst />}
+        <div className="flex items-center gap-2.5">
+          {inv.status === "PENDING" && inv.days_remaining <= 3 && (
+            <motion.div
+              layoutId={`risk-${inv.id}`}
+              className="w-0.5 h-8 rounded-full bg-rose-500 -ml-2 mr-0.5"
+            />
+          )}
+          {inv.status === "PENDING" && inv.days_remaining > 3 && inv.days_remaining <= 14 && (
+            <div className="w-0.5 h-8 rounded-full bg-amber-500 -ml-2 mr-0.5" />
+          )}
+          {inv.status === "VERIFIED" && (
+            <motion.div
+              layoutId={`risk-${inv.id}`}
+              className="w-0.5 h-8 rounded-full bg-emerald-500 -ml-2 mr-0.5"
+              initial={{ backgroundColor: "#f43f5e" }}
+              animate={{ backgroundColor: "#10b981" }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+            />
+          )}
+          <div>
+            <p className="text-[13px] text-white font-medium group-hover:text-blue-400 transition-colors leading-tight tracking-tight">
+              {inv.vendor_name}
+            </p>
+            <p className="text-[10px] text-slate-600 mt-0.5">{inv.invoice_date}</p>
+          </div>
+        </div>
+      </td>
+      <td className="px-3 py-3">
+        <code className="text-[10px] text-slate-500 font-mono">{inv.gstin}</code>
+      </td>
+      <td className="px-3 py-3">
+        <span className="text-[12px] text-slate-400 font-mono">{inv.invoice_number}</span>
+      </td>
+      <td className="px-3 py-3 text-right">
+        <span className="text-[13px] text-white font-semibold tabular-nums tracking-tight">
+          INR {inv.invoice_amount.toLocaleString("en-IN")}
+        </span>
+      </td>
+      <td className="px-3 py-3 text-center">
+        <Deadline days={inv.days_remaining} status={inv.status} />
+      </td>
+      <td className="px-4 py-3 text-center">
+        <StatusBadge status={inv.status} />
+      </td>
+    </motion.tr>
+  );
+}
 
 /* Grid card mount variants */
 const gridCardVariants = {
@@ -248,64 +394,7 @@ export default function Dashboard({ invoices, stats, activity, loading, onSelect
           <tbody>
             <AnimatePresence mode="popLayout" initial={false}>
               {invoices.map((inv, i) => (
-                <motion.tr
-                  key={inv.id}
-                  custom={i}
-                  variants={rowVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  layout
-                  onClick={() => onSelectInvoice(inv)}
-                  className="row-transition border-b border-white/[0.04] cursor-pointer group"
-                >
-                  {/* Risk indicator + vendor */}
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      {inv.status === "PENDING" && inv.days_remaining <= 3 && (
-                        <motion.div
-                          layoutId={`risk-${inv.id}`}
-                          className="w-0.5 h-8 rounded-full bg-rose-500 -ml-2 mr-0.5"
-                        />
-                      )}
-                      {inv.status === "PENDING" && inv.days_remaining > 3 && inv.days_remaining <= 14 && (
-                        <div className="w-0.5 h-8 rounded-full bg-amber-500 -ml-2 mr-0.5" />
-                      )}
-                      {inv.status === "VERIFIED" && (
-                        <motion.div
-                          layoutId={`risk-${inv.id}`}
-                          className="w-0.5 h-8 rounded-full bg-emerald-500 -ml-2 mr-0.5"
-                          initial={{ backgroundColor: "#f43f5e" }}
-                          animate={{ backgroundColor: "#10b981" }}
-                          transition={{ duration: 1.2, ease: "easeOut" }}
-                        />
-                      )}
-                      <div>
-                        <p className="text-[13px] text-white font-medium group-hover:text-blue-400 transition-colors leading-tight tracking-tight">
-                          {inv.vendor_name}
-                        </p>
-                        <p className="text-[10px] text-slate-600 mt-0.5">{inv.invoice_date}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3">
-                    <code className="text-[10px] text-slate-500 font-mono">{inv.gstin}</code>
-                  </td>
-                  <td className="px-3 py-3">
-                    <span className="text-[12px] text-slate-400 font-mono">{inv.invoice_number}</span>
-                  </td>
-                  <td className="px-3 py-3 text-right">
-                    <span className="text-[13px] text-white font-semibold tabular-nums tracking-tight">
-                      INR {inv.invoice_amount.toLocaleString("en-IN")}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 text-center">
-                    <Deadline days={inv.days_remaining} status={inv.status} />
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <StatusBadge status={inv.status} />
-                  </td>
-                </motion.tr>
+                <InvoiceRow key={inv.id} inv={inv} i={i} onSelect={onSelectInvoice} />
               ))}
             </AnimatePresence>
           </tbody>

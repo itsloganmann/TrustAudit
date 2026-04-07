@@ -37,9 +37,17 @@ function CanvasFallback() {
    ───────────────────────────────────────────── */
 
 const backdrop = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
+  hidden: { opacity: 0, backdropFilter: "blur(0px)" },
+  visible: {
+    opacity: 1,
+    backdropFilter: "blur(18px)",
+    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
+  },
+  exit: {
+    opacity: 0,
+    backdropFilter: "blur(0px)",
+    transition: { duration: 0.22, ease: "easeIn" },
+  },
 };
 
 const panel = {
@@ -441,7 +449,7 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
 
 function SectionHeader({ icon: Icon, title }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 relative glass-shimmer rounded-md pr-2">
       <div className="w-6 h-6 rounded-md bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
         <Icon size={12} className="text-slate-400" />
       </div>

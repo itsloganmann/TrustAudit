@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import TiltCard from "../components/effects/TiltCard";
 import {
   ArrowLeft,
   Shield,
@@ -212,7 +213,7 @@ const cardVariants = {
   },
 };
 
-function AvatarBubble({ founder }) {
+function AvatarBubble({ founder, hovered }) {
   // Fallback chain: jpg -> svg -> initials. We use a stage counter so React
   // owns the swap instead of mutating the DOM via the onError handler.
   // 0 = primary jpg, 1 = stylized svg, 2 = inline initials.
@@ -223,16 +224,19 @@ function AvatarBubble({ founder }) {
 
   return (
     <div className="relative shrink-0">
-      {/* Outer glow ring — reacts to hover */}
+      {/* Outer glow ring — accelerates on hover (4.5s vs 14s) and lifts +6px */}
       <motion.div
         aria-hidden
         className="absolute -inset-1 rounded-full opacity-70 blur-xl"
         style={{
           background: `conic-gradient(from 180deg at 50% 50%, ${founder.gradientFrom}, ${founder.gradientVia}, ${founder.gradientTo}, ${founder.gradientFrom})`,
         }}
-        initial={{ rotate: 0 }}
         animate={{ rotate: 360 }}
-        transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
+        transition={{
+          duration: hovered ? 4.5 : 14,
+          repeat: Infinity,
+          ease: "linear",
+        }}
       />
       {/* Photo or initials circle */}
       <div
@@ -395,30 +399,42 @@ function TimelineNode({ node, index }) {
 }
 
 function FounderCard({ founder }) {
+  const [hovered, setHovered] = useState(false);
   return (
     <motion.article
       variants={cardVariants}
-      whileHover={{ y: -6, transition: { type: "spring", stiffness: 300 } }}
-      className="relative overflow-hidden rounded-3xl p-6 md:p-8 group"
-      style={{
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
-        backdropFilter: "blur(18px) saturate(140%)",
-        WebkitBackdropFilter: "blur(18px) saturate(140%)",
-        border: "1px solid rgba(255,255,255,0.08)",
-      }}
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+      className="relative group"
     >
-      {/* Animated caustic light sheen */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-[2px] rounded-3xl opacity-40 group-hover:opacity-70 transition-opacity"
-        style={{
-          background: `radial-gradient(600px circle at 20% -10%, ${founder.gradientFrom}22, transparent 40%), radial-gradient(600px circle at 100% 100%, ${founder.gradientTo}22, transparent 40%)`,
-        }}
-      />
+      <TiltCard
+        glare
+        maxTilt={5}
+        scale={1.012}
+        className="relative overflow-hidden rounded-3xl p-6 md:p-8 block"
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-3xl"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
+            backdropFilter: "blur(18px) saturate(140%)",
+            WebkitBackdropFilter: "blur(18px) saturate(140%)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        />
+        {/* Animated caustic light sheen */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-[2px] rounded-3xl opacity-40 group-hover:opacity-80 transition-opacity"
+          style={{
+            background: `radial-gradient(600px circle at 20% -10%, ${founder.gradientFrom}22, transparent 40%), radial-gradient(600px circle at 100% 100%, ${founder.gradientTo}22, transparent 40%)`,
+          }}
+        />
 
       <div className="relative flex flex-col md:flex-row gap-6 md:gap-8">
-        <AvatarBubble founder={founder} />
+        <AvatarBubble founder={founder} hovered={hovered} />
 
         <div className="min-w-0 flex-1">
           <p className="text-[11px] uppercase tracking-[0.3em] font-semibold text-emerald-400">
@@ -469,6 +485,7 @@ function FounderCard({ founder }) {
           </div>
         </div>
       </div>
+      </TiltCard>
     </motion.article>
   );
 }
