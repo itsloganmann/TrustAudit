@@ -16,8 +16,11 @@ Each frame is encoded as an SSE block::
     event: invoice.extracted
     data: {"invoice_id": 51, "state": "VERIFIED", ...}
 
-A comment heartbeat (``: keepalive\\n\\n``) is emitted every 15s so
-Render's proxy does not close the connection as idle.
+A named ``stream.heartbeat`` event is emitted every 15s so Render's
+proxy does not close the connection as idle. The client can safely
+ignore the heartbeat (it carries a server-side timestamp only), but
+because it is a real SSE event the ``onmessage`` plumbing sees it and
+the connection stays demonstrably alive in developer tools.
 
 Design notes
 ------------
@@ -37,19 +40,16 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
-from typing import AsyncIterator
+from typing import AsyncIterator, Dict, Optional
 
 from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 
 from ..services import demo_sessions
 
-logger = logging.getLogger(__name__)
-
 router = APIRouter(prefix="/live", tags=["live-stream"])
 
-# How often to emit a keepalive comment frame (seconds).
+# How often to emit a ``stream.heartbeat`` event (seconds).
 #
 # Render's default idle timeout is 100s for HTTP/1.1 connections; the
 # baileys sidecar uses 60s. 15s leaves headroom for proxy jitter and
@@ -80,15 +80,32 @@ async def _event_stream(session_id: str) -> AsyncIterator[str]:
     Emits an initial ``stream.open`` frame so the client can confirm
     the connection. Then multiplexes real ``emit`` frames with
     periodic keepalive comments.
+
+    Ordering note
+    -------------
+    We allocate the subscribe queue *before* yielding the opening
+    handshake. The ``subscribe`` async generator only registers its
+    queue once its first ``__anext__`` runs, so we kick it off via a
+    pre-fetch task. This prevents a race where a caller emits an
+    event between ``stream.open`` and the first ``queue.get`` —
+    without the pre-fetch, that event would silently vanish.
     """
+    start_time = asyncio.get_event_loop().time()
+    source = demo_sessions.subscribe(session_id)
+    # Start the generator so its queue is registered in the pub/sub
+    # bucket before we yield anything. We cache the first fetched frame
+    # (if any) so it is re-yielded on the next loop iteration.
+    first_fetch: "asyncio.Task[Dict]" = asyncio.ensure_future(source.__anext__())
+    # Yield once so the above task actually gets scheduled and the
+    # subscribe() body runs up to ``await queue.get()``.
+    await asyncio.sleep(0)
+
     yield _format_sse(
         "stream.open",
         {"session_id": session_id, "heartbeat_s": HEARTBEAT_SECONDS},
     )
 
-    start_time = asyncio.get_event_loop().time()
-    source = demo_sessions.subscribe(session_id)
-
+    pending: "Optional[asyncio.Task[Dict]]" = first_fetch
     try:
         while True:
             elapsed = asyncio.get_event_loop().time() - start_time
@@ -96,18 +113,35 @@ async def _event_stream(session_id: str) -> AsyncIterator[str]:
                 yield _format_sse("stream.close", {"reason": "max_lifetime"})
                 return
 
+            if pending is None:
+                pending = asyncio.ensure_future(source.__anext__())
+
             try:
                 frame = await asyncio.wait_for(
-                    source.__anext__(), timeout=HEARTBEAT_SECONDS
+                    asyncio.shield(pending), timeout=HEARTBEAT_SECONDS
                 )
             except asyncio.TimeoutError:
-                # Heartbeat comment — SSE spec says lines starting with
-                # ``:`` are ignored by the client, so this keeps the
-                # connection warm without firing an event on the DOM.
-                yield ": keepalive\n\n"
+                # Named heartbeat event — keeps Render's proxy from
+                # closing the connection as idle and lets the client
+                # see "still alive" in its event log. The in-flight
+                # ``pending`` task is preserved across heartbeats via
+                # ``asyncio.shield`` so we don't lose a frame that
+                # arrives during a long idle window.
+                yield _format_sse(
+                    "stream.heartbeat",
+                    {
+                        "session_id": session_id,
+                        "ts": asyncio.get_event_loop().time(),
+                    },
+                )
                 continue
             except StopAsyncIteration:
+                pending = None
                 return
+
+            # Consume this frame; the next iteration will start a new
+            # fetch task.
+            pending = None
 
             event_name = str(frame.get("event") or "message")
             data = frame.get("data") or {}
@@ -115,6 +149,13 @@ async def _event_stream(session_id: str) -> AsyncIterator[str]:
                 data = {"value": data}
             yield _format_sse(event_name, data)
     finally:
+        # Cancel any outstanding fetch task so it doesn't leak.
+        if pending is not None and not pending.done():
+            pending.cancel()
+            try:
+                await pending
+            except (asyncio.CancelledError, Exception):  # noqa: BLE001
+                pass
         # Ensure the subscribe generator cleans up its queue.
         try:
             await source.aclose()

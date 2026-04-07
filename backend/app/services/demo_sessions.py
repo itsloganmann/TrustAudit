@@ -290,6 +290,11 @@ def emit(session_id: str, event: str, payload: Dict) -> int:
 
     The dict delivered to subscribers is a new object — we never share
     mutable state across subscribers.
+
+    A subscriber registered under ``"*"`` receives every event exactly
+    once, even when ``emit`` itself is called with ``session_id="*"``.
+    We deduplicate the target set so a wildcard subscriber never gets
+    the same frame twice.
     """
     frame = {
         "event": str(event),
@@ -299,9 +304,14 @@ def emit(session_id: str, event: str, payload: Dict) -> int:
     }
 
     with _subscribers_lock:
-        targets = list(_subscribers.get(session_id, set())) + list(
-            _subscribers.get("*", set())
-        )
+        # A set union deduplicates the target queues so a subscriber
+        # registered under both the literal session id and ``"*"`` (or
+        # the wildcard case where session_id == "*") still only gets
+        # one copy of each frame.
+        targets_set: Set["asyncio.Queue[Dict]"] = set()
+        targets_set.update(_subscribers.get(session_id, set()))
+        targets_set.update(_subscribers.get("*", set()))
+        targets = list(targets_set)
 
     delivered = 0
     for queue in targets:
