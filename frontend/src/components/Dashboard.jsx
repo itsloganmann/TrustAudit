@@ -111,8 +111,8 @@ const STAT_ICONS = {
 function StatCard({ label, value, color, iconKey }) {
   const Icon = STAT_ICONS[iconKey] || FileText;
   return (
-    <div className="glass glass-hover rounded-xl px-4 py-3 group transition-all">
-      <div className="flex items-center justify-between mb-1">
+    <div className="frost-card rounded-xl px-4 py-3 group">
+      <div className="flex items-center justify-between mb-1 relative">
         <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">{label}</p>
         <Icon
           size={13}
@@ -120,12 +120,14 @@ function StatCard({ label, value, color, iconKey }) {
           style={{ color: color || "#94a3b8" }}
         />
       </div>
-      <AnimatedCounter
-        value={value}
-        className="text-[22px] font-bold tabular-nums leading-tight tracking-tight"
-        style={{ color: color || "#f8fafc" }}
-        duration={800}
-      />
+      <div className="relative">
+        <AnimatedCounter
+          value={value}
+          className="text-[22px] font-bold tabular-nums leading-tight tracking-tight"
+          style={{ color: color || "#f8fafc" }}
+          duration={800}
+        />
+      </div>
     </div>
   );
 }
