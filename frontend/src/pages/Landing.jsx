@@ -25,7 +25,7 @@ function HeroShieldFallback() {
           filter: "blur(30px)",
         }}
       />
-      <div className="relative w-28 h-32 rounded-2xl glass border border-white/[0.08] flex items-center justify-center animate-pulse">
+      <div className="relative w-28 h-32 rounded-2xl frost-card glass-shimmer flex items-center justify-center">
         <Shield size={36} className="text-emerald-400/70" strokeWidth={1.6} />
       </div>
     </div>
@@ -93,7 +93,7 @@ function TopBar() {
         <button
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
-          className="md:hidden p-2 rounded-lg glass text-white"
+          className="md:hidden p-2 rounded-lg glass-xl text-white"
           aria-label="Toggle menu"
         >
           {mobileOpen ? <X size={18} /> : <Menu size={18} />}
@@ -117,7 +117,7 @@ function TopBar() {
             <div className="pt-3 border-t border-white/[0.06] flex gap-2">
               <a
                 href="/auth/vendor/signin"
-                className="flex-1 h-10 rounded-lg glass text-white text-[13px] font-semibold flex items-center justify-center"
+                className="flex-1 h-10 rounded-lg glass-xl text-white text-[13px] font-semibold flex items-center justify-center"
               >
                 Sign in
               </a>
@@ -211,9 +211,9 @@ function Hero() {
             </a>
             <a
               href="/auth/vendor/signin"
-              className="inline-flex items-center gap-2 px-6 h-12 rounded-xl glass glass-hover text-white font-semibold text-[14px] tracking-tight transition-all"
+              className="inline-flex items-center gap-2 px-6 h-12 rounded-xl frost-card text-white font-semibold text-[14px] tracking-tight"
             >
-              Sign in as CFO
+              <span className="relative">Sign in as CFO</span>
             </a>
           </motion.div>
 
