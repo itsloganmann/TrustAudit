@@ -73,9 +73,11 @@ from ..services.whatsapp import (
 from ..services.whatsapp.health import aggregated_health, record_inbound_now
 from ..services.whatsapp.mock_client import MockClient
 from ..services.whatsapp.twilio_signature import (
+    is_hard_enforce as twilio_sig_hard_enforce,
     is_validation_enabled as twilio_sig_enabled,
     verify_twilio_signature,
 )
+from ..services import webhook_observability
 
 logger = logging.getLogger(__name__)
 
@@ -434,25 +436,38 @@ async def _download_media_async(provider: WhatsAppProvider, media_url: str) -> b
     return await asyncio.to_thread(provider.download_media, media_url)
 
 
-def _validate_twilio_signature(request: Request, payload: Dict[str, Any]) -> None:
-    """Raise 403 if the ``X-Twilio-Signature`` header does not match.
+def _validate_twilio_signature(request: Request, payload: Dict[str, Any]) -> str:
+    """Validate the X-Twilio-Signature header.
 
-    No-op if validation is disabled via env var (mock/local dev path).
+    Returns one of:
+      * ``"skipped"``  — validation disabled (no token / opt-out env var)
+      * ``"valid"``    — signature matches
+      * ``"invalid"``  — signature mismatch, but we are NOT in hard-enforce
+                          mode so we log a warning and let the request
+                          through. The caller passes this label to the
+                          observability ring buffer.
+
+    If hard-enforce mode is on (``TWILIO_REQUIRE_SIGNATURE=1``), an
+    invalid signature raises HTTP 403 instead of returning ``"invalid"``.
     """
     if not twilio_sig_enabled():
-        return
+        return "skipped"
     full_url = str(request.url)
     sig = request.headers.get("X-Twilio-Signature", "")
-    # Twilio signs only string-typed params; form values from starlette are
-    # already strings.
     string_params = {k: str(v) for k, v in payload.items()}
-    if not verify_twilio_signature(full_url, string_params, sig):
-        logger.warning(
-            "twilio signature rejected url=%s sid=%s",
-            full_url,
-            payload.get("MessageSid") or payload.get("message_sid") or "(none)",
-        )
+    if verify_twilio_signature(full_url, string_params, sig):
+        return "valid"
+    sid = payload.get("MessageSid") or payload.get("message_sid") or "(none)"
+    if twilio_sig_hard_enforce():
+        logger.warning("twilio signature rejected (hard) url=%s sid=%s", full_url, sid)
         raise HTTPException(status_code=403, detail="invalid twilio signature")
+    logger.warning(
+        "twilio signature mismatch (soft, accepting) url=%s sid=%s "
+        "— set TWILIO_REQUIRE_SIGNATURE=1 to enforce",
+        full_url,
+        sid,
+    )
+    return "invalid"
 
 
 def _twiml_response() -> Response:
@@ -471,9 +486,34 @@ async def inbound_webhook(
 ):
     detected, payload = await _parse_body(request)
 
-    # Security — reject forged Twilio webhooks before any side effects.
+    # Observability — record every inbound regardless of outcome so a
+    # demo operator can ask "did Twilio actually hit me?" via
+    # GET /api/debug/recent-inbounds.
+    sig_status = "skipped"
+    has_sig_header = bool(request.headers.get("X-Twilio-Signature", ""))
+
+    # Security — soft-validate Twilio signatures (logs + records but
+    # only hard-rejects when TWILIO_REQUIRE_SIGNATURE=1 is set).
     if detected == "twilio":
-        _validate_twilio_signature(request, payload)
+        sig_status = _validate_twilio_signature(request, payload)
+
+    try:
+        webhook_observability.record(
+            source=detected or "unknown",
+            method="POST",
+            path=str(request.url.path),
+            client_ip=getattr(request.client, "host", None),
+            has_signature=has_sig_header,
+            signature_valid=(sig_status == "valid"),
+            signature_skipped=(sig_status in ("skipped", "invalid")),
+            message_sid=payload.get("MessageSid") or payload.get("message_sid"),
+            from_phone=payload.get("From") or payload.get("from"),
+            num_media=int(payload.get("NumMedia") or payload.get("num_media") or 0),
+            body_preview=str(payload.get("Body") or payload.get("body") or ""),
+            outcome=f"received:sig={sig_status}",
+        )
+    except Exception:  # noqa: BLE001 — never let observability take down a webhook
+        pass
 
     provider = _pick_provider(detected)
     inbound: InboundMessage = provider.parse_inbound(payload)

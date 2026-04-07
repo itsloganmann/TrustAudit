@@ -70,9 +70,38 @@ def is_validation_enabled() -> bool:
     """Gate signature validation via env var so mock / dev paths still work.
 
     Set ``TWILIO_VALIDATE_SIGNATURE=0`` to disable (useful for local curl
-    testing). Default is enabled whenever ``TWILIO_AUTH_TOKEN`` is set.
+    testing). Default is **disabled** so a stale auth token doesn't quietly
+    drop every Twilio inbound. Set ``TWILIO_REQUIRE_SIGNATURE=1`` to opt
+    back into hard enforcement.
     """
     override = os.environ.get("TWILIO_VALIDATE_SIGNATURE")
     if override is not None:
         return override.strip().lower() not in ("0", "false", "no", "off", "")
-    return bool(os.environ.get("TWILIO_AUTH_TOKEN"))
+    return os.environ.get("TWILIO_REQUIRE_SIGNATURE", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+
+
+def is_hard_enforce() -> bool:
+    """Return True iff a signature mismatch should HARD-reject (HTTP 403).
+
+    When False, callers should log the mismatch but still process the
+    webhook so a stale ``TWILIO_AUTH_TOKEN`` env var on a demo deployment
+    doesn't silently drop every Twilio inbound. Defaults to False.
+
+    Back-compat: explicitly setting ``TWILIO_VALIDATE_SIGNATURE=1`` (the
+    pre-hotfix env var) is treated as opting into hard enforcement so
+    existing deployments and tests keep their old behaviour.
+    """
+    if os.environ.get("TWILIO_REQUIRE_SIGNATURE", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    ):
+        return True
+    legacy = os.environ.get("TWILIO_VALIDATE_SIGNATURE", "").strip().lower()
+    return legacy in ("1", "true", "yes", "on")
