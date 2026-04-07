@@ -38,23 +38,36 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 # to a deterministic pseudo-hash so the seed still runs end-to-end.
 # ---------------------------------------------------------------------------
 def _hash_password(password: str) -> str:
-    try:
-        from passlib.hash import bcrypt  # type: ignore
+    """Hash a password the same way ``backend/app/auth/passwords.py`` does.
 
-        return bcrypt.hash(password)
-    except Exception as exc:  # pragma: no cover - depends on env
-        # Hard-fail in production so a missing system-level libffi/openssl
-        # never silently ships sha256-dev$ hashes to a real user database.
-        # See adversary review of 6293462 (P1 #11).
+    We deliberately import ``bcrypt`` directly (NOT via passlib).
+    passlib 1.7.4 and bcrypt 5.0.0 have a known incompatibility — passlib's
+    internal length probe raises ``ValueError`` on the first call, which
+    seed.py used to swallow and silently fall back to ``sha256-dev$`` hashes.
+    On Render that fallback got REJECTED by ``verify_password`` (adversary
+    review fix #8) and the seeded demo accounts couldn't sign in.
+
+    Direct ``bcrypt.hashpw`` works on every supported bcrypt version and
+    produces hashes ``verify_password`` accepts everywhere.
+    """
+    if not isinstance(password, str) or password == "":
+        raise ValueError("password must be a non-empty string")
+    try:
+        import bcrypt  # type: ignore
+
+        # Same 72-byte truncation as auth/passwords.py so the seed
+        # behaves identically to the production hash function.
+        salt = bcrypt.gensalt(rounds=12)
+        return bcrypt.hashpw(password.encode("utf-8")[:72], salt).decode("ascii")
+    except ImportError as exc:
         env_name = os.environ.get("APP_ENV", os.environ.get("TRUSTAUDIT_ENV", "development")).lower()
         if env_name in ("production", "prod"):
             raise RuntimeError(
-                "passlib[bcrypt] is required in production — refusing to seed "
-                "with sha256-dev$ fallback. Install passlib[bcrypt] in the "
-                "container image."
+                "bcrypt is required in production — refusing to seed with "
+                "sha256-dev$ fallback. Add bcrypt to backend/requirements.txt."
             ) from exc
         logger.warning(
-            "passlib[bcrypt] unavailable (%s) — falling back to sha256-dev hash. "
+            "bcrypt unavailable (%s) — falling back to sha256-dev hash. "
             "DEV ONLY. Will raise in production (APP_ENV=production).",
             exc,
         )
