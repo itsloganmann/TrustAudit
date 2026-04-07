@@ -1,0 +1,7 @@
+# Tesseract OCR language data — downloaded automatically by tesseract.js
+# on first OCR call (5MB+, do NOT commit).
+eng.traineddata
+*.traineddata
+
+# Loop driver runtime log — overwritten on each invocation.
+loop_until_green.log

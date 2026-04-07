@@ -1,0 +1,17 @@
+{
+  "name": "trustaudit-visual-verify",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Autonomous visual verifier for TrustAudit. Drives the live demo with Playwright, OCRs every screenshot with tesseract.js, and asserts the dashboard, drawer, annotation overlay, 3D justification canvas, and public verify page each render the right (and only the right) text.",
+  "scripts": {
+    "verify": "node visual_verify.mjs"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "playwright": "^1.49.1",
+    "tesseract.js": "^5.1.1"
+  }
+}
