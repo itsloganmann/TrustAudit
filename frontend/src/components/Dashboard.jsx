@@ -21,26 +21,26 @@ const SPRING_HOVER = { type: "spring", stiffness: 300, damping: 24 };
 const STATUS_CONFIG = {
   PENDING: {
     label: "Pending",
-    bg: "bg-rose-500/8",
-    text: "text-rose-400",
-    dot: "bg-rose-500",
-    border: "border-rose-500/15",
+    bg: "bg-[#fb7185]/8",
+    text: "text-[#fb7185]",
+    dot: "bg-[#fb7185]",
+    border: "border-[#fb7185]/30",
     dotPulse: true,
   },
   VERIFIED: {
     label: "Verified",
-    bg: "bg-emerald-500/8",
-    text: "text-emerald-400",
-    dot: "bg-emerald-500",
-    border: "border-emerald-500/15",
+    bg: "bg-[#34d399]/8",
+    text: "text-[#34d399]",
+    dot: "bg-[#34d399]",
+    border: "border-[#34d399]/30",
     dotPulse: false,
   },
   PAID: {
     label: "Paid",
-    bg: "bg-blue-500/8",
-    text: "text-blue-400",
-    dot: "bg-blue-500",
-    border: "border-blue-500/15",
+    bg: "bg-[#a78bfa]/8",
+    text: "text-[#a78bfa]",
+    dot: "bg-[#a78bfa]",
+    border: "border-[#a78bfa]/30",
     dotPulse: false,
   },
 };
@@ -48,7 +48,7 @@ const STATUS_CONFIG = {
 function StatusBadge({ status }) {
   const c = STATUS_CONFIG[status] || STATUS_CONFIG.PENDING;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider ${c.bg} ${c.text} border ${c.border}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 h-6 rounded font-mono text-[9px] font-semibold uppercase tracking-[0.15em] ${c.bg} ${c.text} border ${c.border}`}>
       <span className={`w-1 h-1 rounded-full ${c.dot} ${c.dotPulse ? "pulse-dot" : ""}`} />
       {c.label}
     </span>
@@ -58,8 +58,8 @@ function StatusBadge({ status }) {
 function Deadline({ days, status }) {
   if (status === "VERIFIED") {
     return (
-      <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1 justify-center">
-        <ShieldCheck size={11} />
+      <span className="font-mono text-[10px] text-[#34d399] font-semibold flex items-center gap-1 justify-center uppercase tracking-wider">
+        <ShieldCheck size={10} />
         Secured
       </span>
     );
@@ -67,17 +67,17 @@ function Deadline({ days, status }) {
   if (days <= 0) {
     return (
       <div className="flex items-center gap-1.5 justify-center">
-        <span className="w-1 h-1 rounded-full bg-rose-500 pulse-dot" />
-        <span className="text-[11px] text-rose-400 font-bold">Overdue</span>
+        <span className="w-1 h-1 rounded-full bg-[#fb7185] pulse-dot" />
+        <span className="font-mono text-[10px] text-[#fb7185] font-bold uppercase tracking-wider">Overdue</span>
       </div>
     );
   }
   if (days <= 1) {
     return (
       <div className="flex flex-col items-center">
-        <span className="text-[12px] text-rose-400 font-bold tabular-nums">{days}d</span>
-        <div className="w-10 h-[3px] rounded-full bg-white/[0.04] mt-1 overflow-hidden">
-          <div className="h-full bg-rose-500 rounded-full" style={{ width: "95%" }} />
+        <span className="font-mono text-[12px] text-[#fb7185] font-bold tabular-nums">{days}d</span>
+        <div className="w-10 h-[2px] rounded-full bg-violet-500/8 mt-1 overflow-hidden">
+          <div className="h-full bg-[#fb7185] rounded-full" style={{ width: "95%" }} />
         </div>
       </div>
     );
@@ -85,9 +85,9 @@ function Deadline({ days, status }) {
   if (days <= 7) {
     return (
       <div className="flex flex-col items-center">
-        <span className="text-[12px] text-amber-400 font-semibold tabular-nums">{days}d</span>
-        <div className="w-10 h-[3px] rounded-full bg-white/[0.04] mt-1 overflow-hidden">
-          <div className="h-full bg-amber-500 rounded-full" style={{ width: `${Math.min(90, 50 + (7 - days) * 7)}%` }} />
+        <span className="font-mono text-[12px] text-[#fbbf24] font-semibold tabular-nums">{days}d</span>
+        <div className="w-10 h-[2px] rounded-full bg-violet-500/8 mt-1 overflow-hidden">
+          <div className="h-full bg-[#fbbf24] rounded-full" style={{ width: `${Math.min(90, 50 + (7 - days) * 7)}%` }} />
         </div>
       </div>
     );
@@ -95,14 +95,14 @@ function Deadline({ days, status }) {
   if (days <= 14) {
     return (
       <div className="flex flex-col items-center">
-        <span className="text-[12px] text-slate-400 font-medium tabular-nums">{days}d</span>
-        <div className="w-10 h-[3px] rounded-full bg-white/[0.04] mt-1 overflow-hidden">
-          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(60, 20 + (14 - days) * 3)}%` }} />
+        <span className="font-mono text-[12px] text-violet-200/70 font-medium tabular-nums">{days}d</span>
+        <div className="w-10 h-[2px] rounded-full bg-violet-500/8 mt-1 overflow-hidden">
+          <div className="h-full bg-[#a78bfa] rounded-full" style={{ width: `${Math.min(60, 20 + (14 - days) * 3)}%` }} />
         </div>
       </div>
     );
   }
-  return <span className="text-[12px] text-slate-600 font-medium tabular-nums">{days}d</span>;
+  return <span className="font-mono text-[12px] text-violet-300/40 font-medium tabular-nums">{days}d</span>;
 }
 
 const STAT_ICONS = {
@@ -119,30 +119,36 @@ function StatCard({ label, value, color, iconKey, index = 0 }) {
   const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
       animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-      transition={{ ...SPRING_CARD, delay: index * 0.04 }}
+      transition={{ ...SPRING_CARD, delay: index * 0.05 }}
       className="will-change-transform"
     >
       <TiltCard
         glare
-        maxTilt={6}
-        scale={1.025}
-        className="frost-card rounded-xl px-4 py-3 group block"
+        maxTilt={4}
+        scale={1.018}
+        className="frost-card !rounded-md px-5 py-5 group block relative"
       >
-        <div className="flex items-center justify-between mb-1 relative">
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">{label}</p>
-          <Icon
-            size={13}
-            className="opacity-30 group-hover:opacity-60 transition-opacity"
-            style={{ color: color || "#94a3b8" }}
-          />
+        <div className="flex items-start justify-between mb-3 relative">
+          <p className="font-mono text-[9px] text-violet-300/60 uppercase tracking-[0.25em]">
+            {label}
+          </p>
+          <div
+            className="w-7 h-7 rounded border flex items-center justify-center transition-all"
+            style={{
+              borderColor: `${color || "#a78bfa"}33`,
+              background: `${color || "#a78bfa"}0d`,
+            }}
+          >
+            <Icon size={12} style={{ color: color || "#a78bfa" }} strokeWidth={2} />
+          </div>
         </div>
         <div className="relative">
           <AnimatedCounter
             value={value}
-            className="text-[22px] font-bold tabular-nums leading-tight tracking-tight inline-block"
-            style={{ color: color || "#f8fafc" }}
+            className="aurora-headline text-[44px] tabular-nums leading-none inline-block"
+            style={{ color: color || "#fafafa" }}
             duration={700}
           />
         </div>
@@ -193,17 +199,17 @@ function VerifiedBurst() {
           key={d.id}
           cx={6}
           cy={24}
-          r={2.2}
-          fill="#10b981"
+          r={2.4}
+          fill={d.id % 2 === 0 ? "#a78bfa" : "#e879f9"}
           initial={{ opacity: 0, x: 0, y: 0, scale: 0.6 }}
           animate={{
             opacity: [0, 0.95, 0],
             x: [0, d.tx],
             y: [0, d.ty],
-            scale: [0.6, 1.1, 0.4],
+            scale: [0.6, 1.2, 0.4],
           }}
-          transition={{ duration: 0.72, delay: d.delay, ease: [0.22, 1, 0.36, 1] }}
-          style={{ filter: "drop-shadow(0 0 6px rgba(16,185,129,0.8))" }}
+          transition={{ duration: 0.78, delay: d.delay, ease: [0.22, 1, 0.36, 1] }}
+          style={{ filter: "drop-shadow(0 0 7px rgba(167,139,250,0.85))" }}
         />
       ))}
     </svg>
@@ -247,56 +253,58 @@ function InvoiceRow({ inv, i, onSelect }) {
       layout
       onClick={() => onSelect(inv)}
       whileHover={{
-        backgroundColor: "rgba(255,255,255,0.02)",
+        backgroundColor: "rgba(167,139,250,0.05)",
         transition: { type: "spring", stiffness: 320, damping: 26 },
       }}
-      className="row-transition border-b border-white/[0.04] cursor-pointer group relative"
+      className="row-transition border-b border-violet-500/[0.06] cursor-pointer group relative"
     >
       {/* Risk indicator + vendor */}
-      <td className="px-4 py-3 relative">
+      <td className="px-5 py-4 relative">
         {showBurst && <VerifiedBurst />}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           {inv.status === "PENDING" && inv.days_remaining <= 3 && (
             <motion.div
               layoutId={`risk-${inv.id}`}
-              className="w-0.5 h-8 rounded-full bg-rose-500 -ml-2 mr-0.5"
+              className="w-[2px] h-9 rounded-full bg-[#fb7185] -ml-2 mr-0.5 shadow-[0_0_10px_rgba(251,113,133,0.7)]"
             />
           )}
           {inv.status === "PENDING" && inv.days_remaining > 3 && inv.days_remaining <= 14 && (
-            <div className="w-0.5 h-8 rounded-full bg-amber-500 -ml-2 mr-0.5" />
+            <div className="w-[2px] h-9 rounded-full bg-[#fbbf24] -ml-2 mr-0.5 shadow-[0_0_10px_rgba(251,191,36,0.6)]" />
           )}
           {inv.status === "VERIFIED" && (
             <motion.div
               layoutId={`risk-${inv.id}`}
-              className="w-0.5 h-8 rounded-full bg-emerald-500 -ml-2 mr-0.5"
-              initial={{ backgroundColor: "#f43f5e" }}
-              animate={{ backgroundColor: "#10b981" }}
+              className="w-[2px] h-9 rounded-full bg-[#34d399] -ml-2 mr-0.5 shadow-[0_0_10px_rgba(52,211,153,0.6)]"
+              initial={{ backgroundColor: "#fb7185" }}
+              animate={{ backgroundColor: "#34d399" }}
               transition={{ duration: 1.2, ease: "easeOut" }}
             />
           )}
           <div>
-            <p className="text-[13px] text-white font-medium group-hover:text-blue-400 transition-colors leading-tight tracking-tight">
+            <p className="text-[14px] text-white font-medium group-hover:text-[#a78bfa] transition-colors leading-tight tracking-tight">
               {inv.vendor_name}
             </p>
-            <p className="text-[10px] text-slate-600 mt-0.5">{inv.invoice_date}</p>
+            <p className="font-mono text-[9px] text-violet-300/40 mt-1 uppercase tracking-wider">
+              {inv.invoice_date}
+            </p>
           </div>
         </div>
       </td>
-      <td className="px-3 py-3">
-        <code className="text-[10px] text-slate-500 font-mono">{inv.gstin}</code>
+      <td className="px-3 py-4">
+        <code className="font-mono text-[10px] text-violet-300/50">{inv.gstin}</code>
       </td>
-      <td className="px-3 py-3">
-        <span className="text-[12px] text-slate-400 font-mono">{inv.invoice_number}</span>
+      <td className="px-3 py-4">
+        <span className="font-mono text-[11px] text-violet-200/70">{inv.invoice_number}</span>
       </td>
-      <td className="px-3 py-3 text-right">
-        <span className="text-[13px] text-white font-semibold tabular-nums tracking-tight">
-          INR {inv.invoice_amount.toLocaleString("en-IN")}
+      <td className="px-3 py-4 text-right">
+        <span className="aurora-headline text-[18px] text-white tabular-nums">
+          ₹{inv.invoice_amount.toLocaleString("en-IN")}
         </span>
       </td>
-      <td className="px-3 py-3 text-center">
+      <td className="px-3 py-4 text-center">
         <Deadline days={inv.days_remaining} status={inv.status} />
       </td>
-      <td className="px-4 py-3 text-center">
+      <td className="px-5 py-4 text-center">
         <StatusBadge status={inv.status} />
       </td>
     </motion.tr>
@@ -364,31 +372,39 @@ export default function Dashboard({ invoices, stats, activity, loading, onSelect
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard label="Total" value={stats.total_invoices || 0} iconKey="total" index={0} />
-        <StatCard label="Verified" value={stats.verified_count || 0} color="#10b981" iconKey="verified" index={1} />
-        <StatCard label="Critical" value={stats.critical_count || 0} color="#f43f5e" iconKey="critical" index={2} />
-        <StatCard label="Warning" value={stats.warning_count || 0} color="#f59e0b" iconKey="warning" index={3} />
-        <StatCard label="Safe" value={stats.safe_count || 0} color="#3b82f6" iconKey="safe" index={4} />
-        <StatCard label="Today" value={stats.processed_today || 0} color="#8b5cf6" iconKey="today" index={5} />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <StatCard label="Total" value={stats.total_invoices || 0} color="#fafafa" iconKey="total" index={0} />
+        <StatCard label="Verified" value={stats.verified_count || 0} color="#34d399" iconKey="verified" index={1} />
+        <StatCard label="Critical" value={stats.critical_count || 0} color="#fb7185" iconKey="critical" index={2} />
+        <StatCard label="Warning" value={stats.warning_count || 0} color="#fbbf24" iconKey="warning" index={3} />
+        <StatCard label="Safe" value={stats.safe_count || 0} color="#a78bfa" iconKey="safe" index={4} />
+        <StatCard label="Today" value={stats.processed_today || 0} color="#e879f9" iconKey="today" index={5} />
       </div>
 
       {/* Invoice Table */}
       <motion.div
-        className="glass rounded-xl overflow-hidden will-change-transform"
+        className="glass !rounded-md overflow-hidden will-change-transform"
         initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
         animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
         transition={{ ...SPRING_CARD, delay: 0.2 }}
       >
+        <div className="px-5 py-4 border-b border-violet-500/10 flex items-center justify-between">
+          <p className="font-mono text-[9px] text-violet-300/60 uppercase tracking-[0.3em]">
+            Invoice Ledger
+          </p>
+          <span className="font-mono text-[9px] text-violet-300/40 tabular-nums tracking-wider">
+            {invoices.length} ROWS
+          </span>
+        </div>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-white/[0.06] text-[10px] text-slate-500 uppercase tracking-widest">
-              <th className="text-left px-4 py-2.5 font-semibold">Vendor</th>
-              <th className="text-left px-3 py-2.5 font-semibold">GSTIN</th>
-              <th className="text-left px-3 py-2.5 font-semibold">Invoice</th>
-              <th className="text-right px-3 py-2.5 font-semibold">Amount</th>
-              <th className="text-center px-3 py-2.5 font-semibold">Deadline</th>
-              <th className="text-center px-4 py-2.5 font-semibold">Status</th>
+            <tr className="border-b border-violet-500/10 font-mono text-[9px] text-violet-300/50 uppercase tracking-[0.2em]">
+              <th className="text-left px-5 py-3 font-semibold">Vendor</th>
+              <th className="text-left px-3 py-3 font-semibold">GSTIN</th>
+              <th className="text-left px-3 py-3 font-semibold">Invoice #</th>
+              <th className="text-right px-3 py-3 font-semibold">Amount</th>
+              <th className="text-center px-3 py-3 font-semibold">Deadline</th>
+              <th className="text-center px-5 py-3 font-semibold">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -401,19 +417,19 @@ export default function Dashboard({ invoices, stats, activity, loading, onSelect
         </table>
 
         {invoices.length === 0 && (
-          <div className="px-4 py-12 text-center text-[13px] text-slate-600">
-            No invoices match the current filter.
+          <div className="px-5 py-16 text-center font-mono text-[10px] text-violet-300/40 uppercase tracking-[0.25em]">
+            No invoices match the current filter
           </div>
         )}
 
-        <div className="px-4 py-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-slate-600">
+        <div className="px-5 py-3 border-t border-violet-500/10 flex items-center justify-between font-mono text-[9px] text-violet-300/40 uppercase tracking-[0.2em]">
           <span>{invoices.length} results</span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-2">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#a78bfa] opacity-40" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#a78bfa]" />
             </span>
-            Auto-refresh 2s
+            Polling · 2s
           </span>
         </div>
       </motion.div>

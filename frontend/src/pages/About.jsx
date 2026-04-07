@@ -427,10 +427,10 @@ function FounderCard({ founder }) {
         <AvatarBubble founder={founder} hovered={hovered} />
 
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] uppercase tracking-[0.3em] font-semibold text-emerald-400">
+          <p className="font-mono text-[10px] uppercase tracking-[0.3em] font-semibold text-[#a78bfa]">
             {founder.role}
           </p>
-          <h2 className="mt-1 text-[28px] md:text-[32px] font-black text-white tracking-tight leading-tight">
+          <h2 className="mt-2 aurora-headline text-[36px] md:text-[44px] text-white leading-[0.95]">
             {founder.name}
           </h2>
           <p className="mt-1 text-[14px] text-slate-300">{founder.tagline}</p>
@@ -450,7 +450,7 @@ function FounderCard({ founder }) {
                 key={label}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] text-slate-300"
               >
-                <Icon size={11} className="text-emerald-400" />
+                <Icon size={11} className="text-violet-300" />
                 <span>{label}</span>
               </li>
             ))}
@@ -481,7 +481,7 @@ function FounderCard({ founder }) {
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#06070f] text-white relative overflow-hidden">
       {/* Ambient gradient orbs — pure CSS, GPU-cheap */}
       <div
         aria-hidden
@@ -493,7 +493,7 @@ export default function About() {
       />
 
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-slate-950/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#06070f]/70 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
             <ArrowLeft size={16} className="text-slate-400" />
@@ -518,7 +518,7 @@ export default function About() {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-400">
+          <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
             The team behind TrustAudit
           </p>
           <h1 className="mt-3 text-[40px] md:text-[52px] font-black text-white tracking-tight leading-[1.05]">
@@ -549,7 +549,7 @@ export default function About() {
           aria-label="Why TrustAudit"
         >
           <div className="text-center mb-8">
-            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-400">
+            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
               Why TrustAudit
             </p>
             <h2 className="mt-2 text-[24px] md:text-[28px] font-black text-white tracking-tight">
@@ -587,7 +587,7 @@ export default function About() {
           aria-label="How we got here"
         >
           <div className="text-center mb-10">
-            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-400">
+            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
               How we got here
             </p>
             <h2 className="mt-2 text-[24px] md:text-[28px] font-black text-white tracking-tight">
@@ -608,7 +608,7 @@ export default function About() {
           aria-label="Press and contact"
         >
           <div className="text-center mb-6">
-            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-400">
+            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
               Press + talk to us
             </p>
             <h2 className="mt-2 text-[24px] md:text-[28px] font-black text-white tracking-tight">
@@ -635,7 +635,7 @@ export default function About() {
                   }
                   className="inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[13px] font-semibold text-white transition-colors"
                 >
-                  <LinkIcon size={14} className="text-emerald-400" />
+                  <LinkIcon size={14} className="text-violet-300" />
                   <span>{link.label}</span>
                 </motion.a>
               );

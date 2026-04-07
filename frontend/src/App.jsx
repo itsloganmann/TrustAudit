@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion, useReducedMotion } from "framer-motion";
 import { Toaster, toast } from "sonner";
-import { Shield, Search, Activity } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
+import { Search, Activity } from "lucide-react";
 import Dashboard from "./components/Dashboard";
 import ExamplePipeline from "./components/ExamplePipeline";
 import SupplierNetwork from "./components/SupplierNetwork";
@@ -109,8 +110,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans">
-      {/* Ambient 3D background — mounts once, behind everything */}
+    <div className="min-h-screen bg-[#06070f] text-violet-100/70 font-sans">
+      {/* Ambient background — mounts once, behind everything */}
       <AmbientBackground />
 
       {/* All interactive content sits above the ambient canvas */}
@@ -132,17 +133,17 @@ function App() {
       />
 
       {/* Live Ticker Strip */}
-      <div className="h-8 bg-slate-950/80 border-b border-white/[0.04] overflow-hidden flex items-center backdrop-blur-sm">
-        <div className="ticker-scroll flex items-center gap-8 whitespace-nowrap px-4">
+      <div className="h-9 bg-[#06070f]/85 border-b border-violet-500/10 overflow-hidden flex items-center backdrop-blur-md">
+        <div className="ticker-scroll flex items-center gap-10 whitespace-nowrap px-6">
           {invoices
             .filter((i) => i.status === "PENDING" && i.days_remaining <= 3)
             .map((inv, i) => (
-              <span key={`t1-${i}`} className="flex items-center gap-2 text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 pulse-dot" />
-                <span className="text-rose-400 font-medium">{inv.vendor_name}</span>
-                <span className="text-slate-600">INR {inv.invoice_amount.toLocaleString("en-IN")}</span>
-                <span className="text-slate-700">/</span>
-                <span className="text-rose-400">
+              <span key={`t1-${i}`} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185] pulse-dot" />
+                <span className="text-[#fb7185] font-semibold">{inv.vendor_name}</span>
+                <span className="text-violet-300/40">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
+                <span className="text-violet-300/30">·</span>
+                <span className="text-[#fb7185]">
                   {inv.days_remaining <= 0 ? "OVERDUE" : `${inv.days_remaining}d left`}
                 </span>
               </span>
@@ -151,24 +152,24 @@ function App() {
             .filter((i) => i.status === "VERIFIED")
             .slice(0, 5)
             .map((inv, i) => (
-              <span key={`t2-${i}`} className="flex items-center gap-2 text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="text-emerald-400 font-medium">{inv.vendor_name}</span>
-                <span className="text-slate-600">INR {inv.invoice_amount.toLocaleString("en-IN")}</span>
-                <span className="text-slate-700">/</span>
-                <span className="text-emerald-400">Secured</span>
+              <span key={`t2-${i}`} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#34d399]" />
+                <span className="text-[#34d399] font-semibold">{inv.vendor_name}</span>
+                <span className="text-violet-300/40">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
+                <span className="text-violet-300/30">·</span>
+                <span className="text-[#34d399]">Secured</span>
               </span>
             ))}
           {/* Duplicate for seamless scroll */}
           {invoices
             .filter((i) => i.status === "PENDING" && i.days_remaining <= 3)
             .map((inv, i) => (
-              <span key={`t3-${i}`} className="flex items-center gap-2 text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 pulse-dot" />
-                <span className="text-rose-400 font-medium">{inv.vendor_name}</span>
-                <span className="text-slate-600">INR {inv.invoice_amount.toLocaleString("en-IN")}</span>
-                <span className="text-slate-700">/</span>
-                <span className="text-rose-400">
+              <span key={`t3-${i}`} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185] pulse-dot" />
+                <span className="text-[#fb7185] font-semibold">{inv.vendor_name}</span>
+                <span className="text-violet-300/40">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
+                <span className="text-violet-300/30">·</span>
+                <span className="text-[#fb7185]">
                   {inv.days_remaining <= 0 ? "OVERDUE" : `${inv.days_remaining}d left`}
                 </span>
               </span>
@@ -176,51 +177,53 @@ function App() {
         </div>
       </div>
 
-      {/* Header */}
-      <header className="border-b border-white/[0.06] bg-slate-950/60 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
+      {/* Header — round 5 Aurora */}
+      <header className="border-b border-violet-500/10 bg-[#06070f]/80 backdrop-blur-2xl sticky top-0 z-40">
+        <div className="max-w-[1600px] mx-auto px-8 h-20 flex items-center justify-between">
           {/* Left: Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-              <Shield size={15} className="text-slate-950" strokeWidth={2.5} />
+            <div className="relative w-10 h-10 rounded-md bg-gradient-to-br from-violet-400 via-fuchsia-400 to-amber-300 flex items-center justify-center shadow-[0_0_30px_-4px_rgba(167,139,250,0.6)]">
+              <span className="aurora-headline text-[20px] text-[#06070f] leading-none">A</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-white font-semibold text-[15px] tracking-tight">
+            <div className="flex flex-col">
+              <span className="aurora-headline text-[22px] text-white leading-none">
                 TrustAudit
               </span>
-              <span className="text-[10px] text-slate-500 font-semibold px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08]">
-                43B(h)
+              <span className="font-mono text-[9px] text-violet-300/70 tracking-[0.3em] uppercase mt-0.5">
+                Dashboard · CFO
               </span>
             </div>
           </div>
 
           {/* Center: Key metrics */}
-          <div className="flex items-center gap-8">
-            <Metric label="Portfolio" value={stats.total_value || 0} prefix="INR " />
-            <div className="w-px h-8 bg-white/[0.06]" />
-            <Metric label="Saved" value={stats.liability_saved || 0} prefix="INR " color="#10b981" glow="emerald" />
-            <div className="w-px h-8 bg-white/[0.06]" />
-            <Metric label="At Risk" value={stats.total_at_risk || 0} prefix="INR " color="#f43f5e" glow="rose" />
-            <div className="w-px h-8 bg-white/[0.06]" />
-            <div className="text-right">
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest">Compliance</p>
-              <p className="text-[18px] font-bold text-white tabular-nums leading-tight tracking-tight">
+          <div className="flex items-stretch gap-6">
+            <MetricBlock label="Portfolio" value={stats.total_value || 0} prefix="INR " />
+            <div className="w-px bg-violet-500/15" />
+            <MetricBlock label="Saved" value={stats.liability_saved || 0} prefix="INR " accent="#34d399" />
+            <div className="w-px bg-violet-500/15" />
+            <MetricBlock label="At Risk" value={stats.total_at_risk || 0} prefix="INR " accent="#fb7185" />
+            <div className="w-px bg-violet-500/15" />
+            <div className="flex flex-col justify-center">
+              <p className="font-mono text-[9px] text-violet-300/60 uppercase tracking-[0.25em]">
+                Compliance
+              </p>
+              <p className="aurora-headline text-[28px] text-[#fbbf24] tabular-nums leading-none mt-1">
                 {stats.compliance_rate || 0}
-                <span className="text-[12px] text-slate-600 font-normal">%</span>
+                <span className="text-[16px] text-violet-300/60">%</span>
               </p>
             </div>
           </div>
 
           {/* Right: Live indicator */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <span className="chip !bg-[#34d399]/8 !border-[#34d399]/30 !text-[#34d399]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#34d399] opacity-40" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#34d399]" />
               </span>
               Live
-            </div>
-            <span className="text-[11px] text-slate-700 tabular-nums">
+            </span>
+            <span className="font-mono text-[10px] text-violet-300/60 tabular-nums tracking-wider">
               {stats.total_invoices || 0} invoices
             </span>
           </div>
@@ -228,54 +231,37 @@ function App() {
       </header>
 
       {/* Main */}
-      <main className="max-w-[1600px] mx-auto px-6 py-5">
-        <div className="space-y-4">
+      <main className="max-w-[1600px] mx-auto px-8 py-8">
+        <div className="space-y-6">
           {/* Tabs + Search */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 glass rounded-xl p-0.5">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
               {[
                 { key: "all", label: "All" },
-                { key: "critical", label: "Critical", color: "#f43f5e" },
-                { key: "warning", label: "Warning", color: "#f59e0b" },
-                { key: "pending", label: "Safe", color: "#3b82f6" },
-                { key: "verified", label: "Verified", color: "#10b981" },
+                { key: "critical", label: "Critical", color: "#fb7185" },
+                { key: "warning", label: "Warning", color: "#fbbf24" },
+                { key: "pending", label: "Safe", color: "#a78bfa" },
+                { key: "verified", label: "Verified", color: "#34d399" },
               ].map((t) => {
                 const isActive = tab === t.key;
                 return (
                   <motion.button
                     key={t.key}
+                    type="button"
                     onClick={() => setTab(t.key)}
-                    whileHover={shouldReduceMotion ? undefined : { scale: 1.03, transition: { type: "spring", stiffness: 300, damping: 24 } }}
+                    whileHover={shouldReduceMotion ? undefined : { y: -1 }}
                     whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
-                    className={`relative px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors ${isActive
-                        ? "text-white"
-                        : "text-slate-500 hover:text-slate-300"
-                      }`}
+                    className={`chip ${isActive ? "chip-active" : ""}`}
                   >
-                    {isActive && (
-                      <motion.span
-                        layoutId="activeTabPill"
-                        transition={
-                          shouldReduceMotion
-                            ? { duration: 0.15 }
-                            : { type: "spring", stiffness: 320, damping: 26 }
-                        }
-                        className="absolute inset-0 rounded-lg bg-white/[0.08] border border-white/[0.1]"
+                    {t.color && (
+                      <span
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ background: t.color }}
                       />
                     )}
-                    <span className="relative flex items-center gap-1.5">
-                      {t.color && (
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ background: t.color }}
-                        />
-                      )}
-                      {t.label}
-                      <span
-                        className={`text-[10px] tabular-nums ${isActive ? "text-slate-400" : "text-slate-600"}`}
-                      >
-                        {tabCounts[t.key]}
-                      </span>
+                    {t.label}
+                    <span className="font-mono tabular-nums opacity-60">
+                      {tabCounts[t.key]}
                     </span>
                   </motion.button>
                 );
@@ -285,14 +271,14 @@ function App() {
             <div className="relative">
               <Search
                 size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-violet-300/40"
               />
               <input
                 type="text"
-                placeholder="Search vendor, GSTIN, invoice..."
+                placeholder="Search vendor, GSTIN, invoice…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-72 h-8 pl-9 pr-3 text-[12px] bg-white/[0.03] border border-white/[0.06] rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.12] transition-colors backdrop-blur-sm"
+                className="w-80 h-10 pl-10 pr-4 font-mono text-[11px] uppercase tracking-wider bg-violet-500/4 border border-violet-500/15 rounded-md text-white placeholder:text-violet-300/30 placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-violet-400/50 focus:bg-violet-500/8 transition-all backdrop-blur-md"
               />
             </div>
           </div>
@@ -321,18 +307,20 @@ function App() {
   );
 }
 
-function Metric({ label, value, prefix = "", color, glow }) {
+function MetricBlock({ label, value, prefix = "", accent }) {
   return (
-    <div className="text-right">
-      <p className="text-[10px] text-slate-500 uppercase tracking-widest">{label}</p>
-      <AnimatedCounter
-        value={value}
-        prefix={prefix}
-        className={`text-[18px] font-bold tabular-nums leading-tight tracking-tight ${glow === "emerald" ? "glow-emerald" : glow === "rose" ? "glow-rose" : ""
-          }`}
-        style={{ color: color || "#f8fafc" }}
-        duration={1200}
-      />
+    <div className="flex flex-col justify-center">
+      <p className="font-mono text-[9px] text-violet-300/60 uppercase tracking-[0.25em]">
+        {label}
+      </p>
+      <div className="aurora-headline text-[28px] tabular-nums leading-none mt-1" style={{ color: accent || "#fafafa" }}>
+        <AnimatedCounter
+          value={value}
+          prefix={prefix}
+          className="aurora-headline tabular-nums"
+          style={{ color: accent || "#fafafa" }}
+        />
+      </div>
     </div>
   );
 }

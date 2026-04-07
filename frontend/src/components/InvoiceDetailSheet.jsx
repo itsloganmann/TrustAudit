@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   X,
@@ -14,21 +14,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import AnnotationOverlay from "./AnnotationOverlay";
+import JustificationCanvas from "./JustificationCanvas.jsx";
 import { api, ApiError } from "../lib/api";
-
-// Lazy-loaded so the three.js / @react-three/fiber bundle only ships when
-// a user actually opens an invoice drawer. Keeps the main chunk lean.
-const JustificationCanvas = lazy(() => import("./JustificationCanvas.jsx"));
-
-function CanvasFallback() {
-  return (
-    <div className="w-full h-[360px] rounded-xl border border-white/[0.06] bg-slate-900/40 flex items-center justify-center">
-      <span className="text-[11px] text-slate-500 uppercase tracking-[0.18em]">
-        Initializing 3D scene...
-      </span>
-    </div>
-  );
-}
 
 /* ─────────────────────────────────────────────
    Evidence Drawer — slides from right on row click.
@@ -198,17 +185,15 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                     </span>
                   )}
                 </div>
-                <Suspense fallback={<CanvasFallback />}>
-                  <JustificationCanvas
-                    invoiceId={invoice.id}
-                    confidence={justification?.confidence_score ?? 0}
-                    deductionInr={justification?.deduction_estimate_inr ?? 0}
-                    totalRecoverableInr={justification?.total_recoverable_inr ?? 0}
-                    availableFields={justification?.available_fields ?? []}
-                    missingFields={justification?.missing_fields ?? []}
-                    recommendations={justification?.recommendations ?? []}
-                  />
-                </Suspense>
+                <JustificationCanvas
+                  invoiceId={invoice.id}
+                  confidence={justification?.confidence_score ?? 0}
+                  deductionInr={justification?.deduction_estimate_inr ?? 0}
+                  totalRecoverableInr={justification?.total_recoverable_inr ?? 0}
+                  availableFields={justification?.available_fields ?? []}
+                  missingFields={justification?.missing_fields ?? []}
+                  recommendations={justification?.recommendations ?? []}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-0 h-full">

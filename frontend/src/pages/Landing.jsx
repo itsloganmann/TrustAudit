@@ -43,30 +43,30 @@ function TopBar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-slate-950/70 backdrop-blur-xl">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-50 border-b border-violet-500/10 bg-[#06070f]/80 backdrop-blur-2xl">
+      <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
         {/* Brand */}
-        <a href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-            <Shield size={15} className="text-slate-950" strokeWidth={2.5} />
+        <a href="/" className="flex items-center gap-3 group">
+          <div className="relative w-10 h-10 rounded-md bg-gradient-to-br from-violet-400 via-fuchsia-400 to-amber-300 flex items-center justify-center shadow-[0_0_30px_-4px_rgba(167,139,250,0.6)]">
+            <span className="aurora-headline text-[20px] text-[#06070f] leading-none">A</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-white font-semibold text-[15px] tracking-tight">
+          <div className="flex flex-col">
+            <span className="aurora-headline text-[22px] text-white leading-none">
               TrustAudit
             </span>
-            <span className="text-[10px] text-slate-500 font-semibold px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08]">
-              43B(h)
+            <span className="font-mono text-[9px] text-violet-300/70 tracking-[0.3em] uppercase mt-0.5">
+              Section 43B(h) Engine
             </span>
           </div>
         </a>
 
         {/* Center nav */}
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-[13px] text-slate-400 hover:text-white transition-colors font-medium"
+              className="px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-violet-200/60 hover:text-white transition-colors"
             >
               {link.label}
             </a>
@@ -74,19 +74,13 @@ function TopBar() {
         </nav>
 
         {/* Right CTAs */}
-        <div className="hidden md:flex items-center gap-2">
-          <a
-            href="/auth/vendor/signin"
-            className="px-3.5 h-9 rounded-lg text-[13px] text-slate-300 hover:text-white transition-colors inline-flex items-center font-medium"
-          >
+        <div className="hidden md:flex items-center gap-3">
+          <a href="/auth/vendor/signin" className="btn btn-md btn-ghost">
             Sign in
           </a>
-          <a
-            href="/auth/vendor/signup"
-            className="px-4 h-9 rounded-lg bg-white hover:bg-slate-100 text-slate-950 text-[13px] font-semibold tracking-tight inline-flex items-center gap-1.5 transition-all"
-          >
+          <a href="/auth/vendor/signup" className="btn btn-md btn-primary">
             Get started
-            <ArrowRight size={13} strokeWidth={2.5} />
+            <ArrowRight size={12} strokeWidth={2.5} />
           </a>
         </div>
 
@@ -94,38 +88,32 @@ function TopBar() {
         <button
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
-          className="md:hidden p-2 rounded-lg glass-xl text-white"
+          className="md:hidden btn btn-md btn-ghost !px-3"
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          {mobileOpen ? <X size={16} /> : <Menu size={16} />}
         </button>
       </div>
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-white/[0.06] bg-slate-950/95 backdrop-blur-xl">
-          <div className="px-6 py-4 flex flex-col gap-3">
+        <div className="md:hidden border-t border-violet-500/10 bg-[#06070f]/95 backdrop-blur-2xl">
+          <div className="px-8 py-6 flex flex-col gap-2">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="text-[14px] text-slate-300 hover:text-white py-1.5"
+                className="font-mono text-[11px] uppercase tracking-[0.2em] text-violet-200/70 hover:text-white py-2"
               >
                 {link.label}
               </a>
             ))}
-            <div className="pt-3 border-t border-white/[0.06] flex gap-2">
-              <a
-                href="/auth/vendor/signin"
-                className="flex-1 h-10 rounded-lg glass-xl text-white text-[13px] font-semibold flex items-center justify-center"
-              >
+            <div className="pt-4 border-t border-violet-500/10 flex gap-2 mt-2">
+              <a href="/auth/vendor/signin" className="btn btn-md btn-ghost flex-1">
                 Sign in
               </a>
-              <a
-                href="/auth/vendor/signup"
-                className="flex-1 h-10 rounded-lg bg-white text-slate-950 text-[13px] font-semibold flex items-center justify-center"
-              >
+              <a href="/auth/vendor/signup" className="btn btn-md btn-primary flex-1">
                 Get started
               </a>
             </div>
@@ -151,73 +139,61 @@ function Hero() {
         }}
       />
 
-      <div className="relative max-w-6xl mx-auto px-6 pt-16 md:pt-24 pb-20 md:pb-28 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <div className="relative max-w-7xl mx-auto px-8 pt-24 md:pt-32 pb-24 md:pb-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left 55% */}
         <div className="lg:col-span-7">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 font-semibold tracking-wide mb-6"
+            className="chip mb-8 !bg-violet-500/8 !border-violet-400/30 !text-violet-200"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot" />
-            Live — Section 43B(h) compliance engine
+            <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] pulse-dot" />
+            Live · Compliance Engine v2
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="text-[40px] md:text-[58px] leading-[1.02] font-bold text-white tracking-tight"
+            transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            className="aurora-headline text-[64px] md:text-[96px] leading-[0.92] text-white"
           >
-            Never miss a{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10">43B(h) deadline</span>
-              <span
-                className="absolute left-0 right-0 bottom-1 md:bottom-2 h-2.5 md:h-3 rounded-sm"
-                style={{
-                  background:
-                    "linear-gradient(90deg, rgba(16,185,129,0.35), rgba(59,130,246,0.15))",
-                }}
-              />
+            The end of the
+            <br />
+            <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-amber-300 bg-clip-text text-transparent">
+              ₹12,000 crore
             </span>
             <br />
-            again.
+            <span className="font-display-italic text-violet-200/80">tax cliff.</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.16 }}
-            className="mt-6 text-[16px] md:text-[18px] text-slate-400 max-w-2xl leading-relaxed"
+            className="mt-10 text-[16px] md:text-[17px] text-violet-100/60 max-w-xl leading-relaxed font-light"
           >
-            TrustAudit turns every WhatsApp challan photo into a real-time
-            Section 43B(h) compliance shield. Drivers send photos. Your CFO sees
-            a filing-ready PDF in under 15 seconds. Zero missed deadlines. Zero
-            disallowed deductions.
+            TrustAudit turns every WhatsApp challan into a real-time Section 43B(h)
+            compliance shield. Drivers snap photos. Your CFO sees a filing-ready
+            PDF in <span className="font-mono text-violet-200">15 seconds</span>.
+            Zero missed deadlines. Zero disallowed deductions.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.24 }}
-            className="mt-8 flex flex-wrap items-center gap-3"
+            className="mt-12 flex flex-wrap items-center gap-4"
           >
             <MagneticCTA strength={0.4} radius={120}>
-              <a
-                href="#try-live"
-                className="inline-flex items-center gap-2 px-6 h-12 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-[14px] tracking-tight transition-all shadow-[0_14px_48px_-12px_rgba(16,185,129,0.7)]"
-              >
-                Try the live demo
-                <ArrowRight size={15} strokeWidth={2.5} />
+              <a href="#try-live" className="btn btn-hero btn-aurora">
+                <span className="relative z-10">Try the live demo</span>
+                <ArrowRight size={14} strokeWidth={2.5} className="relative z-10" />
               </a>
             </MagneticCTA>
             <MagneticCTA strength={0.3} radius={100}>
-              <a
-                href="/auth/vendor/signin"
-                className="inline-flex items-center gap-2 px-6 h-12 rounded-xl frost-card glass-shimmer text-white font-semibold text-[14px] tracking-tight"
-              >
-                <span className="relative">Sign in as CFO</span>
+              <a href="/auth/vendor/signin" className="btn btn-hero btn-ghost">
+                Sign in as CFO
               </a>
             </MagneticCTA>
           </motion.div>
@@ -226,7 +202,7 @@ function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.32 }}
-            className="mt-8"
+            className="mt-12"
           >
             <StatsStrip compact />
           </motion.div>
@@ -242,10 +218,10 @@ function Hero() {
 
       {/* Subtle bottom fade to transition into the pitch section */}
       <div
-        className="pointer-events-none absolute bottom-0 left-0 right-0 h-32"
+        className="pointer-events-none absolute bottom-0 left-0 right-0 h-40"
         style={{
           background:
-            "linear-gradient(to bottom, transparent, rgba(2,6,23,0.8) 60%, #020617 100%)",
+            "linear-gradient(to bottom, transparent, rgba(6,7,15,0.8) 60%, #06070f 100%)",
         }}
       />
     </section>
@@ -254,18 +230,21 @@ function Hero() {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans antialiased">
-      <TopBar />
-      <main>
-        <Hero />
-        <ProductPitchScroll />
-        <DemoCTAPanel />
-        <HowItWorksSteps />
-        <FeatureGrid />
-        <Testimonials />
-        <FAQSection />
-      </main>
-      <Footer />
+    <div className="min-h-screen bg-[#06070f] text-violet-100/70 font-sans antialiased relative">
+      <div className="ambient-bg" aria-hidden />
+      <div className="relative" style={{ zIndex: 1 }}>
+        <TopBar />
+        <main>
+          <Hero />
+          <ProductPitchScroll />
+          <DemoCTAPanel />
+          <HowItWorksSteps />
+          <FeatureGrid />
+          <Testimonials />
+          <FAQSection />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }
