@@ -12,12 +12,11 @@ import AmbientBackground from "./components/AmbientBackground";
 import { useVendorLiveStatus } from "./components/shell/vendorLiveStatus.js";
 
 const API = "/api";
-// When the Phase I SSE stream is open we slow the REST poll way down because
-// the stream itself pushes near-real-time deltas. If SSE is unavailable (or
-// the route is mounted outside VendorShell, e.g. during tests) we keep the
-// original 2-second cadence so nothing regresses.
+// Hotfix: SSE frames trigger toasts via LiveInvoiceStream but they do NOT
+// re-fetch dashboard data, so the prior "slow polling when SSE is open"
+// behaviour caused new invoices to take up to 15s to appear. Always poll
+// at 2s — SSE then provides the layered toast feedback on top.
 const POLL_INTERVAL_FAST_MS = 2000;
-const POLL_INTERVAL_SSE_MS = 15000;
 
 function App() {
   const [invoices, setInvoices] = useState([]);
@@ -29,12 +28,11 @@ function App() {
   const [search, setSearch] = useState("");
   const shouldReduceMotion = useReducedMotion();
 
-  // When mounted inside VendorShell this returns the SSE status; when mounted
-  // standalone the default context value ("idle") falls through and polling
-  // stays at its original 2s cadence.
+  // SSE status is read just so we can surface it elsewhere if needed; the
+  // polling cadence is now constant at 2s regardless of SSE state.
+  // eslint-disable-next-line no-unused-vars
   const liveStatus = useVendorLiveStatus();
-  const pollIntervalMs =
-    liveStatus === "open" ? POLL_INTERVAL_SSE_MS : POLL_INTERVAL_FAST_MS;
+  const pollIntervalMs = POLL_INTERVAL_FAST_MS;
 
   // Track previous invoice statuses for toast detection
   const prevStatusMap = useRef({});

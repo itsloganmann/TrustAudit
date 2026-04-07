@@ -73,7 +73,7 @@ function CenterSphere({ confidence, reducedMotion }) {
   return (
     <group>
       <mesh ref={meshRef}>
-        <sphereGeometry args={[1, 48, 48]} />
+        <sphereGeometry args={[1, 24, 24]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
@@ -362,8 +362,7 @@ function Scene({
       <OrbitControls
         enableZoom={false}
         enablePan={false}
-        autoRotate={!reducedMotion}
-        autoRotateSpeed={0.6}
+        autoRotate={false}
         makeDefault
       />
     </>
@@ -450,9 +449,10 @@ export default function JustificationCanvas({
       data-invoice-id={invoiceId}
     >
       <Canvas
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 1.25]}
+        gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
         camera={{ position: [4, 3, 6], fov: 45, near: 0.1, far: 100 }}
+        performance={{ min: 0.5 }}
         onCreated={({ gl }) => {
           gl.setClearColor(new THREE.Color("#020617"), 0);
         }}

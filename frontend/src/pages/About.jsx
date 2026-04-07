@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import TiltCard from "../components/effects/TiltCard";
 import {
   ArrowLeft,
   Shield,
@@ -403,35 +402,26 @@ function FounderCard({ founder }) {
   return (
     <motion.article
       variants={cardVariants}
+      whileHover={{ y: -6, transition: { type: "spring", stiffness: 300 } }}
       onPointerEnter={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
-      className="relative group"
+      className="relative overflow-hidden rounded-3xl p-6 md:p-8 group"
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
+        backdropFilter: "blur(18px) saturate(140%)",
+        WebkitBackdropFilter: "blur(18px) saturate(140%)",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
     >
-      <TiltCard
-        glare
-        maxTilt={5}
-        scale={1.012}
-        className="relative overflow-hidden rounded-3xl p-6 md:p-8 block"
-      >
-        <div
-          aria-hidden
-          className="absolute inset-0 rounded-3xl"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
-            backdropFilter: "blur(18px) saturate(140%)",
-            WebkitBackdropFilter: "blur(18px) saturate(140%)",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
-        />
-        {/* Animated caustic light sheen */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-[2px] rounded-3xl opacity-40 group-hover:opacity-80 transition-opacity"
-          style={{
-            background: `radial-gradient(600px circle at 20% -10%, ${founder.gradientFrom}22, transparent 40%), radial-gradient(600px circle at 100% 100%, ${founder.gradientTo}22, transparent 40%)`,
-          }}
-        />
+      {/* Animated caustic light sheen */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-[2px] rounded-3xl opacity-40 group-hover:opacity-80 transition-opacity"
+        style={{
+          background: `radial-gradient(600px circle at 20% -10%, ${founder.gradientFrom}22, transparent 40%), radial-gradient(600px circle at 100% 100%, ${founder.gradientTo}22, transparent 40%)`,
+        }}
+      />
 
       <div className="relative flex flex-col md:flex-row gap-6 md:gap-8">
         <AvatarBubble founder={founder} hovered={hovered} />
@@ -485,7 +475,6 @@ function FounderCard({ founder }) {
           </div>
         </div>
       </div>
-      </TiltCard>
     </motion.article>
   );
 }

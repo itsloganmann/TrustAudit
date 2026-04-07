@@ -209,10 +209,19 @@ def get_invoice_justification(
     missing = parse_missing_fields_json(invoice.missing_fields)
     edges = parse_edge_cases_json(invoice.detected_edge_cases)
 
+    # Hotfix: WhatsApp-ingested invoices may have a 0/None confidence_score
+    # on the model row even when individual fields were extracted with high
+    # confidence. In that case, fall back to the mean of the per-field
+    # confidences so the 3D canvas never displays a misleading "0%" while
+    # the extracted data panel beside it shows full vendor + GSTIN + amount.
+    raw_score = float(invoice.confidence_score or 0.0)
+    if raw_score <= 0.0 and per_field_conf:
+        raw_score = sum(per_field_conf.values()) / len(per_field_conf)
+
     payload = build_justification(
         invoice_id=invoice.id,
         invoice_amount_inr=float(invoice.invoice_amount or 0.0),
-        confidence_score=float(invoice.confidence_score or 0.0),
+        confidence_score=raw_score,
         extracted=extracted,
         field_confidences=per_field_conf,
         missing_fields=missing,
