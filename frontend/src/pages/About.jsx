@@ -85,7 +85,7 @@ const COFOUNDERS = [
       {
         kind: "linkedin",
         label: "LinkedIn",
-        href: "https://www.linkedin.com/in/arnavbhardwaj",
+        href: "https://www.linkedin.com/in/thearnavbhardwaj/",
         Icon: Linkedin,
       },
       {
@@ -178,7 +178,7 @@ const CONTACT_LINKS = [
   {
     kind: "linkedin-arnav",
     label: "Arnav on LinkedIn",
-    href: "https://www.linkedin.com/in/arnavbhardwaj",
+    href: "https://www.linkedin.com/in/thearnavbhardwaj/",
     Icon: Linkedin,
   },
   {

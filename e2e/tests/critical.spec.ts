@@ -197,7 +197,7 @@ test.describe("Journey 3 — Public /about page", () => {
     const link = about.linkedInLink("Arnav Bhardwaj");
     await expect(link).toBeVisible();
     const href = await link.getAttribute("href");
-    expect(href).toContain("linkedin.com/in/arnavbhardwaj");
+    expect(href).toContain("linkedin.com/in/thearnavbhardwaj");
   });
 
   test("both founder cards are present (exactly 2)", async ({ page }) => {
