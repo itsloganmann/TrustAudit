@@ -22,6 +22,7 @@ from .routes.disputes import router as disputes_router
 from .routes.compliance import router as compliance_router
 from .routes.verification import router as verification_router
 from .routes.invoice_insights import router as invoice_insights_router
+from .routes.live_stream import router as live_stream_router
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -93,6 +94,7 @@ app.include_router(disputes_router, prefix="/api")  # /api/disputes (vendor/admi
 app.include_router(compliance_router, prefix="/api")  # /api/invoices/{id}/compliance.pdf, /submit-to-gov (W9)
 app.include_router(verification_router, prefix="/api")  # /api/verify/{id} (PUBLIC, no auth, W9)
 app.include_router(invoice_insights_router, prefix="/api")  # /api/invoices/{id}/annotation + /justification
+app.include_router(live_stream_router, prefix="/api")  # /api/live/stream?session=... (SSE)
 
 # Resolve the frontend dist directory
 FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
