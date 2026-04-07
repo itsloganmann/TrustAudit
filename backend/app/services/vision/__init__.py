@@ -45,8 +45,15 @@ def get_vision_provider(name: Optional[str] = None) -> VisionProvider:
 
     On ``VisionProviderNotConfigured`` (e.g. missing API key) we log a
     warning and return the mock provider so demos never crash.
+
+    Empty or whitespace-only values (from either ``name`` or the env
+    var) are treated as "unset" — Render sometimes declares an env key
+    with no value, which would otherwise slip through ``or`` short-
+    circuiting and land in the ``unknown provider`` branch.
     """
-    chosen = (name or os.environ.get("VISION_PROVIDER") or "mock").strip().lower()
+    explicit = (name or "").strip()
+    from_env = (os.environ.get("VISION_PROVIDER") or "").strip()
+    chosen = (explicit or from_env or "mock").lower()
 
     if chosen == "mock":
         from .mock_client import MockVisionClient

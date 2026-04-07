@@ -39,12 +39,19 @@ class GeminiVisionClient:
         model: str | None = None,
         timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     ) -> None:
-        self._api_key = api_key or os.environ.get("GEMINI_API_KEY")
+        # Treat whitespace-only values as unset — Render env vars that
+        # are declared but have no value come through as empty strings,
+        # which would otherwise sneak past a simple ``not key`` check
+        # once somebody explicitly sets ``GEMINI_API_KEY=" "`` in the
+        # dashboard.
+        raw_key = api_key if api_key is not None else os.environ.get("GEMINI_API_KEY")
+        self._api_key = (raw_key or "").strip() or None
         if not self._api_key:
             raise VisionProviderNotConfigured(
                 "GEMINI_API_KEY is not set in the environment"
             )
-        self._model = model or os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
+        raw_model = model if model is not None else os.environ.get("GEMINI_MODEL")
+        self._model = (raw_model or "").strip() or DEFAULT_MODEL
         self._timeout = timeout_seconds
 
     # ------------------------------------------------------------------
@@ -116,9 +123,13 @@ class GeminiVisionClient:
             candidate = body["candidates"][0]
             parts = candidate["content"]["parts"]
             text_part = next(p["text"] for p in parts if "text" in p)
-        except (KeyError, IndexError, StopIteration) as exc:
+        except (KeyError, IndexError, StopIteration, TypeError, AttributeError) as exc:
+            # ``body`` may not even be a dict if the transport hiccups and
+            # returns a list or None — we still want to degrade gracefully
+            # rather than bubble a TypeError out of ``extract`` so
+            # ``_safe_extract`` can keep the happy path alive.
             logger.warning("Gemini response missing expected shape: %s", exc)
-            return _empty_result(raw=body)
+            return _empty_result(raw=body if isinstance(body, dict) else {"body": body})
 
         # Gemini may return the JSON wrapped in code fences despite
         # response_mime_type — strip them defensively.
@@ -133,6 +144,17 @@ class GeminiVisionClient:
             data = json.loads(cleaned)
         except json.JSONDecodeError as exc:
             logger.warning("Gemini returned non-JSON text: %s (%.200s)", exc, cleaned)
+            return _empty_result(raw={"body": body, "raw_text": text_part})
+
+        if not isinstance(data, dict):
+            # Gemini very occasionally returns a JSON array or a bare
+            # string — normalize to an empty extraction so the rest of
+            # the pipeline stays on its ``dict``-shaped happy path.
+            logger.warning(
+                "Gemini returned non-object JSON payload (%s): %.200s",
+                type(data).__name__,
+                cleaned,
+            )
             return _empty_result(raw={"body": body, "raw_text": text_part})
 
         # Reshape detected_issues -> detected_edge_cases for our unified shape
