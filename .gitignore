@@ -44,3 +44,7 @@ uploads/*
 backend/services/whatsapp_sidecar/sessions/
 *.db-shm
 *.db-wal
+
+# Agent worktrees + ephemeral uploads
+.claude/worktrees/
+backend/uploads/
