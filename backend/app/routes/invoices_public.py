@@ -87,7 +87,13 @@ def list_public_invoices(
     # Opportunistic cleanup so long-running servers don't leak rows.
     demo_sessions.prune_expired()
 
-    rows = demo_sessions.list_recent(session, max_age_seconds=max_age)
+    # Wildcard mode: pool every session's rows so anyone landing on
+    # ``/live`` (with no ?session= param) sees the public firehose. Safe
+    # because every row passes through ``_anonymize`` before return.
+    if session == "*":
+        rows = demo_sessions.list_recent_across_all(max_age_seconds=max_age)
+    else:
+        rows = demo_sessions.list_recent(session, max_age_seconds=max_age)
     return PublicInvoiceListResponse(
         session_id=session,
         count=len(rows),

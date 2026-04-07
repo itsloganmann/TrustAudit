@@ -261,6 +261,36 @@ def list_recent(
     return anonymized
 
 
+def list_recent_across_all(
+    max_age_seconds: int = DEFAULT_MAX_AGE_SECONDS,
+    cap: int = 50,
+) -> List[Dict]:
+    """Return anonymized rows from EVERY session, last ``max_age_seconds``,
+    sorted newest-first, capped at ``cap``.
+
+    Used by the public ``/live`` dashboard's wildcard mode so a guest
+    landing on ``/live`` (with no ``?session=`` param) sees the firehose
+    of every recent submission across every linked phone — exactly what
+    the demo wants.
+
+    Output shape is identical to ``list_recent`` (rows already pass
+    through ``_anonymize``), so the route can swap it in transparently.
+    Safe to expose unauthenticated: vendor_name, gstin, and
+    invoice_number are stripped before return.
+    """
+    now = time.time()
+    cutoff = now - max_age_seconds
+    pooled: List[Dict] = []
+    with _lock:
+        for state in _sessions.values():
+            for inv in state.invoices:
+                if float(inv.get("created_at", now)) >= cutoff:
+                    pooled.append(dict(inv))
+    anonymized = _anonymize(pooled)
+    anonymized.sort(key=lambda r: r.get("created_at", 0), reverse=True)
+    return anonymized[:cap]
+
+
 def prune_expired(max_age_seconds: int = DEFAULT_MAX_AGE_SECONDS) -> int:
     """Drop expired rows and empty sessions. Returns the count removed.
 

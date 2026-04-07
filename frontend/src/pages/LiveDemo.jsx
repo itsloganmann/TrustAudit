@@ -61,6 +61,45 @@ function randomSessionId() {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+const LINKED_PHONE_KEY = "trustaudit:linkedPhone";
+
+function readLinkedPhoneFromStorage() {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(LINKED_PHONE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeLinkedPhoneToStorage(id) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LINKED_PHONE_KEY, id);
+  } catch {
+    /* ignore quota / disabled storage */
+  }
+}
+
+function clearLinkedPhoneFromStorage() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LINKED_PHONE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function phoneToSessionId(rawPhone) {
+  // Mirrors backend ``_phone_to_session_id`` in webhook_whatsapp.py — last
+  // 10 digits, prefixed with ``live-phone-``. The webhook stores into the
+  // exact same key, so a frontend session=live-phone-XXXXXXXXXX picks up
+  // submissions from that phone in real time.
+  const digits = (rawPhone || "").replace(/\D/g, "").slice(-10);
+  if (digits.length !== 10) return null;
+  return `live-phone-${digits}`;
+}
+
 // ---------------------------------------------------------------------------
 // Status + confidence bits
 // ---------------------------------------------------------------------------
@@ -182,16 +221,48 @@ export default function LiveDemo() {
   const [connected, setConnected] = useState(false);
   const [transport, setTransport] = useState("idle"); // 'sse' | 'poll' | 'idle'
   const [creating, setCreating] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [linkError, setLinkError] = useState("");
   const lastFetchRef = useRef(0);
 
-  // Bootstrap: if no session in URL, generate one and stick it in.
+  // Bootstrap: pick the right session id on mount.
+  // Order of precedence:
+  //   1. ?session=<id> in the URL (manual override)
+  //   2. localStorage linked phone (sticky private feed)
+  //   3. "*" wildcard public firehose (default — anyone landing on
+  //      /live sees every recent submission)
   useEffect(() => {
-    if (!sessionId) {
-      const id = randomSessionId();
-      writeSessionIdToUrl(id);
-      setSessionId(id);
-    }
+    if (sessionId) return;
+    const fromUrl = readSessionIdFromUrl();
+    const linked = readLinkedPhoneFromStorage();
+    const initial = fromUrl || linked || "*";
+    writeSessionIdToUrl(initial);
+    setSessionId(initial);
   }, [sessionId]);
+
+  // Re-key the session to a phone-bound id and persist to localStorage.
+  const linkPhone = useCallback(() => {
+    setLinkError("");
+    const id = phoneToSessionId(phoneInput);
+    if (!id) {
+      setLinkError("Enter at least 10 digits.");
+      return;
+    }
+    writeLinkedPhoneToStorage(id);
+    writeSessionIdToUrl(id);
+    setSessionId(id);
+    setInvoices([]);
+  }, [phoneInput]);
+
+  // Drop the linked phone and fall back to the public firehose.
+  const unlinkPhone = useCallback(() => {
+    clearLinkedPhoneFromStorage();
+    writeSessionIdToUrl("*");
+    setSessionId("*");
+    setPhoneInput("");
+    setLinkError("");
+    setInvoices([]);
+  }, []);
 
   // Fetch loop + SSE attempt.
   const fetchOnce = useCallback(async () => {
@@ -353,7 +424,11 @@ export default function LiveDemo() {
             <span className="hidden md:inline-flex ml-3 px-2 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-[10px] text-slate-400 font-mono tracking-wide">
               session:{" "}
               <span className="text-emerald-400 ml-1 font-semibold tabular-nums">
-                {sessionId || "—"}
+                {sessionId === "*"
+                  ? "ALL SUBMISSIONS"
+                  : sessionId?.startsWith("live-phone-")
+                    ? `phone …${sessionId.slice(-4)}`
+                    : sessionId || "—"}
               </span>
             </span>
           </div>
@@ -530,6 +605,56 @@ export default function LiveDemo() {
 
         {/* Right: sidebar */}
         <aside className="lg:col-span-3 space-y-4">
+          {/* Phone-link card — re-keys the session to a private feed */}
+          <div className="glass rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[13px] font-semibold text-white tracking-tight">
+                Link your phone
+              </p>
+              {sessionId?.startsWith("live-phone-") && (
+                <button
+                  type="button"
+                  onClick={unlinkPhone}
+                  className="text-[10px] text-slate-500 hover:text-rose-400 uppercase tracking-wider font-semibold"
+                >
+                  Unlink
+                </button>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
+              Paste the WhatsApp number you'll send challans from. This page
+              will then show only your submissions in real time.
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="tel"
+                value={phoneInput}
+                onChange={(e) => setPhoneInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") linkPhone();
+                }}
+                placeholder="+1 415 555 1234"
+                className="flex-1 h-9 px-3 text-[12px] bg-white/[0.03] border border-white/[0.06] rounded-lg text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400/50 transition-colors font-mono"
+              />
+              <button
+                type="button"
+                onClick={linkPhone}
+                className="px-3 h-9 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-semibold tracking-wide uppercase transition-all"
+              >
+                Link
+              </button>
+            </div>
+            {linkError && (
+              <p className="mt-2 text-[10px] text-rose-400">{linkError}</p>
+            )}
+            {sessionId === "*" && (
+              <p className="mt-3 text-[10px] text-slate-600 leading-relaxed">
+                Currently watching the public firehose — every recent
+                submission across every linked phone.
+              </p>
+            )}
+          </div>
+
           <div className="glass rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/12 border border-emerald-500/25 flex items-center justify-center">
