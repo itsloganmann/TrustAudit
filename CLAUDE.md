@@ -106,3 +106,12 @@ Locally the catch-all is skipped (because `frontend/dist` doesn't exist during d
 - **The frontend is plain JSX** (not TypeScript). ESLint config ignores `dist/` and uses `varsIgnorePattern: '^[A-Z_]'` so PascalCase imports won't trip the unused-vars rule.
 - **Tailwind v4** is used via `@tailwindcss/vite` — there is no `tailwind.config.js`; configuration lives in `index.css`.
 - **Polling, not websockets.** All "live" behavior is a 2-second interval in `App.jsx`. If something feels laggy in the demo, that's the lower bound.
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- After modifying code files in this session, run `python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"` to keep the graph current

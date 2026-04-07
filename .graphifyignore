@@ -1,0 +1,17 @@
+node_modules/
+venv/
+.venv/
+__pycache__/
+.git/
+dist/
+build/
+frontend/dist/
+frontend/node_modules/
+backend/uploads/
+backend/services/whatsapp_sidecar/sessions/
+backend/services/whatsapp_sidecar/node_modules/
+.claude/
+.fleet/
+*.lock
+*.log
+graphify-out/
