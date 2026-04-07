@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   FileText,
   CheckCircle2,
@@ -11,6 +11,10 @@ import AnimatedCounter from "./AnimatedCounter";
 import ComplianceChart from "./ComplianceChart";
 import ActivityTicker from "./ActivityTicker";
 import TaxSimulator from "./TaxSimulator";
+
+/* Shared spring presets — used across components for consistency */
+const SPRING_CARD = { type: "spring", stiffness: 180, damping: 22 };
+const SPRING_HOVER = { type: "spring", stiffness: 300, damping: 24 };
 
 const STATUS_CONFIG = {
   PENDING: {
@@ -108,10 +112,20 @@ const STAT_ICONS = {
   today: Zap,
 };
 
-function StatCard({ label, value, color, iconKey }) {
+function StatCard({ label, value, color, iconKey, index = 0 }) {
   const Icon = STAT_ICONS[iconKey] || FileText;
+  const shouldReduceMotion = useReducedMotion();
+  const hoverProps = shouldReduceMotion
+    ? {}
+    : { whileHover: { y: -3, transition: SPRING_HOVER } };
   return (
-    <div className="frost-card rounded-xl px-4 py-3 group">
+    <motion.div
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      transition={{ ...SPRING_CARD, delay: index * 0.04 }}
+      {...hoverProps}
+      className="frost-card rounded-xl px-4 py-3 group will-change-transform"
+    >
       <div className="flex items-center justify-between mb-1 relative">
         <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">{label}</p>
         <Icon
@@ -125,21 +139,40 @@ function StatCard({ label, value, color, iconKey }) {
           value={value}
           className="text-[22px] font-bold tabular-nums leading-tight tracking-tight"
           style={{ color: color || "#f8fafc" }}
-          duration={800}
+          duration={700}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-/* Row animation variants */
+/* Row animation variants — stagger by index for cascading entry */
 const rowVariants = {
-  initial: { opacity: 0, x: -8 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: 8 },
+  hidden: { opacity: 0, x: -12 },
+  visible: (i) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: Math.min(i, 20) * 0.04, type: "spring", stiffness: 260, damping: 24 },
+  }),
+  exit: { opacity: 0, x: 8, transition: { duration: 0.18 } },
+};
+
+/* Grid card mount variants */
+const gridCardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { ...SPRING_CARD, delay: i * 0.06 },
+  }),
 };
 
 export default function Dashboard({ invoices, stats, activity, loading, onSelectInvoice }) {
+  const shouldReduceMotion = useReducedMotion();
+  const hoverProps = shouldReduceMotion
+    ? {}
+    : { whileHover: { y: -3, transition: SPRING_HOVER } };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -152,29 +185,55 @@ export default function Dashboard({ invoices, stats, activity, loading, onSelect
     <div className="space-y-4">
       {/* Top Grid: Chart + Simulator + Ticker */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-2">
+        <motion.div
+          className="lg:col-span-2 will-change-transform"
+          custom={0}
+          initial="hidden"
+          animate="visible"
+          variants={gridCardVariants}
+          {...hoverProps}
+        >
           <ComplianceChart stats={stats} />
-        </div>
-        <div className="lg:col-span-1">
+        </motion.div>
+        <motion.div
+          className="lg:col-span-1 will-change-transform"
+          custom={1}
+          initial="hidden"
+          animate="visible"
+          variants={gridCardVariants}
+          {...hoverProps}
+        >
           <TaxSimulator stats={stats} />
-        </div>
-        <div className="lg:col-span-1">
+        </motion.div>
+        <motion.div
+          className="lg:col-span-1 will-change-transform"
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={gridCardVariants}
+          {...hoverProps}
+        >
           <ActivityTicker activity={activity || []} />
-        </div>
+        </motion.div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard label="Total" value={stats.total_invoices || 0} iconKey="total" />
-        <StatCard label="Verified" value={stats.verified_count || 0} color="#10b981" iconKey="verified" />
-        <StatCard label="Critical" value={stats.critical_count || 0} color="#f43f5e" iconKey="critical" />
-        <StatCard label="Warning" value={stats.warning_count || 0} color="#f59e0b" iconKey="warning" />
-        <StatCard label="Safe" value={stats.safe_count || 0} color="#3b82f6" iconKey="safe" />
-        <StatCard label="Today" value={stats.processed_today || 0} color="#8b5cf6" iconKey="today" />
+        <StatCard label="Total" value={stats.total_invoices || 0} iconKey="total" index={0} />
+        <StatCard label="Verified" value={stats.verified_count || 0} color="#10b981" iconKey="verified" index={1} />
+        <StatCard label="Critical" value={stats.critical_count || 0} color="#f43f5e" iconKey="critical" index={2} />
+        <StatCard label="Warning" value={stats.warning_count || 0} color="#f59e0b" iconKey="warning" index={3} />
+        <StatCard label="Safe" value={stats.safe_count || 0} color="#3b82f6" iconKey="safe" index={4} />
+        <StatCard label="Today" value={stats.processed_today || 0} color="#8b5cf6" iconKey="today" index={5} />
       </div>
 
       {/* Invoice Table */}
-      <div className="glass rounded-xl overflow-hidden">
+      <motion.div
+        className="glass rounded-xl overflow-hidden will-change-transform"
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+        transition={{ ...SPRING_CARD, delay: 0.2 }}
+      >
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/[0.06] text-[10px] text-slate-500 uppercase tracking-widest">
@@ -188,15 +247,15 @@ export default function Dashboard({ invoices, stats, activity, loading, onSelect
           </thead>
           <tbody>
             <AnimatePresence mode="popLayout" initial={false}>
-              {invoices.map((inv) => (
+              {invoices.map((inv, i) => (
                 <motion.tr
                   key={inv.id}
+                  custom={i}
                   variants={rowVariants}
-                  initial="initial"
-                  animate="animate"
+                  initial="hidden"
+                  animate="visible"
                   exit="exit"
                   layout
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   onClick={() => onSelectInvoice(inv)}
                   className="row-transition border-b border-white/[0.04] cursor-pointer group"
                 >
@@ -268,7 +327,7 @@ export default function Dashboard({ invoices, stats, activity, loading, onSelect
             Auto-refresh 2s
           </span>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

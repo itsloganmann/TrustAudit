@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+// eslint-disable-next-line no-unused-vars
+import { motion, useReducedMotion } from "framer-motion";
 import {
   AreaChart,
   Area,
@@ -90,6 +92,7 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function ComplianceChart({ stats }) {
   const data = useMemo(() => generateChartData(stats), [stats]);
+  const shouldReduceMotion = useReducedMotion();
 
   const totals = useMemo(() => {
     const totalSaved = data.reduce((s, d) => s + d.saved, 0);
@@ -102,7 +105,12 @@ export default function ComplianceChart({ stats }) {
   }, [data]);
 
   return (
-    <div className="glass rounded-xl overflow-hidden h-full flex flex-col">
+    <motion.div
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 200, damping: 24, delay: 0.1 }}
+      className="glass rounded-xl overflow-hidden h-full flex flex-col will-change-transform"
+    >
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
         <div>
@@ -196,6 +204,6 @@ export default function ComplianceChart({ stats }) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </motion.div>
   );
 }
