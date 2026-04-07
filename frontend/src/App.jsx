@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+// eslint-disable-next-line no-unused-vars
+import { motion, useReducedMotion } from "framer-motion";
 import { Toaster, toast } from "sonner";
 import { Shield, Search, Activity } from "lucide-react";
 import Dashboard from "./components/Dashboard";
@@ -25,6 +27,7 @@ function App() {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [tab, setTab] = useState("all");
   const [search, setSearch] = useState("");
+  const shouldReduceMotion = useReducedMotion();
 
   // When mounted inside VendorShell this returns the SSE status; when mounted
   // standalone the default context value ("idle") falls through and polling
@@ -238,30 +241,47 @@ function App() {
                 { key: "warning", label: "Warning", color: "#f59e0b" },
                 { key: "pending", label: "Safe", color: "#3b82f6" },
                 { key: "verified", label: "Verified", color: "#10b981" },
-              ].map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all flex items-center gap-1.5 ${tab === t.key
-                      ? "bg-white/[0.08] text-white border border-white/[0.1]"
-                      : "text-slate-500 hover:text-slate-300 border border-transparent"
-                    }`}
-                >
-                  {t.color && (
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ background: t.color }}
-                    />
-                  )}
-                  {t.label}
-                  <span
-                    className={`text-[10px] tabular-nums ${tab === t.key ? "text-slate-400" : "text-slate-600"
+              ].map((t) => {
+                const isActive = tab === t.key;
+                return (
+                  <motion.button
+                    key={t.key}
+                    onClick={() => setTab(t.key)}
+                    whileHover={shouldReduceMotion ? undefined : { scale: 1.03, transition: { type: "spring", stiffness: 300, damping: 24 } }}
+                    whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+                    className={`relative px-3 py-1.5 rounded-lg text-[12px] font-medium flex items-center gap-1.5 transition-colors ${isActive
+                        ? "text-white"
+                        : "text-slate-500 hover:text-slate-300"
                       }`}
                   >
-                    {tabCounts[t.key]}
-                  </span>
-                </button>
-              ))}
+                    {isActive && (
+                      <motion.span
+                        layoutId="activeTabPill"
+                        transition={
+                          shouldReduceMotion
+                            ? { duration: 0.15 }
+                            : { type: "spring", stiffness: 320, damping: 26 }
+                        }
+                        className="absolute inset-0 rounded-lg bg-white/[0.08] border border-white/[0.1]"
+                      />
+                    )}
+                    <span className="relative flex items-center gap-1.5">
+                      {t.color && (
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ background: t.color }}
+                        />
+                      )}
+                      {t.label}
+                      <span
+                        className={`text-[10px] tabular-nums ${isActive ? "text-slate-400" : "text-slate-600"}`}
+                      >
+                        {tabCounts[t.key]}
+                      </span>
+                    </span>
+                  </motion.button>
+                );
+              })}
             </div>
 
             <div className="relative">
@@ -293,13 +313,11 @@ function App() {
         </div>
       </main>
 
-      {/* Evidence Drawer */}
-      {selectedInvoice && (
-        <InvoiceDetailSheet
-          invoice={selectedInvoice}
-          onClose={() => setSelectedInvoice(null)}
-        />
-      )}
+      {/* Evidence Drawer — kept mounted so InvoiceDetailSheet's AnimatePresence can run exit */}
+      <InvoiceDetailSheet
+        invoice={selectedInvoice}
+        onClose={() => setSelectedInvoice(null)}
+      />
       </div>
     </div>
   );

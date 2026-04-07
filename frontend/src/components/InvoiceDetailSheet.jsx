@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   X,
   CheckCircle2,
@@ -44,11 +44,20 @@ const backdrop = {
 
 const panel = {
   hidden: { x: "100%" },
-  visible: { x: 0, transition: { type: "spring", stiffness: 300, damping: 34 } },
+  visible: { x: 0, transition: { type: "spring", stiffness: 260, damping: 28 } },
   exit: { x: "100%", transition: { duration: 0.25, ease: "easeIn" } },
 };
 
+const panelReduced = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.15 } },
+  exit: { opacity: 0, transition: { duration: 0.15 } },
+};
+
 export default function InvoiceDetailSheet({ invoice, onClose }) {
+  const shouldReduceMotion = useReducedMotion();
+  const panelVariants = shouldReduceMotion ? panelReduced : panel;
+
   // Justification fetch + per-invoice cache. Hooks must run on every render.
   // We keep a ref-backed cache and a single state object keyed by invoice id
   // so the derived render values don't need synchronous setState in effects.
@@ -116,11 +125,11 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
           {/* Panel */}
           <motion.div
             key="drawer-panel"
-            variants={panel}
+            variants={panelVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[900px] bg-slate-950/95 backdrop-blur-xl border-l border-white/[0.06] flex flex-col"
+            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[900px] bg-slate-950/95 backdrop-blur-xl border-l border-white/[0.06] flex flex-col will-change-transform"
             onClick={(e) => e.stopPropagation()}
           >
             {/* ── Header ── */}
@@ -149,12 +158,14 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                   </p>
                 </div>
               </div>
-              <button
+              <motion.button
                 onClick={onClose}
+                whileHover={shouldReduceMotion ? undefined : { scale: 1.03, transition: { type: "spring", stiffness: 300, damping: 24 } }}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
                 className="w-8 h-8 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] flex items-center justify-center text-slate-500 hover:text-white transition-colors"
               >
                 <X size={14} />
-              </button>
+              </motion.button>
             </div>
 
             {/* ── Body: Justification canvas + two columns ── */}

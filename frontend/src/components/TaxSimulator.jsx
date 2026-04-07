@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Gauge, TrendingUp, AlertTriangle, ShieldCheck } from "lucide-react";
 
 /**
@@ -64,6 +64,7 @@ function calculateRisk(delayDays, portfolioValue) {
 }
 
 function RiskMeter({ percentage }) {
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="relative h-2 w-full rounded-full bg-white/[0.04] overflow-hidden">
       <motion.div
@@ -76,7 +77,11 @@ function RiskMeter({ percentage }) {
             percentage < 50 ? "#f59e0b" :
             "#f43f5e",
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={
+          shouldReduceMotion
+            ? { duration: 0.2 }
+            : { type: "spring", stiffness: 220, damping: 26 }
+        }
       />
       {/* Threshold markers */}
       <div className="absolute top-0 left-[15%] w-px h-full bg-white/[0.08]" title="15 days" />
@@ -88,12 +93,18 @@ function RiskMeter({ percentage }) {
 export default function TaxSimulator({ stats }) {
   const [delay, setDelay] = useState(12);
   const portfolioValue = stats?.total_value || 1_200_000;
+  const shouldReduceMotion = useReducedMotion();
 
   const result = useMemo(() => calculateRisk(delay, portfolioValue), [delay, portfolioValue]);
   const riskPercentage = Math.min(100, (result.risk / portfolioValue) * 100);
 
   return (
-    <div className="glass rounded-xl overflow-hidden h-full flex flex-col">
+    <motion.div
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 200, damping: 24, delay: 0.16 }}
+      className="glass rounded-xl overflow-hidden h-full flex flex-col will-change-transform"
+    >
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
         <div>
@@ -215,7 +226,8 @@ export default function TaxSimulator({ stats }) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2"
+              transition={shouldReduceMotion ? { duration: 0.15 } : { type: "spring", stiffness: 240, damping: 26 }}
+              className="rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2 will-change-transform"
             >
               <p className="text-[11px] text-rose-400 font-semibold flex items-center gap-1.5">
                 <AlertTriangle size={12} />
@@ -229,6 +241,6 @@ export default function TaxSimulator({ stats }) {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 }
