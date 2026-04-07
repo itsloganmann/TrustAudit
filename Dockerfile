@@ -39,6 +39,16 @@ RUN npm run build
 FROM node:20-slim AS sidecar-build
 WORKDIR /app/sidecar
 
+# baileys' transitive deps include a git-source package (libsignal-node).
+# node:20-slim does not ship git, so npm install fails with
+# "errno -2 / enoent / unknown git error". Install git + ca-certificates
+# in this build stage only — the runtime image is unaffected because we
+# only COPY --from=sidecar-build the resolved node_modules tree.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY backend/services/whatsapp_sidecar/package*.json ./
 RUN if [ -f package-lock.json ]; then \
         npm ci --omit=dev --no-audit --no-fund; \
