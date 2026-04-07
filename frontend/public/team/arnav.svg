@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="Arnav Bhardwaj avatar">
+  <defs>
+    <!-- Base brand gradient: amber -> rose -> violet -->
+    <linearGradient id="arnav-base" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+
+    <!-- Conic-ish overlay synthesized from three angled gradients -->
+    <linearGradient id="arnav-conic-a" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="arnav-conic-b" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="arnav-conic-c" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Radial sheen / caustic light -->
+    <radialGradient id="arnav-sheen" cx="28%" cy="22%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Inner vignette for depth -->
+    <radialGradient id="arnav-vignette" cx="50%" cy="60%" r="70%">
+      <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+    </radialGradient>
+
+    <!-- Soft glow around the letters -->
+    <filter id="arnav-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- Base -->
+  <rect width="400" height="400" fill="url(#arnav-base)"/>
+
+  <!-- Layered conic-style sweeps -->
+  <rect width="400" height="400" fill="url(#arnav-conic-a)"/>
+  <rect width="400" height="400" fill="url(#arnav-conic-b)"/>
+  <rect width="400" height="400" fill="url(#arnav-conic-c)"/>
+
+  <!-- Caustic sheen -->
+  <rect width="400" height="400" fill="url(#arnav-sheen)"/>
+
+  <!-- Vignette -->
+  <rect width="400" height="400" fill="url(#arnav-vignette)"/>
+
+  <!-- Subtle sheen streak -->
+  <g opacity="0.35">
+    <path d="M -40 260 Q 200 80 440 260 L 440 320 Q 200 140 -40 320 Z" fill="#ffffff" opacity="0.12"/>
+  </g>
+
+  <!-- Soft backdrop glow behind initials -->
+  <text x="50%" y="58%" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="200" fill="#ffffff" opacity="0.35" filter="url(#arnav-glow)">AB</text>
+
+  <!-- Initials -->
+  <text x="50%" y="58%" text-anchor="middle" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="200" letter-spacing="-6" fill="#ffffff">AB</text>
+</svg>
