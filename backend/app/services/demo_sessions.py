@@ -23,11 +23,12 @@ much easier.
 """
 from __future__ import annotations
 
+import asyncio
 import secrets
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import AsyncIterator, Dict, List, Optional, Set
 
 # ---------------------------------------------------------------------------
 # Tunables
@@ -70,6 +71,26 @@ class SessionState:
 
 _lock = threading.Lock()
 _sessions: Dict[str, SessionState] = {}
+
+# Pub/sub for Server-Sent Events (Phase I).
+#
+# Each ``subscribe`` call registers an ``asyncio.Queue`` keyed by
+# session_id. ``emit`` fans out a payload to every subscriber for that
+# session (and to the wildcard ``"*"`` bucket, for admin/ops streams).
+#
+# We use ``asyncio.Queue`` instead of ``threading.Queue`` because the
+# SSE endpoint is an ``async def`` generator — mixing sync queues into
+# an async loop would force us to ``run_in_executor`` for every frame.
+#
+# The queue list itself is guarded by ``_subscribers_lock`` (a plain
+# ``threading.Lock``) because ``emit`` can be called from a sync
+# thread (``asyncio.to_thread`` worker in the webhook persistence
+# path). We hold the lock only long enough to snapshot the subscriber
+# list; the actual ``put_nowait`` happens outside the lock to avoid
+# deadlocks if a queue is full.
+_subscribers_lock = threading.Lock()
+_subscribers: Dict[str, Set["asyncio.Queue[Dict]"]] = {}
+SUBSCRIBER_QUEUE_MAX = 64  # drop oldest on overflow, per-subscriber
 
 
 # ---------------------------------------------------------------------------
@@ -254,3 +275,94 @@ def reset_all() -> None:
     """Test helper: nuke every session. Not for production use."""
     with _lock:
         _sessions.clear()
+    with _subscribers_lock:
+        _subscribers.clear()
+
+
+# ---------------------------------------------------------------------------
+# Pub/sub — Server-Sent Events wiring (Phase I)
+# ---------------------------------------------------------------------------
+def emit(session_id: str, event: str, payload: Dict) -> int:
+    """Broadcast ``payload`` to every subscriber for ``session_id`` + ``"*"``.
+
+    Returns the number of subscribers the message was delivered to.
+    Safe to call from both sync and async contexts; never raises.
+
+    The dict delivered to subscribers is a new object — we never share
+    mutable state across subscribers.
+
+    A subscriber registered under ``"*"`` receives every event exactly
+    once, even when ``emit`` itself is called with ``session_id="*"``.
+    We deduplicate the target set so a wildcard subscriber never gets
+    the same frame twice.
+    """
+    frame = {
+        "event": str(event),
+        "session_id": str(session_id),
+        "timestamp": time.time(),
+        "data": dict(payload),
+    }
+
+    with _subscribers_lock:
+        # A set union deduplicates the target queues so a subscriber
+        # registered under both the literal session id and ``"*"`` (or
+        # the wildcard case where session_id == "*") still only gets
+        # one copy of each frame.
+        targets_set: Set["asyncio.Queue[Dict]"] = set()
+        targets_set.update(_subscribers.get(session_id, set()))
+        targets_set.update(_subscribers.get("*", set()))
+        targets = list(targets_set)
+
+    delivered = 0
+    for queue in targets:
+        try:
+            # Bounded: if the consumer is slow, drop the oldest frame so
+            # a stalled tab can't grow memory unbounded.
+            if queue.full():
+                try:
+                    queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    pass
+            queue.put_nowait(dict(frame))
+            delivered += 1
+        except Exception:  # noqa: BLE001 — best-effort, never break the caller
+            continue
+    return delivered
+
+
+async def subscribe(session_id: str) -> AsyncIterator[Dict]:
+    """Async generator yielding one frame dict per ``emit`` call.
+
+    Usage::
+
+        async for frame in subscribe(session_id):
+            yield f"event: {frame['event']}\\n"
+            yield f"data: {json.dumps(frame['data'])}\\n\\n"
+
+    Heartbeats are handled by the caller (the SSE route) — this
+    function only forwards real events. The subscriber queue is
+    registered on entry and removed on cancellation so a disconnected
+    client immediately stops receiving frames.
+    """
+    queue: "asyncio.Queue[Dict]" = asyncio.Queue(maxsize=SUBSCRIBER_QUEUE_MAX)
+    with _subscribers_lock:
+        _subscribers.setdefault(session_id, set()).add(queue)
+    try:
+        while True:
+            frame = await queue.get()
+            yield frame
+    finally:
+        with _subscribers_lock:
+            bucket = _subscribers.get(session_id)
+            if bucket is not None:
+                bucket.discard(queue)
+                if not bucket:
+                    _subscribers.pop(session_id, None)
+
+
+def subscriber_count(session_id: Optional[str] = None) -> int:
+    """Return subscriber count for a session (or total if ``None``)."""
+    with _subscribers_lock:
+        if session_id is None:
+            return sum(len(s) for s in _subscribers.values())
+        return len(_subscribers.get(session_id, set()))
