@@ -32,7 +32,7 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.main import app  # noqa: E402
-from app.services import webhook_idempotency, rate_limit  # noqa: E402
+from app.services import webhook_idempotency, rate_limit, webhook_observability  # noqa: E402
 from app.services.whatsapp import mock_client as mock_mod  # noqa: E402
 from app.services import whatsapp as wa_factory  # noqa: E402
 
@@ -262,3 +262,61 @@ def test_webhook_health_endpoint(client):
     assert "active_provider" in body
     assert "providers" in body
     assert "mock" in body["providers"]
+
+
+# ---------------------------------------------------------------------------
+# Step-1.5 immediate ack + outbound observability
+# ---------------------------------------------------------------------------
+def test_inbound_fires_immediate_ack_and_records_outbound_observability(client):
+    """Adversary regression: every accepted inbound must (a) push a
+    user-visible ack to the sender BEFORE running the slow vision pipeline,
+    and (b) record the outbound result to the observability ring buffer so
+    a stale ``TWILIO_AUTH_TOKEN`` is diagnosable from
+    ``GET /api/debug/recent-inbounds`` without needing log access.
+
+    Without this, the user gets nothing back from the bot when their auth
+    token rotates and the only signal is a `WARNING send_text failed` line
+    in Render's stdout.
+    """
+    webhook_observability.reset()
+
+    sid = "ack-obs-test-1"
+    r = client.post(
+        "/api/webhook/whatsapp/inbound",
+        files={"_dummy": ("", "")},  # force multipart → mock provider path
+        data={
+            "from": "+919812345678",
+            "text": "challan upload",
+            "message_sid": sid,
+        },
+    )
+    assert r.status_code == 200
+    assert r.json()["status"] == "accepted"
+
+    # The mock provider's send_text appends to SENT_MESSAGES — there should
+    # be exactly one entry, the step-1.5 ack, with the live-status link in
+    # the body so the user can tap straight from WhatsApp.
+    assert len(mock_mod.SENT_MESSAGES) == 1, mock_mod.SENT_MESSAGES
+    sent = mock_mod.SENT_MESSAGES[0]
+    assert sent["to"] == "+919812345678"
+    assert "TrustAudit" in sent["body"]
+    assert "got your challan" in sent["body"]
+    assert "trustaudit-wxd7.onrender.com/live" in sent["body"]
+
+    # The observability ring buffer should now contain TWO rows for this
+    # webhook hit: the inbound record (sig=skipped) AND the ack record
+    # (ack_sent:ok=True). The debug endpoint exposes them newest-first.
+    debug = client.get("/api/debug/recent-inbounds?limit=10").json()
+    items = debug["items"]
+    matched_inbound = [
+        i for i in items
+        if i.get("message_sid") == sid and str(i.get("outcome", "")).startswith("received:")
+    ]
+    matched_ack = [
+        i for i in items
+        if i.get("message_sid") == sid and str(i.get("outcome", "")).startswith("ack_sent:")
+    ]
+    assert len(matched_inbound) == 1, items
+    assert len(matched_ack) == 1, items
+    assert matched_ack[0]["outcome"] == "ack_sent:ok=True"
+    assert matched_ack[0].get("extra", {}).get("ack_error") is None

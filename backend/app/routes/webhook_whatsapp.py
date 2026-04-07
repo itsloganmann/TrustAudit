@@ -417,17 +417,27 @@ def _persist_pipeline_result(
     return invoice
 
 
-async def _send_text_async(provider: WhatsAppProvider, to: str, body: str) -> None:
+async def _send_text_async(
+    provider: WhatsAppProvider, to: str, body: str
+) -> tuple[bool, Optional[str]]:
     """Dispatch a provider.send_text call off the event loop so a slow
     provider (e.g. Twilio API timing out) cannot stall every other inbound.
-    Failures are logged but never raised to the webhook caller.
+
+    Returns ``(ok, error)``. Failures are logged but never raised to the
+    webhook caller — callers that don't care about the result can simply
+    discard the tuple. The step-0.5 inbound ack uses the return value to
+    record outbound API health in the observability ring buffer so a stale
+    ``TWILIO_AUTH_TOKEN`` is visible from ``/api/debug/recent-inbounds``
+    without needing log access.
     """
     if not to:
-        return
+        return False, "no recipient"
     try:
         await asyncio.to_thread(provider.send_text, to, body)
+        return True, None
     except Exception as exc:  # noqa: BLE001
         logger.warning("send_text failed: %s", exc)
+        return False, str(exc)
 
 
 async def _download_media_async(provider: WhatsAppProvider, media_url: str) -> bytes:
@@ -526,6 +536,31 @@ async def inbound_webhook(
             return _twiml_response()
         return {"status": "duplicate", "sid": inbound.message_sid}
 
+    # 1.5. Immediate ack to the sender. Fires *before* the (potentially slow)
+    # vision pipeline so the user sees a reply within ~1s and we stay well
+    # inside Twilio's 15s webhook timeout. The result is recorded to the
+    # observability ring buffer so an operator can diagnose a stale
+    # TWILIO_AUTH_TOKEN from /api/debug/recent-inbounds without log access.
+    ack_ok, ack_err = await _send_text_async(
+        provider,
+        inbound.from_phone_e164,
+        "TrustAudit: got your challan. Verifying now — "
+        "live status at https://trustaudit-wxd7.onrender.com/live",
+    )
+    try:
+        webhook_observability.record(
+            source=detected or "unknown",
+            method="POST",
+            path=str(request.url.path),
+            client_ip=getattr(request.client, "host", None),
+            from_phone=inbound.from_phone_e164,
+            message_sid=inbound.message_sid,
+            outcome=f"ack_sent:ok={ack_ok}",
+            extra={"ack_error": ack_err},
+        )
+    except Exception:  # noqa: BLE001 — never let observability take down a webhook
+        pass
+
     # 2. Rate limit per phone number
     if inbound.from_phone_e164 and not rate_limit.check(
         "phone", inbound.from_phone_e164
@@ -610,10 +645,9 @@ async def inbound_webhook(
                     persisted.confidence_score or 0.0,
                 )
 
-    # 4. Reply to the sender (non-blocking, errors are logged)
-    await _send_text_async(
-        provider, inbound.from_phone_e164, "Received — processing..."
-    )
+    # NOTE: the user-visible ack already fired at step 1.5 (immediately
+    # after idempotency, before the slow vision pipeline) so the sender
+    # gets a reply within ~1s instead of after the entire pipeline runs.
 
     # Twilio expects ``text/xml`` TwiML for webhook responses; other providers
     # (baileys, mock) are fine with JSON for observability.
