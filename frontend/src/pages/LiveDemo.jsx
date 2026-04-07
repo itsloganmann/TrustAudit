@@ -30,9 +30,9 @@ import {
  * forbidden-files list we're allowed to consume from.
  */
 
-const WHATSAPP_NUMBER_RAW = "14155238886";
-const JOIN_CODE = "crop-conversation";
-const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER_RAW}?text=${encodeURIComponent(`join ${JOIN_CODE}`)}`;
+const WHATSAPP_NUMBER_RAW = "14085959751";
+const JOIN_CODE = "hi";
+const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER_RAW}?text=${encodeURIComponent(JOIN_CODE)}`;
 const POLL_INTERVAL_MS = 2000;
 const MAX_AGE_SECONDS = 600;
 
@@ -784,7 +784,7 @@ export default function LiveDemo() {
               Open WhatsApp
             </a>
             <p className="mt-3 text-[10px] text-slate-600 text-center font-mono">
-              +1 415 523 8886
+              +1 408 595 9751
             </p>
           </div>
 
