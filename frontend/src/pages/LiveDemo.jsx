@@ -582,15 +582,15 @@ export default function LiveDemo() {
           </div>
 
           <a
-            href="/help/demo"
+            href="/about"
             className="block glass glass-hover rounded-2xl p-4 text-[12px] text-slate-300 hover:text-white transition-all"
           >
             <div className="flex items-center justify-between">
-              <span className="font-semibold">Full demo guide</span>
+              <span className="font-semibold">About the founders</span>
               <ExternalLink size={12} />
             </div>
             <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-              Step-by-step walkthrough for sharing on Zoom.
+              Meet the team shipping TrustAudit.
             </p>
           </a>
         </aside>

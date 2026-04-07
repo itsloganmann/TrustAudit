@@ -38,7 +38,7 @@ function TopBar() {
     { href: "#how-it-works", label: "How it works" },
     { href: "#try-live", label: "Try demo" },
     { href: "#faq", label: "FAQ" },
-    { href: "/help/demo", label: "Docs" },
+    { href: "/about", label: "About" },
   ];
 
   return (

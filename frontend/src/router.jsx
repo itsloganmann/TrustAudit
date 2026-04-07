@@ -14,7 +14,7 @@ import { useAuth } from "./hooks/useAuth.js";
 // don't have to ship react-three/fiber.
 const Landing = lazy(() => import("./pages/Landing.jsx"));
 const LiveDemo = lazy(() => import("./pages/LiveDemo.jsx"));
-const HelpDemo = lazy(() => import("./pages/HelpDemo.jsx"));
+const About = lazy(() => import("./pages/About.jsx"));
 
 // ── Auth pages ──────────────────────────────────────────────────────────────
 import VendorSignup from "./pages/VendorSignup.jsx";
@@ -169,10 +169,10 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: "/help/demo",
+    path: "/about",
     element: (
       <Suspense fallback={<FullPageSpinner />}>
-        <HelpDemo />
+        <About />
       </Suspense>
     ),
   },

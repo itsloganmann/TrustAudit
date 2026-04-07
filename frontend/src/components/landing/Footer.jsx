@@ -60,8 +60,8 @@ export default function Footer() {
               </p>
               <ul className="space-y-2 text-[12px] text-slate-400">
                 <li>
-                  <a href="/help/demo" className="hover:text-white transition-colors">
-                    Demo walkthrough
+                  <a href="/about" className="hover:text-white transition-colors">
+                    About the team
                   </a>
                 </li>
                 <li>

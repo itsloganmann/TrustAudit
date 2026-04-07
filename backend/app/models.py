@@ -200,6 +200,20 @@ class Invoice(Base):
     submitted_to_gov_at = Column(DateTime, nullable=True)
     govt_submission_receipt = Column(String(255), nullable=True)
 
+    # ---- Annotation overlay (Phase H) ----------------------------------
+    # ``annotated_image_b64`` stores a base64-encoded PNG (NO data: prefix)
+    # produced by services.vision.annotator. We store the full image in
+    # the DB because Render's free tier has an ephemeral disk and the
+    # ``uploads/`` directory is wiped on every restart — the annotation
+    # absolutely has to survive.
+    annotated_image_b64 = Column(Text, nullable=True)
+    # ``annotated_boxes_json`` is a JSON array of FieldBox dicts, used by
+    # the frontend to render an SVG overlay and by the 3D justification
+    # canvas to show "available" vs "missing" field nodes.
+    annotated_boxes_json = Column(Text, nullable=True)
+    annotated_width = Column(Integer, nullable=True)
+    annotated_height = Column(Integer, nullable=True)
+
     enterprise = relationship("Enterprise")
     msme = relationship("MSME", back_populates="invoices")
     disputes = relationship(

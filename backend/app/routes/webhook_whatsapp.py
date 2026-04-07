@@ -200,6 +200,7 @@ def _persist_pipeline_result(
     inbound: InboundMessage,
     saved_path: Path,
     image_sha256: str,
+    image_bytes: bytes,
 ) -> Optional[Invoice]:
     """Materialise the pipeline output into an ``Invoice`` row.
 
@@ -257,6 +258,27 @@ def _persist_pipeline_result(
         or f"WA-{int(time.time())}-{uuid.uuid4().hex[:6]}"
     )
 
+    # Render an annotated overlay of the challan. This is a pure Pillow
+    # call, so it's safe to run inside the DB transaction — we don't want
+    # to persist a half-row if annotation fails, but we also don't want
+    # a rendering glitch to take down the webhook. Hence the try/except
+    # that falls back to a None payload rather than raising.
+    annotated_b64: Optional[str] = None
+    annotated_boxes: Optional[str] = None
+    annotated_w: Optional[int] = None
+    annotated_h: Optional[int] = None
+    try:
+        from ..services.vision.annotator import annotate_image
+        from dataclasses import asdict as _asdict
+
+        annotated = annotate_image(image_bytes, extraction)
+        annotated_b64 = annotated.png_base64
+        annotated_boxes = json.dumps([_asdict(b) for b in annotated.boxes])
+        annotated_w = annotated.width
+        annotated_h = annotated.height
+    except Exception as exc:  # noqa: BLE001 — never fail persistence on annotation
+        logger.warning("annotation failed for sid=%s: %s", inbound.message_sid, exc)
+
     try:
         invoice = Invoice(
             vendor_name=(extraction.vendor_name or fallback_vendor)[:255],
@@ -294,6 +316,10 @@ def _persist_pipeline_result(
                 else None
             ),
             raw_image_sha256=image_sha256,
+            annotated_image_b64=annotated_b64,
+            annotated_boxes_json=annotated_boxes,
+            annotated_width=annotated_w,
+            annotated_height=annotated_h,
         )
         db.add(invoice)
         db.commit()
@@ -475,6 +501,7 @@ async def inbound_webhook(
                 inbound,
                 saved_path,
                 image_sha256,
+                image_bytes,
             )
             if persisted is not None:
                 logger.info(
