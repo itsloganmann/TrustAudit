@@ -6,6 +6,7 @@ import ExamplePipeline from "./components/ExamplePipeline";
 import SupplierNetwork from "./components/SupplierNetwork";
 import InvoiceDetailSheet from "./components/InvoiceDetailSheet";
 import AnimatedCounter from "./components/AnimatedCounter";
+import AmbientBackground from "./components/AmbientBackground";
 
 const API = "/api";
 
@@ -94,6 +95,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans">
+      {/* Ambient 3D background — mounts once, behind everything */}
+      <AmbientBackground />
+
+      {/* All interactive content sits above the ambient canvas */}
+      <div className="relative" style={{ zIndex: 1 }}>
       {/* Sonner Toast Provider */}
       <Toaster
         position="top-right"
@@ -280,6 +286,7 @@ function App() {
           onClose={() => setSelectedInvoice(null)}
         />
       )}
+      </div>
     </div>
   );
 }
