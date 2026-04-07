@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Scan,
 } from "lucide-react";
+import AnnotationOverlay from "./AnnotationOverlay";
 
 /* ─────────────────────────────────────────────
    Evidence Drawer — slides from right on row click.
@@ -251,6 +252,9 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                       />
                     </div>
                   </div>
+
+                  {/* Annotation Overlay — animated SVG bounding boxes on rendered challan */}
+                  {invoice?.id != null && <AnnotationOverlay invoiceId={invoice.id} />}
 
                   {/* AI Extraction Results */}
                   {ok && (
