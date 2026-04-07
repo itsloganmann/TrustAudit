@@ -28,7 +28,7 @@ import secrets
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import AsyncIterator, Dict, List, Optional, Set
+from typing import AsyncIterator, Dict, List, Optional, Set, Tuple
 
 # ---------------------------------------------------------------------------
 # Tunables
@@ -89,8 +89,37 @@ _sessions: Dict[str, SessionState] = {}
 # list; the actual ``put_nowait`` happens outside the lock to avoid
 # deadlocks if a queue is full.
 _subscribers_lock = threading.Lock()
-_subscribers: Dict[str, Set["asyncio.Queue[Dict]"]] = {}
+
+# Adversary R3 hotfix #3:
+# ``asyncio.Queue.put_nowait`` is NOT thread-safe. Earlier versions
+# stored a bare ``Set[Queue]`` and called ``put_nowait`` from
+# ``emit``, which the webhook handler invokes inside a worker thread
+# via ``asyncio.to_thread``. Cross-thread puts can drop wakeups,
+# leave futures inconsistent, and silently lose SSE frames during
+# the demo. The fix is to capture the running event loop in
+# ``subscribe`` and route every put through
+# ``loop.call_soon_threadsafe``. We store ``(queue, loop)`` tuples
+# so each subscriber knows which loop owns its queue.
+_SubscriberKey = Tuple["asyncio.Queue[Dict]", asyncio.AbstractEventLoop]
+_subscribers: Dict[str, Set[_SubscriberKey]] = {}
 SUBSCRIBER_QUEUE_MAX = 64  # drop oldest on overflow, per-subscriber
+
+
+def _safe_put(queue: "asyncio.Queue[Dict]", frame: Dict) -> None:
+    """Bounded put — runs on the queue's owning event loop.
+
+    Drops the oldest frame if the consumer has fallen behind so a
+    stalled SSE tab cannot grow memory unbounded.
+    """
+    try:
+        if queue.full():
+            try:
+                queue.get_nowait()
+            except asyncio.QueueEmpty:
+                pass
+        queue.put_nowait(frame)
+    except Exception:  # noqa: BLE001 — best-effort
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -285,16 +314,23 @@ def reset_all() -> None:
 def emit(session_id: str, event: str, payload: Dict) -> int:
     """Broadcast ``payload`` to every subscriber for ``session_id`` + ``"*"``.
 
-    Returns the number of subscribers the message was delivered to.
+    Returns the number of subscribers the message was scheduled to.
     Safe to call from both sync and async contexts; never raises.
 
-    The dict delivered to subscribers is a new object — we never share
-    mutable state across subscribers.
+    Adversary R3 hotfix #3:
+    ``emit`` may be called from a worker thread (the webhook calls
+    ``_persist_pipeline_result`` via ``asyncio.to_thread``). Each
+    subscriber tuple carries its own owning event loop, and we route
+    the bounded put through ``loop.call_soon_threadsafe`` so the
+    queue mutation always runs on the loop that owns it.
 
-    A subscriber registered under ``"*"`` receives every event exactly
-    once, even when ``emit`` itself is called with ``session_id="*"``.
-    We deduplicate the target set so a wildcard subscriber never gets
-    the same frame twice.
+    The dict delivered to subscribers is a new object — we never
+    share mutable state across subscribers.
+
+    A subscriber registered under ``"*"`` receives every event
+    exactly once, even when ``emit`` itself is called with
+    ``session_id="*"``. We deduplicate the target set so a wildcard
+    subscriber never gets the same frame twice.
     """
     frame = {
         "event": str(event),
@@ -304,27 +340,23 @@ def emit(session_id: str, event: str, payload: Dict) -> int:
     }
 
     with _subscribers_lock:
-        # A set union deduplicates the target queues so a subscriber
-        # registered under both the literal session id and ``"*"`` (or
-        # the wildcard case where session_id == "*") still only gets
-        # one copy of each frame.
-        targets_set: Set["asyncio.Queue[Dict]"] = set()
+        targets_set: Set[_SubscriberKey] = set()
         targets_set.update(_subscribers.get(session_id, set()))
         targets_set.update(_subscribers.get("*", set()))
         targets = list(targets_set)
 
     delivered = 0
-    for queue in targets:
+    for queue, loop in targets:
         try:
-            # Bounded: if the consumer is slow, drop the oldest frame so
-            # a stalled tab can't grow memory unbounded.
-            if queue.full():
-                try:
-                    queue.get_nowait()
-                except asyncio.QueueEmpty:
-                    pass
-            queue.put_nowait(dict(frame))
+            # Always hop onto the queue's owning loop. This makes
+            # ``emit`` safe to call from any thread.
+            if loop.is_closed():
+                continue
+            loop.call_soon_threadsafe(_safe_put, queue, dict(frame))
             delivered += 1
+        except RuntimeError:
+            # Loop has been shut down between snapshot and call.
+            continue
         except Exception:  # noqa: BLE001 — best-effort, never break the caller
             continue
     return delivered
@@ -343,10 +375,16 @@ async def subscribe(session_id: str) -> AsyncIterator[Dict]:
     function only forwards real events. The subscriber queue is
     registered on entry and removed on cancellation so a disconnected
     client immediately stops receiving frames.
+
+    Adversary R3 hotfix #3: captures the running event loop and
+    stores it alongside the queue so cross-thread emits can hop
+    back via ``loop.call_soon_threadsafe``.
     """
+    loop = asyncio.get_running_loop()
     queue: "asyncio.Queue[Dict]" = asyncio.Queue(maxsize=SUBSCRIBER_QUEUE_MAX)
+    key: _SubscriberKey = (queue, loop)
     with _subscribers_lock:
-        _subscribers.setdefault(session_id, set()).add(queue)
+        _subscribers.setdefault(session_id, set()).add(key)
     try:
         while True:
             frame = await queue.get()
@@ -355,7 +393,7 @@ async def subscribe(session_id: str) -> AsyncIterator[Dict]:
         with _subscribers_lock:
             bucket = _subscribers.get(session_id)
             if bucket is not None:
-                bucket.discard(queue)
+                bucket.discard(key)
                 if not bucket:
                     _subscribers.pop(session_id, None)
 

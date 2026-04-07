@@ -40,14 +40,26 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 from typing import AsyncIterator, Dict, Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 from ..services import demo_sessions
 
 router = APIRouter(prefix="/live", tags=["live-stream"])
+
+# Adversary R3 review #1 (CRITICAL):
+# The pub/sub layer fans out to a wildcard ``"*"`` bucket for admin/ops
+# streams. The /api/live/stream endpoint is intentionally unauthenticated
+# (matches /api/live/invoices), so any caller could subscribe to ``*`` and
+# receive every WhatsApp inbound from every vendor. We must reject the
+# wildcard at the route boundary, and limit valid session ids to a safe
+# alphanumeric/dash/underscore charset (matches the format used by
+# /api/demo/new-session and the phone-derived ``live-phone-<digits>``
+# session ids the webhook produces).
+_VALID_SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
 # How often to emit a ``stream.heartbeat`` event (seconds).
 #
@@ -167,7 +179,20 @@ async def _event_stream(session_id: str) -> AsyncIterator[str]:
 async def stream_live_events(
     session: str = Query(..., min_length=1, max_length=128),
 ) -> StreamingResponse:
-    """Open a named SSE stream for the given demo session id."""
+    """Open a named SSE stream for the given demo session id.
+
+    Adversary R3 hotfix: explicitly reject the wildcard ``"*"`` and
+    any session id that contains characters outside ``[A-Za-z0-9_-]``.
+    The wildcard bucket is reserved for in-process admin/ops fan-out
+    and must never be subscribable from the public network — it is
+    not authentication-gated and would otherwise leak every WhatsApp
+    inbound across every vendor in one HTTP call.
+    """
+    if session == "*" or not _VALID_SESSION_ID.match(session):
+        raise HTTPException(
+            status_code=400,
+            detail="invalid session id (only A-Z, a-z, 0-9, _, - allowed; * forbidden)",
+        )
     headers = {
         "Cache-Control": "no-cache, no-transform",
         "Connection": "keep-alive",

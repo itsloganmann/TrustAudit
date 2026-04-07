@@ -359,9 +359,22 @@ def _persist_pipeline_result(
             if (invoice.confidence_score or 0.0) >= 0.5
             else "invoice.ingested"
         )
-        demo_sessions.emit(session_id, event_name, feed_entry)
-        # Admin/ops wildcard stream — same payload to ``*``.
-        demo_sessions.emit("*", event_name, dict(feed_entry, session_id=session_id))
+        # Adversary R3 hotfix #1 + #2: SSE frames are a wakeup signal
+        # only — they MUST NOT carry vendor_name / gstin / invoice_number,
+        # because the SSE endpoint is unauthenticated. The client uses
+        # the wakeup to re-fetch /api/live/invoices, which goes through
+        # the existing _anonymize() sanitiser. The wildcard "*" bucket
+        # gets the same minimal payload so any admin/ops fan-out leak
+        # also stays PII-free.
+        sse_payload = {
+            "invoice_id": invoice.id,
+            "state": invoice.state or invoice.status,
+            "session_id": session_id,
+            "confidence": round(invoice.confidence_score or 0.0, 4),
+            "days_remaining": days_remaining,
+        }
+        demo_sessions.emit(session_id, event_name, sse_payload)
+        demo_sessions.emit("*", event_name, sse_payload)
     except Exception as exc:  # noqa: BLE001 — best-effort
         logger.warning("failed to push invoice %s to demo session: %s", invoice.id, exc)
 

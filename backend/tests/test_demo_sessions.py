@@ -394,17 +394,30 @@ def test_subscribe_unregisters_on_cancel():
 
 def test_emit_does_not_block_when_queue_full():
     """A stalled consumer must not wedge emit(). The oldest frame gets
-    dropped so the latest one still lands."""
+    dropped so the latest one still lands.
+
+    Adversary R3 hotfix #3: subscribers are now ``(queue, loop)`` tuples
+    so the emit can hop back onto the queue's owning loop via
+    ``call_soon_threadsafe``. The white-box plant uses the same shape
+    and the assertions add an ``await asyncio.sleep(0)`` to give the
+    scheduled puts a tick to drain.
+    """
 
     async def scenario():
-        # Manually plant a tiny queue so we can exhaust it deterministically.
+        # Manually plant a tiny queue + capture the loop so we can
+        # exhaust it deterministically.
         tiny: asyncio.Queue = asyncio.Queue(maxsize=2)
+        loop = asyncio.get_running_loop()
+        key = (tiny, loop)
         with demo_sessions._subscribers_lock:  # noqa: SLF001 — test white-box
-            demo_sessions._subscribers.setdefault("slow-sid", set()).add(tiny)  # noqa: SLF001
+            demo_sessions._subscribers.setdefault("slow-sid", set()).add(key)  # noqa: SLF001
 
         try:
             for i in range(5):
                 demo_sessions.emit("slow-sid", "invoice.ingested", {"i": i})
+
+            # Let the call_soon_threadsafe-scheduled puts drain.
+            await asyncio.sleep(0)
 
             assert tiny.qsize() <= 2
             seen_indexes = []
@@ -413,7 +426,7 @@ def test_emit_does_not_block_when_queue_full():
             return seen_indexes
         finally:
             with demo_sessions._subscribers_lock:  # noqa: SLF001
-                demo_sessions._subscribers.get("slow-sid", set()).discard(tiny)  # noqa: SLF001
+                demo_sessions._subscribers.get("slow-sid", set()).discard(key)  # noqa: SLF001
 
     seen_indexes = _run(scenario())
     # Oldest frame should be evicted so the newest (4) still arrives.
