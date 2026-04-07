@@ -438,9 +438,9 @@ else
 fi
 
 # ===========================================================================
-# 9. WhatsApp webhook ingestion (mock multipart)
+# 9. WhatsApp webhook ingestion (mock multipart, no media)
 # ===========================================================================
-section "9. WhatsApp webhook ingestion"
+section "9. WhatsApp webhook ingestion (no media)"
 
 # Use a unique MessageSid so we don't collide with prior runs.
 SMOKE_SID="SMOKE-$(date +%s)-$$"
@@ -452,7 +452,7 @@ code=$(curl -sS -o /tmp/trustaudit-smoke-body -w '%{http_code}' \
        -F "MessageSid=$SMOKE_SID" \
        -F "NumMedia=0")
 if [ "$code" = "200" ] || [ "$code" = "202" ]; then
-  pass "POST /api/webhook/whatsapp/inbound (mock multipart) -> $code"
+  pass "POST /api/webhook/whatsapp/inbound (mock multipart, no media) -> $code"
 else
   fail "POST /api/webhook/whatsapp/inbound -> HTTP $code (body=$(body | head -c 200))"
 fi
@@ -473,6 +473,108 @@ if [ "$code" = "200" ] || [ "$code" = "202" ]; then
   fi
 else
   fail "replay -> HTTP $code"
+fi
+
+# ===========================================================================
+# 9b. Full real-image pipeline — fixture, then real receipt from internet
+# ===========================================================================
+section "9b. Full real-image pipeline (fixtures + internet receipts)"
+
+# Snapshot the current invoice count so we can detect new rows.
+PRE_COUNT=$(curl -sS -b "$COOKIES" "$BASE_URL/api/invoices" | jq 'length // 0')
+pass "pre-pipeline invoice count = $PRE_COUNT"
+
+# These URLs are downloaded by the webhook's mock provider via download_media.
+# The first set is bundled with the deployed image at /fixtures/challans/<name>.
+# The second set is real receipt photos hosted on GitHub raw / Wikimedia
+# Commons so we can prove the full real-internet ingestion path works.
+FIXTURE_URLS=(
+  "$BASE_URL/fixtures/challans/perfect_tally_printed.jpg"
+  "$BASE_URL/fixtures/challans/handwritten_clear.jpg"
+  "$BASE_URL/fixtures/challans/missing_date.jpg"
+  "$BASE_URL/fixtures/challans/bilingual_hindi_english.jpg"
+)
+
+INTERNET_URLS=(
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Sales_receipt_at_Lego_Store.jpg/640px-Sales_receipt_at_Lego_Store.jpg"
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Receipt_for_Mountain_Dew.jpg/640px-Receipt_for_Mountain_Dew.jpg"
+)
+
+ALL_URLS=("${FIXTURE_URLS[@]}" "${INTERNET_URLS[@]}")
+
+# Pre-check: each URL must be reachable (200 + content-type starts with image/)
+for url in "${ALL_URLS[@]}"; do
+  ct_code=$(curl -sSL -o /dev/null -w "%{http_code} %{content_type}" --max-time 15 "$url" 2>&1 || echo "ERR")
+  http_code=$(echo "$ct_code" | awk '{print $1}')
+  ct=$(echo "$ct_code" | cut -d' ' -f2-)
+  if [ "$http_code" = "200" ] && echo "$ct" | grep -qi "^image/"; then
+    pass "fixture URL reachable: $url ($ct)"
+  else
+    skip "fixture URL not reachable, skipping: $url ($ct_code)"
+    # Remove this URL from the list for the actual webhook test
+    ALL_URLS=("${ALL_URLS[@]/$url}")
+  fi
+done
+
+# POST each reachable image as an inbound multipart with MediaUrl0.
+SUBMITTED_COUNT=0
+for url in "${ALL_URLS[@]}"; do
+  [ -z "$url" ] && continue
+  SUBMITTED_COUNT=$((SUBMITTED_COUNT+1))
+  PHONE="+15555${SUBMITTED_COUNT}5550100"
+  PHONE_DIGITS=$(echo "$PHONE" | tr -dc 0-9 | tail -c 10)
+  EXPECTED_SESSION="live-phone-$PHONE_DIGITS"
+  SID="SMOKE-IMG-$(date +%s)-$SUBMITTED_COUNT-$$"
+
+  code=$(curl -sS -o /tmp/trustaudit-smoke-body -w '%{http_code}' \
+         --max-time 60 \
+         -X POST "$BASE_URL/api/webhook/whatsapp/inbound" \
+         -F "From=$PHONE" \
+         -F "Body=smoke real image $SUBMITTED_COUNT" \
+         -F "MessageSid=$SID" \
+         -F "NumMedia=1" \
+         -F "MediaUrl0=$url" \
+         -F "MediaContentType0=image/jpeg")
+  if [ "$code" = "200" ] || [ "$code" = "202" ]; then
+    pass "POST inbound w/ MediaUrl0=$url -> $code"
+  else
+    fail "POST inbound w/ MediaUrl0=$url -> $code (body=$(body | head -c 200))"
+    continue
+  fi
+
+  # The pipeline runs synchronously inside the webhook handler. Give it
+  # a moment so the DB write is committed before we query for it.
+  sleep 1
+
+  # Verify a row appeared in the public live demo session for this phone.
+  live_count=$(curl -sS "$BASE_URL/api/live/invoices?session=$EXPECTED_SESSION" \
+               | jq -r '.count // 0')
+  if [ "$live_count" -ge 1 ]; then
+    pass "live session $EXPECTED_SESSION has $live_count row(s)"
+  else
+    fail "live session $EXPECTED_SESSION has 0 rows after inbound"
+  fi
+done
+
+# After all submissions, /api/invoices should reflect the new count.
+sleep 2
+POST_COUNT=$(curl -sS -b "$COOKIES" "$BASE_URL/api/invoices" | jq 'length // 0')
+DELTA=$((POST_COUNT - PRE_COUNT))
+if [ "$DELTA" -ge 1 ]; then
+  pass "/api/invoices grew by $DELTA rows ($PRE_COUNT -> $POST_COUNT) — webhook persistence works"
+else
+  fail "/api/invoices did NOT grow ($PRE_COUNT -> $POST_COUNT) — webhook persistence broken"
+fi
+
+# Verify the most-recent rows have a confidence_score and a state set.
+recent=$(curl -sS -b "$COOKIES" "$BASE_URL/api/invoices" \
+         | jq -r 'sort_by(.created_at) | reverse | .[0]')
+recent_status=$(echo "$recent" | jq -r '.status // empty')
+recent_vendor=$(echo "$recent" | jq -r '.vendor_name // empty')
+if [ -n "$recent_status" ] && [ -n "$recent_vendor" ]; then
+  pass "most recent invoice: vendor='$recent_vendor' status='$recent_status'"
+else
+  fail "could not read most recent invoice details: $recent"
 fi
 
 # ===========================================================================

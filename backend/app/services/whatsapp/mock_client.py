@@ -16,12 +16,23 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
+import httpx
+
 from .base import InboundMessage
 
 logger = logging.getLogger(__name__)
 
 # Module-level store so tests and the dashboard can inspect sent messages.
 SENT_MESSAGES: List[Dict[str, Any]] = []
+
+# Largest media payload we will accept from an http(s) URL. Twilio media is
+# capped well below this in practice; the ceiling is here as a safety net
+# against an attacker pointing ``MediaUrl0`` at a multi-GB file.
+_MAX_MEDIA_BYTES = 5 * 1024 * 1024
+
+# Allowed image mime prefixes when fetching over http(s). We accept any
+# ``image/*`` so the smoke test can post PNGs or WEBPs as well as JPEGs.
+_ALLOWED_MEDIA_PREFIXES = ("image/",)
 
 # 1x1 white JPEG placeholder (631 bytes) returned when a fixture path can't be
 # resolved. Generated once at module import from the hex below so we never need
@@ -69,15 +80,25 @@ class MockClient:
         return sid
 
     def download_media(self, media_url: str) -> bytes:
-        """Resolve a ``mock://fixture/<name>`` URL to bytes on disk.
+        """Resolve a media URL into raw image bytes.
 
-        Any non-matching URL returns a 1x1 JPEG placeholder so callers always
-        receive valid image bytes.
+        Three paths are supported:
+
+        1. ``mock://fixture/<name>`` — reads
+           ``backend/tests/fixtures/challans/<name>``. This is the path the
+           in-repo tests exercise, and it does not touch the network.
+        2. ``http://`` / ``https://`` — actually fetches the URL via
+           ``httpx`` with a strict size + content-type check. This is what
+           the autonomous smoke test uses to prove "real receipts from the
+           internet" (GitHub raw URLs, etc.) flow through the exact same
+           code path that Twilio's media-download step would.
+        3. Anything else — returns a 1×1 placeholder JPEG so the caller
+           always receives *some* valid image bytes and the webhook does
+           not crash on malformed or unknown schemes.
         """
         prefix = "mock://fixture/"
         if media_url.startswith(prefix):
             name = media_url[len(prefix) :]
-            # Fixture lookup: backend/tests/fixtures/challans/<name>
             here = Path(__file__).resolve()
             backend_dir = here.parents[3]  # .../backend
             fixture_path = backend_dir / "tests" / "fixtures" / "challans" / name
@@ -88,6 +109,43 @@ class MockClient:
                 name,
                 fixture_path,
             )
+            return _PLACEHOLDER_JPEG
+
+        if media_url.startswith(("http://", "https://")):
+            try:
+                with httpx.Client(
+                    timeout=15.0,
+                    follow_redirects=True,
+                    headers={"User-Agent": "trustaudit-mock-whatsapp/1.0"},
+                ) as client:
+                    resp = client.get(media_url)
+                    resp.raise_for_status()
+                    content_type = (resp.headers.get("content-type") or "").split(";")[0].strip().lower()
+                    if content_type and not any(
+                        content_type.startswith(p) for p in _ALLOWED_MEDIA_PREFIXES
+                    ):
+                        logger.warning(
+                            "[mock.download_media] refusing non-image content-type %s from %s",
+                            content_type,
+                            media_url,
+                        )
+                        return _PLACEHOLDER_JPEG
+                    data = resp.content
+                    if len(data) > _MAX_MEDIA_BYTES:
+                        logger.warning(
+                            "[mock.download_media] media %d bytes > cap %d, refusing",
+                            len(data),
+                            _MAX_MEDIA_BYTES,
+                        )
+                        return _PLACEHOLDER_JPEG
+                    if not data:
+                        logger.warning("[mock.download_media] empty body from %s", media_url)
+                        return _PLACEHOLDER_JPEG
+                    return data
+            except httpx.HTTPError as exc:
+                logger.warning("[mock.download_media] http fetch failed for %s: %s", media_url, exc)
+                return _PLACEHOLDER_JPEG
+
         return _PLACEHOLDER_JPEG
 
     def parse_inbound(self, payload: dict) -> InboundMessage:

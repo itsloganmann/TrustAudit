@@ -68,6 +68,20 @@ uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
 os.makedirs(uploads_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
+# Serve bundled test fixture images so the autonomous smoke pipeline can
+# point ``MediaUrl0`` at a publicly reachable URL on the deployed host.
+# These are the same JPGs used by ``backend/tests/test_*.py`` — bundled
+# with the Docker image at build time.
+fixtures_dir = os.path.join(
+    os.path.dirname(__file__), "..", "tests", "fixtures", "challans"
+)
+if os.path.isdir(fixtures_dir):
+    app.mount(
+        "/fixtures/challans",
+        StaticFiles(directory=fixtures_dir),
+        name="fixtures",
+    )
+
 # Register API routes
 app.include_router(router, prefix="/api")  # legacy: /api/invoices, /api/stats, /api/webhook/whatsapp, /api/activity
 app.include_router(whatsapp_webhook_router, prefix="/api")  # new: /api/webhook/whatsapp/inbound

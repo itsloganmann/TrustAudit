@@ -49,15 +49,22 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 import logging
 import os
+import re
+import time
 import uuid
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from sqlalchemy.orm import Session as DBSession
 
-from ..services import rate_limit, webhook_idempotency
+from ..database import get_db
+from ..models import Invoice, MSME, User
+from ..services import demo_sessions, rate_limit, webhook_idempotency
 from ..services.whatsapp import (
     InboundMessage,
     WhatsAppProvider,
@@ -137,23 +144,191 @@ def _pick_provider(detected: str) -> WhatsAppProvider:
     return get_whatsapp_provider()
 
 
-async def _run_vision_pipeline_async(image_bytes: bytes) -> None:
-    """Invoke the vision pipeline if available.
+async def _run_vision_pipeline_async(image_bytes: bytes):
+    """Invoke the vision pipeline if available and return the result.
 
     Fixed in response to adversary review of 6293462 (must-fix #2):
     uses the correct ``(image_bytes, invoice_id=None)`` argument order and
-    actually ``await``-s the coroutine. Falls back to a no-op if the pipeline
-    module hasn't been imported in this build.
+    actually ``await``-s the coroutine. Returns ``None`` on import or
+    runtime failure (the webhook persistence step then no-ops).
     """
     try:
         from ..services.pipeline import run_vision_pipeline  # lazy
     except ImportError:
         logger.info("vision pipeline not yet wired — skipping")
-        return
+        return None
     try:
-        await run_vision_pipeline(image_bytes, invoice_id=None)
+        return await run_vision_pipeline(image_bytes, invoice_id=None)
     except Exception as exc:  # noqa: BLE001 — never break the webhook on pipeline failure
         logger.error("vision pipeline failed: %s", exc, exc_info=True)
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Persistence — convert a PipelineResult into an Invoice row + push to /live
+# ---------------------------------------------------------------------------
+def _safe_parse_date(value: Any) -> Optional[date]:
+    """Parse an ISO date string (YYYY-MM-DD). Returns None on any failure."""
+    if value is None:
+        return None
+    if isinstance(value, date):
+        return value
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return date.fromisoformat(value.strip()[:10])
+    except (ValueError, TypeError):
+        return None
+
+
+def _phone_to_session_id(phone: Optional[str]) -> str:
+    """Map a WhatsApp From phone to a stable demo session id.
+
+    Used so the public ``/live`` dashboard reacts to inbound submissions
+    deterministically. The smoke test computes the same hash to assert
+    its row appears.
+    """
+    if not phone:
+        return "live-anonymous"
+    digits = re.sub(r"[^0-9]", "", phone)
+    return f"live-phone-{digits[-10:]}" if digits else "live-anonymous"
+
+
+def _persist_pipeline_result(
+    db: DBSession,
+    result: Any,
+    inbound: InboundMessage,
+    saved_path: Path,
+    image_sha256: str,
+) -> Optional[Invoice]:
+    """Materialise the pipeline output into an ``Invoice`` row.
+
+    The webhook handler used to call the pipeline and discard the result,
+    which meant a real WhatsApp inbound never produced any dashboard
+    activity. This helper closes the loop:
+
+    1. Look up the sender by phone to map enterprise/MSME scope (defaults
+       to enterprise_id=1 / no-MSME if the phone is unknown).
+    2. Build an ``Invoice`` row from the extraction, with sane defaults so
+       a partial extraction still produces a viable record.
+    3. Commit + record the SHA → invoice_id mapping for future dedup.
+    4. Push a sanitized snapshot to the demo session store so the
+       ``/live`` public dashboard reacts within the next poll.
+
+    Returns the persisted Invoice row, or None on any failure.
+    """
+    try:
+        extraction = result.extraction
+    except AttributeError:
+        return None
+
+    user: Optional[User] = None
+    if inbound.from_phone_e164:
+        user = (
+            db.query(User)
+            .filter(User.primary_phone_e164 == inbound.from_phone_e164)
+            .one_or_none()
+        )
+
+    msme: Optional[MSME] = None
+    enterprise_id = 1  # default to the seeded "Bharat Industries" enterprise
+    if user is not None:
+        if user.enterprise_id:
+            enterprise_id = user.enterprise_id
+        if user.msme_id:
+            msme = db.query(MSME).filter(MSME.id == user.msme_id).one_or_none()
+
+    today = date.today()
+    invoice_date = _safe_parse_date(extraction.invoice_date) or today
+    accept_date = _safe_parse_date(extraction.date_of_acceptance) or today
+    deadline = accept_date + timedelta(days=45)
+
+    fallback_vendor = msme.vendor_name if msme else "WhatsApp inbound"
+    fallback_gstin = msme.gstin if msme else "PENDING"
+
+    new_state = "PENDING"
+    try:
+        new_state = result.next_state.value  # InvoiceState enum
+    except AttributeError:
+        pass
+
+    invoice_number = (
+        extraction.invoice_number
+        or f"WA-{int(time.time())}-{uuid.uuid4().hex[:6]}"
+    )
+
+    try:
+        invoice = Invoice(
+            vendor_name=(extraction.vendor_name or fallback_vendor)[:255],
+            gstin=(extraction.gstin or fallback_gstin)[:15],
+            invoice_number=invoice_number[:100],
+            invoice_amount=float(extraction.invoice_amount or 0),
+            invoice_date=invoice_date,
+            date_of_acceptance=accept_date,
+            deadline_43bh=deadline,
+            status=new_state,
+            challan_image_url=str(saved_path),
+            enterprise_id=enterprise_id,
+            msme_id=msme.id if msme else None,
+            state=new_state,
+            confidence_score=float(result.final_confidence or 0.0),
+            missing_fields=(
+                json.dumps(list(extraction.missing_fields))
+                if extraction.missing_fields
+                else None
+            ),
+            detected_edge_cases=(
+                json.dumps(
+                    [
+                        {
+                            "case_id": ec.case_id,
+                            "case_name": ec.case_name,
+                            "severity": ec.severity,
+                            "rebut": ec.rebut_message,
+                        }
+                        for ec in result.edge_cases
+                        if getattr(ec, "detected", False)
+                    ]
+                )
+                if result.edge_cases
+                else None
+            ),
+            raw_image_sha256=image_sha256,
+        )
+        db.add(invoice)
+        db.commit()
+        db.refresh(invoice)
+    except Exception as exc:  # noqa: BLE001
+        logger.error("failed to persist invoice from pipeline: %s", exc, exc_info=True)
+        db.rollback()
+        return None
+
+    # Record the SHA → invoice_id mapping so future identical uploads
+    # short-circuit via the existing dedup layer.
+    webhook_idempotency.record_image_hash(image_sha256, invoice.id)
+
+    # Push to the public live demo session feed so /live reacts.
+    try:
+        session_id = _phone_to_session_id(inbound.from_phone_e164)
+        # The session might not exist yet — append_invoice auto-creates.
+        days_remaining = (deadline - today).days
+        demo_sessions.append_invoice(
+            session_id,
+            {
+                "invoice_id": invoice.id,
+                "vendor_name": invoice.vendor_name,
+                "state": invoice.state or invoice.status,
+                "confidence": round(invoice.confidence_score or 0.0, 4),
+                "amount": invoice.invoice_amount,
+                "days_remaining": days_remaining,
+                "invoice_number": invoice.invoice_number,
+                "gstin": invoice.gstin,
+            },
+        )
+    except Exception as exc:  # noqa: BLE001 — best-effort
+        logger.warning("failed to push invoice %s to demo session: %s", invoice.id, exc)
+
+    return invoice
 
 
 async def _send_text_async(provider: WhatsAppProvider, to: str, body: str) -> None:
@@ -206,7 +381,10 @@ def _twiml_response() -> Response:
 # Routes
 # ---------------------------------------------------------------------------
 @router.post("/inbound")
-async def inbound_webhook(request: Request):
+async def inbound_webhook(
+    request: Request,
+    db: DBSession = Depends(get_db),
+):
     detected, payload = await _parse_body(request)
 
     # Security — reject forged Twilio webhooks before any side effects.
@@ -284,10 +462,28 @@ async def inbound_webhook(request: Request):
         saved_path = uploads / filename
         saved_path.write_bytes(image_bytes)
 
-        # Kick the vision pipeline. The pipeline itself is responsible for
-        # eventually creating the Invoice row and calling
-        # ``record_image_hash(sha256, invoice_id)`` once the id is known.
-        await _run_vision_pipeline_async(image_bytes)
+        # Run the vision pipeline AND persist its result. The pipeline
+        # itself is pure (no DB writes); the webhook handler is the
+        # canonical place for the side effect of "create an Invoice
+        # row + push to demo session feed".
+        pipeline_result = await _run_vision_pipeline_async(image_bytes)
+        if pipeline_result is not None:
+            persisted = await asyncio.to_thread(
+                _persist_pipeline_result,
+                db,
+                pipeline_result,
+                inbound,
+                saved_path,
+                image_sha256,
+            )
+            if persisted is not None:
+                logger.info(
+                    "inbound %s persisted as invoice id=%s state=%s confidence=%.2f",
+                    inbound.message_sid,
+                    persisted.id,
+                    persisted.state,
+                    persisted.confidence_score or 0.0,
+                )
 
     # 4. Reply to the sender (non-blocking, errors are logged)
     await _send_text_async(
