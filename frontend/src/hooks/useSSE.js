@@ -1,13 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { openEventStream } from "../lib/sse.js";
 
+const MAX_SSE_RETRIES = 4;
+const BACKOFF_BASE_MS = 500;
+
 /**
  * Subscribe to a Server-Sent Events stream and fall back to polling on failure.
  *
+ * Connection lifecycle:
+ *  1. Attempt to open an `EventSource` against `url`.
+ *  2. On error, retry with exponential backoff (500ms, 1s, 2s, 4s) up to
+ *     `MAX_SSE_RETRIES` attempts.
+ *  3. If all retries fail, fall back to polling `fallback()` every `pollMs`.
+ *
+ * Named events flow through `events[name]`. Default (unnamed) frames flow
+ * through `onMessage`.
+ *
  * @param {object} opts
  * @param {string|null} opts.url - The SSE URL. If null/empty, the hook is idle.
- * @param {(data:any)=>void} [opts.onMessage] - Called for each parsed event.
- * @param {() => Promise<any>} [opts.fallback] - Called every `pollMs` if SSE fails.
+ * @param {(data:any)=>void} [opts.onMessage] - Fires on every frame (default or
+ *   named) with the parsed JSON payload.
+ * @param {Record<string,(data:any)=>void>} [opts.events] - Per-named-event handlers
+ *   that fire with just the parsed payload. Example:
+ *   `{ "invoice.extracted": (row) => ... }`.
+ * @param {() => Promise<any>} [opts.fallback] - Called every `pollMs` once SSE
+ *   has exhausted its retries.
  * @param {number} [opts.pollMs=2000] - Fallback polling interval.
  * @param {boolean} [opts.enabled=true] - Disable to skip stream + polling.
  * @returns {{ status: "idle"|"open"|"polling"|"error", lastEvent: any }}
@@ -15,6 +32,7 @@ import { openEventStream } from "../lib/sse.js";
 export function useSSE({
   url,
   onMessage,
+  events,
   fallback,
   pollMs = 2000,
   enabled = true,
@@ -22,11 +40,16 @@ export function useSSE({
   const [status, setStatus] = useState("idle");
   const [lastEvent, setLastEvent] = useState(null);
   const callbackRef = useRef(onMessage);
+  const eventsRef = useRef(events);
   const fallbackRef = useRef(fallback);
 
   useEffect(() => {
     callbackRef.current = onMessage;
   }, [onMessage]);
+
+  useEffect(() => {
+    eventsRef.current = events;
+  }, [events]);
 
   useEffect(() => {
     fallbackRef.current = fallback;
@@ -40,6 +63,16 @@ export function useSSE({
 
     let cancelled = false;
     let pollTimer = null;
+    let retryTimer = null;
+    let retries = 0;
+    let close = () => {};
+
+    const clearRetryTimer = () => {
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
+    };
 
     const startPolling = () => {
       if (cancelled || pollTimer) return;
@@ -62,29 +95,69 @@ export function useSSE({
       pollTimer = setInterval(tick, pollMs);
     };
 
-    let close = () => {};
-    try {
-      close = openEventStream(url, {
-        onOpen: () => {
-          if (!cancelled) setStatus("open");
-        },
-        onMessage: (data) => {
-          if (cancelled) return;
-          setLastEvent(data);
-          callbackRef.current?.(data);
-        },
-        onError: () => {
-          if (cancelled) return;
-          setStatus("error");
-          startPolling();
-        },
-      });
-    } catch {
-      startPolling();
-    }
+    // Bind every named-event handler through a stable dispatcher so
+    // the underlying EventSource can keep long-lived listeners across
+    // renders. The dispatcher always reads from ``eventsRef.current``.
+    const buildEventsProxy = () => {
+      const proxy = {};
+      const currentEvents = eventsRef.current || {};
+      for (const name of Object.keys(currentEvents)) {
+        proxy[name] = (data) => {
+          const handler = eventsRef.current?.[name];
+          if (typeof handler === "function") handler(data);
+        };
+      }
+      return proxy;
+    };
+
+    const connect = () => {
+      if (cancelled) return;
+      try {
+        close = openEventStream(url, {
+          onOpen: () => {
+            if (cancelled) return;
+            // Successful open resets the retry counter so a later
+            // disconnect gets its own backoff sequence.
+            retries = 0;
+            setStatus("open");
+          },
+          events: buildEventsProxy(),
+          onMessage: (data) => {
+            if (cancelled) return;
+            setLastEvent(data);
+            callbackRef.current?.(data);
+          },
+          onError: () => {
+            if (cancelled) return;
+            try {
+              close();
+            } catch {
+              /* ignore */
+            }
+            close = () => {};
+
+            if (retries < MAX_SSE_RETRIES) {
+              setStatus("error");
+              const delay = BACKOFF_BASE_MS * 2 ** retries;
+              retries += 1;
+              clearRetryTimer();
+              retryTimer = setTimeout(connect, delay);
+            } else {
+              setStatus("error");
+              startPolling();
+            }
+          },
+        });
+      } catch {
+        startPolling();
+      }
+    };
+
+    connect();
 
     return () => {
       cancelled = true;
+      clearRetryTimer();
       try {
         close();
       } catch {
