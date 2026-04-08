@@ -125,5 +125,14 @@ services:
 
 databases:
   - name: trustaudit-pg
-    plan: starter                    # 1GB managed Postgres
+    # Render renamed their Postgres tiers — the legacy `starter` plan is
+    # no longer accepted for NEW databases (existing starter DBs keep
+    # working, but blueprint sync rejects it for fresh provisioning).
+    # `basic-256mb` is the direct replacement: same 256MB RAM, same
+    # 0.1 CPU, same 100-connection cap, and $1/mo cheaper ($6 vs the old
+    # $7). Fine for single-tenant MSMB load; upgrade via dashboard if
+    # we ever need more headroom.
+    plan: basic-256mb                # $6/mo — replaces legacy `starter`
     region: oregon
+    diskSizeGB: 1                    # minimum; Basic tier default is 15GB and we only store ~10MB
+    postgresMajorVersion: "16"       # pin so future Render defaults don't auto-upgrade us
