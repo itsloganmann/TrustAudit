@@ -167,12 +167,44 @@ def _state_code_from_gstin(gstin: str) -> str:
 
 
 def run() -> None:
-    Base.metadata.drop_all(bind=engine)
+    """Populate the demo fixtures.
+
+    Idempotent: if the DB already has any invoices, assume it's
+    populated (seeded or populated by real customer traffic) and
+    skip. This lets ``start.sh`` call ``python seed.py`` on every
+    container start without stomping on persistent data.
+
+    On a fresh DB we run ``Base.metadata.create_all`` as a belt-and-
+    suspenders net in case Alembic hasn't run yet (local dev, tests).
+    Alembic is the source of truth in production.
+    """
+    from sqlalchemy import select, func
+
+    # Quick peek before we touch anything destructive.
+    peek_db = SessionLocal()
+    try:
+        try:
+            existing = peek_db.execute(select(func.count(Invoice.id))).scalar() or 0
+        except Exception:  # noqa: BLE001 — table may not exist yet (first local run)
+            existing = 0
+    finally:
+        peek_db.close()
+
+    if existing > 0:
+        print(
+            f"\nTrustAudit seed: DB already populated ({existing} invoices) — skipping.",
+            flush=True,
+        )
+        return
+
+    # Fresh DB — create tables if they don't exist yet (dev / tests),
+    # then insert fixtures. We deliberately do NOT drop_all in production
+    # because that would wipe onboarded customer data.
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     today = date.today()
 
-    print("\nTrustAudit — Production Database Seed")
+    print("\nTrustAudit — Production Database Seed (fresh DB)")
     print("=" * 60)
 
     # -------------------------------------------------------------------

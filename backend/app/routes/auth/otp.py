@@ -1,15 +1,17 @@
-"""Phone + WhatsApp OTP routes.
+"""WhatsApp OTP routes.
 
 Endpoints::
 
     POST /api/auth/otp/whatsapp/send     {phone, role}       → 200 {ok: true}
     POST /api/auth/otp/whatsapp/verify   {phone, code, role} → 200 {user}
-    POST /api/auth/otp/phone/send        {phone, role}       → 200 {ok: true}
-    POST /api/auth/otp/phone/verify      {phone, code, role} → 200 {user}
 
 Every send endpoint is rate-limited at 5 requests per 60 seconds per
 phone number via the shared ``services.rate_limit.check`` helper. A 429
 is returned when the limit is exceeded.
+
+Phone/SMS OTP was removed with the Twilio pivot — we no longer ship a
+phone-number signup path. Signup goes through Google OAuth, email magic
+link, or WhatsApp OTP.
 
 Errors:
 - 400 on malformed phone.
@@ -21,6 +23,7 @@ Errors:
 from __future__ import annotations
 
 import logging
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
@@ -37,13 +40,6 @@ from ...auth.providers.whatsapp_otp import (
     send_whatsapp_otp,
     verify_whatsapp_otp,
     _normalize_phone,
-)
-from ...auth.providers.phone_otp import (
-    InvalidPhoneOTP,
-    PhoneOtpError,
-    PhoneOtpNotConfigured,
-    send_phone_otp,
-    verify_phone_otp,
 )
 
 logger = logging.getLogger(__name__)
@@ -76,8 +72,14 @@ def _serialize_user(user: User) -> dict:
     }
 
 
-def _enforce_rate_limit(kind_label: str, raw_phone: str) -> None:
-    """Rate-limit OTP requests by *normalized* phone (adversary 7926af6 #9).
+def _enforce_rate_limit(
+    kind_label: str,
+    raw_phone: str,
+    request: Optional[Request] = None,
+) -> None:
+    """Rate-limit OTP requests by *normalized* phone (adversary 7926af6 #9)
+    AND by client IP, so rotating the phone number does not bypass the
+    bucket.
 
     Without normalization an attacker can rotate ``+919999999999``,
     ``+91 9999999999``, ``+91-9999999999`` and bypass the bucket.
@@ -100,6 +102,19 @@ def _enforce_rate_limit(kind_label: str, raw_phone: str) -> None:
             status_code=429,
             detail="Too many OTP requests. Please wait a minute and try again.",
         )
+    if request is not None:
+        client_ip = (request.client.host if request.client else "") or "unknown"
+        ok_ip = rate_limit.check(
+            "ip",
+            f"{kind_label}:{client_ip}",
+            max_per_window=20,  # 20/min per IP across all phones
+            window_seconds=60,
+        )
+        if not ok_ip:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many OTP requests from this network. Please wait and try again.",
+            )
 
 
 class OtpSendRequest(BaseModel):
@@ -119,9 +134,10 @@ class OtpVerifyRequest(BaseModel):
 @router.post("/otp/whatsapp/send")
 def otp_whatsapp_send(
     payload: OtpSendRequest,
+    request: Request,
     db: DBSession = Depends(get_db),
 ):
-    _enforce_rate_limit("whatsapp_send", payload.phone)
+    _enforce_rate_limit("whatsapp_send", payload.phone, request=request)
     try:
         send_whatsapp_otp(db, payload.phone, purpose="whatsapp_otp")
     except InvalidOTP as exc:
@@ -140,7 +156,7 @@ def otp_whatsapp_verify(
     response: Response,
     db: DBSession = Depends(get_db),
 ):
-    _enforce_rate_limit("whatsapp_verify", payload.phone)
+    _enforce_rate_limit("whatsapp_verify", payload.phone, request=request)
     try:
         user, _created = verify_whatsapp_otp(
             db,
@@ -164,60 +180,6 @@ def otp_whatsapp_verify(
     return {"user": _serialize_user(user)}
 
 
-# ---------------------------------------------------------------------------
-# Phone (SMS) OTP
-# ---------------------------------------------------------------------------
-@router.post("/otp/phone/send")
-def otp_phone_send(
-    payload: OtpSendRequest,
-    db: DBSession = Depends(get_db),
-):
-    _enforce_rate_limit("phone_send", payload.phone)
-    try:
-        send_phone_otp(db, payload.phone, purpose="phone_otp")
-    except PhoneOtpNotConfigured as exc:
-        logger.info("Phone OTP not configured: %s", exc)
-        raise HTTPException(
-            status_code=503,
-            detail="Phone OTP not configured. Set TWILIO_VERIFY_SERVICE_SID or TWILIO_PHONE_NUMBER.",
-        ) from exc
-    except InvalidPhoneOTP as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except PhoneOtpError as exc:
-        logger.warning("Phone OTP send failed: %s", exc)
-        raise HTTPException(status_code=502, detail="Phone OTP send failed") from exc
-    db.commit()
-    return {"ok": True}
-
-
-@router.post("/otp/phone/verify")
-def otp_phone_verify(
-    payload: OtpVerifyRequest,
-    request: Request,
-    response: Response,
-    db: DBSession = Depends(get_db),
-):
-    _enforce_rate_limit("phone_verify", payload.phone)
-    try:
-        user, _created = verify_phone_otp(
-            db,
-            payload.phone,
-            payload.code,
-            purpose="phone_otp",
-            default_role=payload.role,
-        )
-    except PhoneOtpNotConfigured as exc:
-        raise HTTPException(status_code=503, detail="Phone OTP not configured") from exc
-    except InvalidPhoneOTP as exc:
-        raise HTTPException(status_code=401, detail="Invalid or expired code") from exc
-
-    if user.role != payload.role:
-        other = "driver" if payload.role == "vendor" else "vendor"
-        raise HTTPException(
-            status_code=403,
-            detail=f"Already registered as {user.role}. Use the {other} signin page.",
-        )
-
-    _issue_session_cookie(db, response, user, request)
-    db.commit()
-    return {"user": _serialize_user(user)}
+# Phone (SMS) OTP endpoints were removed with the Twilio pivot.
+# See backend/app/routes/auth/otp.py history if a non-Twilio SMS provider
+# is reintroduced.

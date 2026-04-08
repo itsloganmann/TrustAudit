@@ -1,6 +1,6 @@
 """Abstract base types for WhatsApp providers.
 
-All providers (twilio, baileys, mock) implement :class:`WhatsAppProvider`
+All providers (baileys, mock) implement :class:`WhatsAppProvider`
 and emit :class:`InboundMessage` records from their ``parse_inbound`` method.
 """
 from __future__ import annotations

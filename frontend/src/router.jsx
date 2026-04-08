@@ -15,6 +15,8 @@ import { useAuth } from "./hooks/useAuth.js";
 const Landing = lazy(() => import("./pages/Landing.jsx"));
 const LiveDemo = lazy(() => import("./pages/LiveDemo.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
+const Privacy = lazy(() => import("./pages/Privacy.jsx"));
+const Terms = lazy(() => import("./pages/Terms.jsx"));
 
 // ── Auth pages ──────────────────────────────────────────────────────────────
 import VendorSignup from "./pages/VendorSignup.jsx";
@@ -173,6 +175,22 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<FullPageSpinner />}>
         <About />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/privacy",
+    element: (
+      <Suspense fallback={<FullPageSpinner />}>
+        <Privacy />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/terms",
+    element: (
+      <Suspense fallback={<FullPageSpinner />}>
+        <Terms />
       </Suspense>
     ),
   },

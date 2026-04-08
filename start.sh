@@ -19,6 +19,23 @@ WHATSAPP_PROVIDER="${WHATSAPP_PROVIDER:-mock}"
 if [ -d /app/backend ]; then
     cd /app/backend
 
+    # Ensure persistent-disk directories exist before anything tries to
+    # write to them. Render mounts /app/data empty on the first deploy.
+    mkdir -p "${BAILEYS_SESSIONS_DIR:-/app/data/baileys_sessions}"
+    mkdir -p "${UPLOADS_DIR:-/app/data/uploads}"
+
+    # Run Alembic migrations before anything else touches the DB.
+    # Idempotent: a no-op if we're already at head.
+    echo "[start.sh] running alembic migrations..."
+    if ! alembic upgrade head; then
+        echo "[start.sh] FATAL: alembic upgrade head failed" >&2
+        exit 1
+    fi
+
+    # Seed demo data (idempotent — skipped if DB already has invoices).
+    echo "[start.sh] seeding demo data (no-op if already populated)..."
+    python seed.py || echo "[start.sh] WARNING: seed.py exited non-zero, continuing"
+
     if [ "${WHATSAPP_PROVIDER}" = "baileys" ]; then
         if [ -d /app/backend/services/whatsapp_sidecar ]; then
             echo "[start.sh] launching baileys sidecar (background)..."
@@ -26,6 +43,8 @@ if [ -d /app/backend ]; then
                 cd /app/backend/services/whatsapp_sidecar
                 BACKEND_URL="http://localhost:${PORT}" \
                 PORT=3001 \
+                BAILEYS_SESSIONS_DIR="${BAILEYS_SESSIONS_DIR:-/app/data/baileys_sessions}" \
+                PAIRING_PHONE="${PAIRING_PHONE:-}" \
                 node index.js &
             )
         else

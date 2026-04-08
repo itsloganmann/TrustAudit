@@ -7,7 +7,6 @@ single-use codes used for:
 - ``email_magic``    — passwordless sign-in link
 - ``password_reset`` — forgot-password flow
 - ``whatsapp_otp``   — 6-digit code W6 sends via WhatsApp
-- ``phone_otp``      — 6-digit code W6 sends via SMS
 
 The raw code goes into a URL query param (``?token=...``) or is displayed
 to the user (for OTPs). Only the SHA-256 hash lives in the DB.
@@ -36,7 +35,6 @@ DEFAULT_TTL_MINUTES = {
     "email_magic": 15,         # 15 min
     "password_reset": 30,      # 30 min
     "whatsapp_otp": 10,        # 10 min
-    "phone_otp": 10,           # 10 min
 }
 
 # Max attempts for OTP-style codes.
@@ -59,7 +57,7 @@ def _naive_utc(dt: datetime) -> datetime:
 
 def _generate_raw(purpose: str) -> str:
     """Shape of the raw code depends on the purpose."""
-    if purpose in ("whatsapp_otp", "phone_otp"):
+    if purpose == "whatsapp_otp":
         # 6-digit numeric, cryptographically random.
         return f"{secrets.randbelow(1_000_000):06d}"
     # URL-safe 32-char token (256 bits).
@@ -151,7 +149,7 @@ def consume_code(
             return None
 
     # Attempts cap for OTP-style codes.
-    if purpose in ("whatsapp_otp", "phone_otp"):
+    if purpose == "whatsapp_otp":
         if (row.attempts or 0) >= MAX_OTP_ATTEMPTS:
             return None
 

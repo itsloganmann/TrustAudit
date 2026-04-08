@@ -100,7 +100,11 @@ async function startSock() {
     connectionStatus = 'degraded';
     return;
   }
-  const { state, saveCreds } = await useMultiFileAuthState('./sessions');
+  // Auth state dir is env-configurable so the Render persistent disk
+  // (/app/data/baileys_sessions) survives container restarts without
+  // forcing a re-pair. Local dev keeps the repo-relative ./sessions.
+  const sessionsDir = process.env.BAILEYS_SESSIONS_DIR || './sessions';
+  const { state, saveCreds } = await useMultiFileAuthState(sessionsDir);
   // Pin to the current WhatsApp Web protocol version so device registration
   // doesn't 405 against a bumped server. The Ubuntu-Chrome stub the old
   // code used gets rejected by WhatsApp on fresh pairs.
@@ -124,7 +128,13 @@ async function startSock() {
     if (qr) {
       connectionStatus = 'qr_pending';
       qrcode.generate(qr, { small: true });
-      try { fs.writeFileSync('./current_qr.txt', qr); } catch (e) { logger.warn({ e: e.message }, 'qr file write failed'); }
+      // Persist the raw QR string next to the auth state so the admin
+      // endpoint (backend/app/routes/admin.py) can serve it for headless
+      // pairing on Render.
+      try {
+        fs.mkdirSync(sessionsDir, { recursive: true });
+        fs.writeFileSync(`${sessionsDir}/current_qr.txt`, qr);
+      } catch (e) { logger.warn({ e: e.message }, 'qr file write failed'); }
       logger.info('Scan the QR code above with your WhatsApp mobile app.');
 
       // Pairing-code flow — regenerate on EVERY QR rotation so the file
@@ -138,7 +148,8 @@ async function startSock() {
           .then((code) => {
             logger.info({ phone, code, rotation: Date.now() }, 'pairing code rotated');
             try {
-              fs.writeFileSync('./current_pair_code.txt', code);
+              fs.mkdirSync(sessionsDir, { recursive: true });
+              fs.writeFileSync(`${sessionsDir}/current_pair_code.txt`, code);
             } catch (e) {
               logger.warn({ e: e.message }, 'pair code file write failed');
             }
@@ -151,7 +162,8 @@ async function startSock() {
     if (connection === 'open') {
       connectionStatus = 'connected';
       phoneNumber = sock.user && sock.user.id ? sock.user.id.split(':')[0] : null;
-      try { fs.unlinkSync('./current_qr.txt'); } catch (_) { /* ignore */ }
+      try { fs.unlinkSync(`${sessionsDir}/current_qr.txt`); } catch (_) { /* ignore */ }
+      try { fs.unlinkSync(`${sessionsDir}/current_pair_code.txt`); } catch (_) { /* ignore */ }
       logger.info({ phoneNumber }, 'WhatsApp connected');
     }
     if (connection === 'close') {

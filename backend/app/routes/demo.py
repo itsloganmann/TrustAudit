@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import io
 import logging
+import os
 from typing import Optional
 from urllib.parse import quote
 
@@ -26,10 +27,12 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Twilio WhatsApp Sandbox number + join code, as documented in the plan.
-# Displayed on the landing page and baked into every wa.me deep link.
-WHATSAPP_NUMBER = "+14155238886"
-WHATSAPP_JOIN_CODE = "crop-conversation"
+# WhatsApp number the landing / demo flow points at. Read from an env
+# var so the paired Baileys number can be rotated without a redeploy.
+# Defaults match the current live pairing of the production sidecar.
+WHATSAPP_NUMBER = os.environ.get("TRUSTAUDIT_WHATSAPP_DISPLAY_NUMBER") or "+14085959751"
+# "hi" is a neutral first message — no Twilio sandbox enrollment.
+WHATSAPP_JOIN_CODE = os.environ.get("TRUSTAUDIT_WHATSAPP_FIRST_MESSAGE") or "hi"
 
 
 # ---------------------------------------------------------------------------
@@ -58,10 +61,12 @@ class HealthResponse(BaseModel):
 
 
 def _build_wa_link(join_code: str) -> str:
-    """Return a wa.me deep link that pre-fills the sandbox join message."""
+    """Return a wa.me deep link that pre-fills the first message."""
     # wa.me strips the leading '+' from numbers.
     number = WHATSAPP_NUMBER.lstrip("+")
-    text = quote(f"join {join_code}")
+    # join_code is the literal first-message text (e.g. "hi") after the
+    # Twilio pivot — no more "join <sandbox-code>" dance.
+    text = quote(join_code)
     return f"https://wa.me/{number}?text={text}"
 
 

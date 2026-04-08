@@ -3,19 +3,11 @@
 Exposes:
 
 * ``POST /api/webhook/whatsapp/inbound`` — unified entry point that accepts
-  Twilio form-encoded payloads, baileys JSON, or mock multipart uploads
-  (used by the frontend's drag-and-drop demo UI).
+  baileys JSON (production) or mock multipart uploads (used by the
+  frontend's drag-and-drop demo UI and the fixture-based self-test path).
 * ``GET /api/webhook/whatsapp/health`` — aggregated provider health.
 
 The router is exported as ``router`` for ``main.py`` to include.
-
-Security
---------
-
-For the Twilio-detected path this handler verifies the ``X-Twilio-Signature``
-header via HMAC-SHA1 against ``TWILIO_AUTH_TOKEN``. Requests failing validation
-are rejected with 403 before any side effects. Gate with
-``TWILIO_VALIDATE_SIGNATURE=0`` to bypass in local dev only.
 
 Concurrency
 -----------
@@ -24,8 +16,7 @@ The handler is ``async def`` so the FastAPI event loop does not stall.
 Provider calls into ``send_text`` and ``download_media`` use synchronous
 ``httpx`` under the hood (to keep the dep footprint small), so they are
 dispatched via ``asyncio.to_thread(...)`` so one slow inbound does not block
-every other request. This eliminates the Twilio retry-storm foot-gun called
-out by the adversary review of 6293462 (must-fix #4).
+every other request.
 
 Idempotency
 -----------
@@ -72,23 +63,16 @@ from ..services.whatsapp import (
 )
 from ..services.whatsapp.health import aggregated_health, record_inbound_now
 from ..services.whatsapp.mock_client import MockClient
-from ..services.whatsapp.twilio_signature import (
-    is_hard_enforce as twilio_sig_hard_enforce,
-    is_validation_enabled as twilio_sig_enabled,
-    verify_twilio_signature,
-)
 from ..services import webhook_observability
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/webhook/whatsapp", tags=["whatsapp-webhook"])
 
-UPLOADS_DIR = Path(__file__).resolve().parents[2] / "uploads"
-
-# TwiML empty reply — Twilio's preferred ack body for a POST it will retry on
-# non-2xx. We still send the user-visible acknowledgement via the async
-# ``send_text`` call so the TwiML body stays minimal.
-_EMPTY_TWIML = '<?xml version="1.0" encoding="UTF-8"?><Response/>'
+# Uploads path: prefer the UPLOADS_DIR env var (used on Render so the
+# persistent disk mount at /app/data/uploads survives deploys), fall back
+# to the repo-local backend/uploads directory for dev.
+UPLOADS_DIR = Path(os.environ.get("UPLOADS_DIR") or (Path(__file__).resolve().parents[2] / "uploads"))
 
 
 def _ensure_uploads_dir() -> Path:
@@ -111,7 +95,7 @@ async def _parse_body(request: Request) -> tuple[str, Dict[str, Any]]:
 
     if content_type == "application/x-www-form-urlencoded":
         form = await request.form()
-        return "twilio", dict(form)
+        return "mock", dict(form)
 
     if content_type.startswith("multipart/form-data"):
         form = await request.form()
@@ -139,15 +123,6 @@ def _pick_provider(detected: str) -> WhatsAppProvider:
     # baileys sidecar's pendingMedia map and 404s.
     if detected == "mock":
         return MockClient()
-    # If the env says mock but the payload is clearly Twilio, parse it with Twilio.
-    if detected == "twilio":
-        from ..services.whatsapp.twilio_client import TwilioClient
-        from ..services.whatsapp.base import WhatsAppProviderNotConfigured
-
-        try:
-            return TwilioClient()
-        except WhatsAppProviderNotConfigured:
-            return MockClient()
     if detected == "baileys":
         from ..services.whatsapp.baileys_client import BaileysClient
 
@@ -435,9 +410,9 @@ async def _send_text_async(
     Returns ``(ok, error)``. Failures are logged but never raised to the
     webhook caller — callers that don't care about the result can simply
     discard the tuple. The step-0.5 inbound ack uses the return value to
-    record outbound API health in the observability ring buffer so a stale
-    ``TWILIO_AUTH_TOKEN`` is visible from ``/api/debug/recent-inbounds``
-    without needing log access.
+    record outbound send health in the observability ring buffer so a
+    disconnected Baileys sidecar is visible from
+    ``/api/debug/recent-inbounds`` without needing log access.
     """
     if not to:
         return False, "no recipient"
@@ -450,49 +425,9 @@ async def _send_text_async(
 
 
 async def _download_media_async(provider: WhatsAppProvider, media_url: str) -> bytes:
-    """Download media off the event loop so a slow Twilio media fetch cannot
+    """Download media off the event loop so a slow media fetch cannot
     stall every other inbound."""
     return await asyncio.to_thread(provider.download_media, media_url)
-
-
-def _validate_twilio_signature(request: Request, payload: Dict[str, Any]) -> str:
-    """Validate the X-Twilio-Signature header.
-
-    Returns one of:
-      * ``"skipped"``  — validation disabled (no token / opt-out env var)
-      * ``"valid"``    — signature matches
-      * ``"invalid"``  — signature mismatch, but we are NOT in hard-enforce
-                          mode so we log a warning and let the request
-                          through. The caller passes this label to the
-                          observability ring buffer.
-
-    If hard-enforce mode is on (``TWILIO_REQUIRE_SIGNATURE=1``), an
-    invalid signature raises HTTP 403 instead of returning ``"invalid"``.
-    """
-    if not twilio_sig_enabled():
-        return "skipped"
-    full_url = str(request.url)
-    sig = request.headers.get("X-Twilio-Signature", "")
-    string_params = {k: str(v) for k, v in payload.items()}
-    if verify_twilio_signature(full_url, string_params, sig):
-        return "valid"
-    sid = payload.get("MessageSid") or payload.get("message_sid") or "(none)"
-    if twilio_sig_hard_enforce():
-        logger.warning("twilio signature rejected (hard) url=%s sid=%s", full_url, sid)
-        raise HTTPException(status_code=403, detail="invalid twilio signature")
-    logger.warning(
-        "twilio signature mismatch (soft, accepting) url=%s sid=%s "
-        "— set TWILIO_REQUIRE_SIGNATURE=1 to enforce",
-        full_url,
-        sid,
-    )
-    return "invalid"
-
-
-def _twiml_response() -> Response:
-    """Return an empty TwiML body. Twilio prefers ``text/xml`` for webhook
-    acks and logs a warning when we return JSON."""
-    return Response(content=_EMPTY_TWIML, media_type="application/xml")
 
 
 # ---------------------------------------------------------------------------
@@ -503,18 +438,33 @@ async def inbound_webhook(
     request: Request,
     db: DBSession = Depends(get_db),
 ):
+    # IP-based DoS guard — runs before any work so bogus-payload floods
+    # are bounded even before we touch the event loop with JSON parsing.
+    # The sidecar itself is whitelisted because it posts from localhost
+    # (and from the internal Render address when both services run
+    # inside the same VPC) — skipping the check there would also cause
+    # self-DoS during bursts of legitimate media.
+    client_ip = getattr(request.client, "host", None) or "unknown"
+    _WEBHOOK_IP_ALLOWLIST = {"127.0.0.1", "localhost", "::1"}
+    if client_ip not in _WEBHOOK_IP_ALLOWLIST and not rate_limit.check(
+        "ip",
+        client_ip,
+        max_per_window=120,  # 2/sec average, room for legit bursty uploads
+        window_seconds=60,
+    ):
+        logger.warning("ip rate limit tripped for %s", client_ip)
+        return {"status": "rate_limited", "reason": "ip"}
+
     detected, payload = await _parse_body(request)
 
     # Observability — record every inbound regardless of outcome so a
-    # demo operator can ask "did Twilio actually hit me?" via
-    # GET /api/debug/recent-inbounds.
+    # demo operator can ask "did the sidecar actually hit me?" via
+    # GET /api/debug/recent-inbounds. We no longer verify webhook
+    # signatures (Twilio signature verification was removed with the
+    # Baileys pivot); sig_status stays "skipped" for back-compat with
+    # the observability ring buffer schema.
     sig_status = "skipped"
-    has_sig_header = bool(request.headers.get("X-Twilio-Signature", ""))
-
-    # Security — soft-validate Twilio signatures (logs + records but
-    # only hard-rejects when TWILIO_REQUIRE_SIGNATURE=1 is set).
-    if detected == "twilio":
-        sig_status = _validate_twilio_signature(request, payload)
+    has_sig_header = False
 
     try:
         webhook_observability.record(
@@ -541,15 +491,13 @@ async def inbound_webhook(
     # 1. Idempotency — atomic check-and-mark.
     if not webhook_idempotency.mark_seen_if_new(inbound.message_sid):
         logger.info("duplicate webhook sid=%s ignored", inbound.message_sid)
-        if detected == "twilio":
-            return _twiml_response()
         return {"status": "duplicate", "sid": inbound.message_sid}
 
     # 1.5. Immediate ack to the sender. Fires *before* the (potentially slow)
-    # vision pipeline so the user sees a reply within ~1s and we stay well
-    # inside Twilio's 15s webhook timeout. The result is recorded to the
-    # observability ring buffer so an operator can diagnose a stale
-    # TWILIO_AUTH_TOKEN from /api/debug/recent-inbounds without log access.
+    # vision pipeline so the user sees a reply within ~1s. The result is
+    # recorded to the observability ring buffer so an operator can
+    # diagnose a disconnected Baileys sidecar from
+    # /api/debug/recent-inbounds without log access.
     ack_ok, ack_err = await _send_text_async(
         provider,
         inbound.from_phone_e164,
@@ -579,8 +527,6 @@ async def inbound_webhook(
             inbound.from_phone_e164,
             "You're sending messages too fast — please wait a moment and try again.",
         )
-        if detected == "twilio":
-            return _twiml_response()
         return {"status": "rate_limited", "sid": inbound.message_sid}
 
     # 3. Media handling — download, hash, dedup, persist, call pipeline
@@ -596,8 +542,6 @@ async def inbound_webhook(
                 inbound.from_phone_e164,
                 "We couldn't download your photo in time — please send it again.",
             )
-            if detected == "twilio":
-                return _twiml_response()
             return {
                 "status": "media_download_failed",
                 "sid": inbound.message_sid,
@@ -617,8 +561,6 @@ async def inbound_webhook(
                 inbound.from_phone_e164,
                 f"Already received this challan — invoice #{existing_invoice} is in the dashboard.",
             )
-            if detected == "twilio":
-                return _twiml_response()
             return {
                 "status": "duplicate_image",
                 "sid": inbound.message_sid,
@@ -658,10 +600,6 @@ async def inbound_webhook(
     # after idempotency, before the slow vision pipeline) so the sender
     # gets a reply within ~1s instead of after the entire pipeline runs.
 
-    # Twilio expects ``text/xml`` TwiML for webhook responses; other providers
-    # (baileys, mock) are fine with JSON for observability.
-    if detected == "twilio":
-        return _twiml_response()
     return {
         "status": "accepted",
         "sid": inbound.message_sid,
