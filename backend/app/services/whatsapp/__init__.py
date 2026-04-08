@@ -5,6 +5,10 @@ concrete implementation at runtime based on the ``WHATSAPP_PROVIDER`` env
 var. Falls back to :class:`MockClient` whenever the requested provider
 cannot be configured — the demo and tests must always work without
 credentials.
+
+Providers:
+    - ``baileys`` — self-hosted Baileys WhatsApp Web sidecar (production)
+    - ``mock``    — local fixtures + test doubles (dev, tests, fallback)
 """
 from __future__ import annotations
 
@@ -19,7 +23,6 @@ from .base import (
 )
 from .baileys_client import BaileysClient
 from .mock_client import MockClient, SENT_MESSAGES, reset_mock_state
-from .twilio_client import TwilioClient
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +37,6 @@ def get_whatsapp_provider() -> WhatsAppProvider:
 
     chosen = os.environ.get("WHATSAPP_PROVIDER", "mock").lower()
     try:
-        if chosen == "twilio":
-            _cached_provider = TwilioClient()
-            return _cached_provider
         if chosen == "baileys":
             _cached_provider = BaileysClient()
             return _cached_provider
@@ -59,7 +59,6 @@ __all__ = [
     "WhatsAppProviderNotConfigured",
     "BaileysClient",
     "MockClient",
-    "TwilioClient",
     "SENT_MESSAGES",
     "get_whatsapp_provider",
     "reset_mock_state",

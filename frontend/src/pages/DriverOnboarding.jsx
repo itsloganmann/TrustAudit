@@ -4,12 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 import { MessageCircle, Camera, ArrowRight, CheckCircle2 } from "lucide-react";
 import AuthShell from "../components/auth/AuthShell.jsx";
-
-const WHATSAPP_NUMBER_RAW = "14155238886";
-const JOIN_CODE = "crop-conversation";
-const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER_RAW}?text=${encodeURIComponent(
-  `join ${JOIN_CODE}`
-)}`;
+import {
+  WA_LINK,
+  WHATSAPP_FIRST_MESSAGE,
+  WHATSAPP_NUMBER_DISPLAY,
+} from "../config/whatsapp.js";
 
 /**
  * Two-screen post-signup walk-through for drivers.
@@ -32,8 +31,8 @@ export default function DriverOnboarding() {
       }
       subtitle={
         screen === 1
-          ? "Tap the WhatsApp number below or scan the QR code with your phone. Send a challan photo and watch it appear in your dashboard within 15 seconds."
-          : "Your enterprise will see every challan you submit. We'll WhatsApp you the moment a payment is approved."
+          ? "Tap the WhatsApp number below or scan the QR code with your phone. Send a photo of a paper bill and watch it appear in your dashboard in under 20 seconds. No app. No login. No typing."
+          : "Your company will see every bill you send. We'll WhatsApp you back the moment a payment is approved."
       }
     >
       <AnimatePresence mode="wait">
@@ -52,7 +51,7 @@ export default function DriverOnboarding() {
                 WhatsApp number
               </div>
               <p className="text-[28px] font-bold text-white tabular-nums tracking-tight">
-                +1 (415) 523-8886
+                {WHATSAPP_NUMBER_DISPLAY}
               </p>
               <a
                 href={WA_LINK}
@@ -66,7 +65,7 @@ export default function DriverOnboarding() {
               </a>
               <p className="text-[10px] text-slate-500">
                 First message:{" "}
-                <code className="text-slate-300 font-mono">join {JOIN_CODE}</code>
+                <code className="text-slate-300 font-mono">{WHATSAPP_FIRST_MESSAGE}</code>
               </p>
             </div>
 
@@ -79,7 +78,7 @@ export default function DriverOnboarding() {
                   On a desktop? Scan this.
                 </p>
                 <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
-                  Opens WhatsApp on your phone with the join code pre-filled.
+                  Opens WhatsApp on your phone with the chat pre-filled.
                 </p>
               </div>
             </div>
@@ -111,8 +110,8 @@ export default function DriverOnboarding() {
               </p>
               <p className="text-[12px] text-slate-400 leading-relaxed">
                 From now on, every photo you send to{" "}
-                <span className="text-white font-medium">+1 415 523 8886</span> will be
-                processed automatically. No app to install. No paperwork.
+                <span className="text-white font-medium">{WHATSAPP_NUMBER_DISPLAY}</span> will be
+                read by our computer in under 20 seconds. No app to install. No paperwork.
               </p>
             </div>
 

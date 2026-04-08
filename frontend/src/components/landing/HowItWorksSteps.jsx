@@ -11,32 +11,32 @@ import {
 const STEPS = [
   {
     icon: FileImage,
-    title: "Paper challan",
-    caption: "A driver hands over a printed delivery challan at the dock.",
+    title: "A driver gets a bill",
+    caption: "Your driver picks up a delivery and the supplier hands them a paper bill.",
     accent: "#f59e0b",
   },
   {
     icon: MessageCircle,
-    title: "WhatsApp photo",
-    caption: "The driver snaps a photo and sends it to the TrustAudit bot.",
+    title: "They snap + send",
+    caption: "They open WhatsApp and text a photo of the bill. That's it. No app. No login.",
     accent: "#10b981",
   },
   {
     icon: Cpu,
-    title: "Vision + OCR",
-    caption: "Gemini extracts Date, GSTIN, amount, and invoice number with confidence scores.",
+    title: "Our computer reads it",
+    caption: "In under 20 seconds we pull out the supplier name, the amount, and the date.",
     accent: "#3b82f6",
   },
   {
     icon: LayoutDashboard,
-    title: "Live dashboard",
-    caption: "The CFO sees the row flash amber then turn green — all in under 15 seconds.",
+    title: "Your CFO sees it",
+    caption: "A new row lands on the CFO dashboard with the 45-day deadline in big red numbers.",
     accent: "#8b5cf6",
   },
   {
     icon: FileBadge,
-    title: "43B(h) PDF",
-    caption: "One tap generates a filing-ready compliance form with audit trail and QR authenticity.",
+    title: "Ready for the tax man",
+    caption: "One tap turns every paid-on-time bill into a PDF your CA can file.",
     accent: "#f43f5e",
   },
 ];
@@ -56,9 +56,9 @@ export default function HowItWorksSteps() {
             How it works
           </p>
           <h2 className="text-[32px] md:text-[44px] font-bold text-white tracking-tight leading-tight">
-            From a printed challan to a filed ITR,
+            From a paper bill to your CFO dashboard,
             <br />
-            <span className="text-slate-500">in under 15 seconds.</span>
+            <span className="text-slate-500">in under 20 seconds.</span>
           </h2>
         </motion.div>
 

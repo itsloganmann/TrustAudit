@@ -76,11 +76,11 @@ def test_webhook_health_returns_provider_state() -> None:
     body = response.json()
     assert "active_provider" in body
     assert "providers" in body
-    # All three providers (mock, twilio, baileys) should at least surface
-    # *some* status string -- even when twilio/baileys are not configured
-    # they degrade gracefully via _safe_*_health.
+    # Both providers (mock, baileys) should surface *some* status string
+    # -- even when baileys is not configured it degrades gracefully via
+    # _safe_baileys_health.
     providers = body["providers"]
-    for name in ("mock", "twilio", "baileys"):
+    for name in ("mock", "baileys"):
         assert name in providers, f"provider {name} missing from health body"
         assert "status" in providers[name]
 

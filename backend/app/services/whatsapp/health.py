@@ -11,8 +11,6 @@ from typing import Any, Dict, Optional
 
 from .baileys_client import BaileysClient
 from .mock_client import MockClient
-from .twilio_client import TwilioClient
-from .base import WhatsAppProviderNotConfigured
 
 
 _last_inbound_at_iso: Optional[str] = None
@@ -26,18 +24,6 @@ def record_inbound_now() -> None:
 
 def last_inbound_at_iso() -> Optional[str]:
     return _last_inbound_at_iso
-
-
-def _safe_twilio_health() -> Dict[str, Any]:
-    try:
-        client = TwilioClient()
-    except WhatsAppProviderNotConfigured as exc:
-        return {
-            "provider": "twilio",
-            "status": "not_configured",
-            "detail": str(exc),
-        }
-    return client.health()
 
 
 def _safe_baileys_health() -> Dict[str, Any]:
@@ -55,7 +41,6 @@ def aggregated_health() -> Dict[str, Any]:
         "last_inbound_at": _last_inbound_at_iso,
         "providers": {
             "mock": MockClient().health(),
-            "twilio": _safe_twilio_health(),
             "baileys": _safe_baileys_health(),
         },
     }

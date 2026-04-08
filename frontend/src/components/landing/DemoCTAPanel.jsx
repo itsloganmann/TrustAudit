@@ -9,11 +9,11 @@ import {
   PhoneCall,
 } from "lucide-react";
 import WhatsAppQRBlock from "./WhatsAppQRBlock";
-
-const WHATSAPP_NUMBER = "+1 415 523 8886";
-const WHATSAPP_NUMBER_RAW = "14155238886";
-const JOIN_CODE = "crop-conversation";
-const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER_RAW}?text=${encodeURIComponent(`join ${JOIN_CODE}`)}`;
+import {
+  WA_LINK,
+  WHATSAPP_FIRST_MESSAGE,
+  WHATSAPP_NUMBER_DISPLAY as WHATSAPP_NUMBER,
+} from "../../config/whatsapp.js";
 
 function CopyButton({ value, label, tone = "emerald" }) {
   const [copied, setCopied] = useState(false);
@@ -94,18 +94,19 @@ export default function DemoCTAPanel() {
                 No login required · 30 seconds
               </div>
               <h2 className="text-[30px] md:text-[42px] font-bold text-white leading-[1.05] tracking-tight">
-                Try it live right now.
+                Try it right now.
               </h2>
               <p className="mt-4 text-[15px] text-slate-400 max-w-xl leading-relaxed">
-                Send a photo of any delivery challan to our WhatsApp bot from
-                your own phone. Watch it land on the public dashboard in real
-                time, state-machined, OCR'd, and ready for filing.
+                Send a photo of any paper bill to our WhatsApp number from
+                your own phone. In under 20 seconds you'll see it land on the
+                public dashboard with the vendor, amount and deadline already
+                filled in. No app. No login. No typing.
               </p>
 
               <div className="mt-8 space-y-3.5">
                 <Step number="1" label="Tap WhatsApp (or scan the QR on the right)" />
-                <Step number="2" label="Send any photo of a delivery challan" />
-                <Step number="3" label="Watch /live — row turns green in seconds" />
+                <Step number="2" label="Send a photo of any paper bill" />
+                <Step number="3" label="Watch /live — row appears in under 20 seconds" />
               </div>
 
               {/* Giant phone number */}
@@ -117,7 +118,7 @@ export default function DemoCTAPanel() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-semibold">
-                        WhatsApp Sandbox
+                        TrustAudit WhatsApp
                       </p>
                       <p className="text-[26px] md:text-[32px] font-bold tabular-nums text-white tracking-tight leading-tight whitespace-nowrap">
                         {WHATSAPP_NUMBER}
@@ -128,13 +129,13 @@ export default function DemoCTAPanel() {
                 </div>
                 <div className="mt-3 pt-3 border-t border-white/[0.05] flex items-center justify-between gap-3 flex-wrap">
                   <div className="text-[12px] text-slate-400">
-                    Send join code{" "}
+                    Just say{" "}
                     <code className="px-1.5 py-0.5 rounded bg-white/[0.06] text-emerald-300 font-mono text-[11px]">
-                      {JOIN_CODE}
+                      {WHATSAPP_FIRST_MESSAGE}
                     </code>{" "}
-                    as your first message
+                    then attach any bill photo.
                   </div>
-                  <CopyButton value={`join ${JOIN_CODE}`} label="Copy code" tone="slate" />
+                  <CopyButton value={WHATSAPP_FIRST_MESSAGE} label="Copy" tone="slate" />
                 </div>
               </div>
 

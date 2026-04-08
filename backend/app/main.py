@@ -66,8 +66,12 @@ app.add_middleware(
     allow_headers=["content-type", "authorization", "x-requested-with", "x-demo-seed-token"],
 )
 
-# Serve uploaded challan images
-uploads_dir = os.path.join(os.path.dirname(__file__), "..", "uploads")
+# Serve uploaded challan images. Honors UPLOADS_DIR so Render can point
+# this at the persistent-disk mount (/app/data/uploads) instead of the
+# ephemeral repo-local backend/uploads/.
+uploads_dir = os.environ.get("UPLOADS_DIR") or os.path.join(
+    os.path.dirname(__file__), "..", "uploads"
+)
 os.makedirs(uploads_dir, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
@@ -97,6 +101,12 @@ app.include_router(verification_router, prefix="/api")  # /api/verify/{id} (PUBL
 app.include_router(invoice_insights_router, prefix="/api")  # /api/invoices/{id}/annotation + /justification
 app.include_router(live_stream_router, prefix="/api")  # /api/live/stream?session=... (SSE)
 app.include_router(debug_router, prefix="/api")  # /api/debug/recent-inbounds (read-only ring buffer)
+
+# Admin endpoints (Baileys pair code / QR / sidecar health). Only mounted
+# when ADMIN_TOKEN is set so the surface is invisible otherwise.
+if os.environ.get("ADMIN_TOKEN"):
+    from .routes.admin import router as admin_router
+    app.include_router(admin_router)  # /api/admin/* (token-gated)
 
 # Resolve the frontend dist directory
 FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"

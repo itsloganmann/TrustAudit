@@ -113,7 +113,7 @@ class UserIdentity(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    provider = Column(String(32), nullable=False)  # google|facebook|whatsapp_otp|phone_otp|email_magic|password
+    provider = Column(String(32), nullable=False)  # google|facebook|whatsapp_otp|email_magic|password
     provider_user_id = Column(String(255), nullable=True, index=True)
     email = Column(String(255), nullable=True)
     phone = Column(String(20), nullable=True)

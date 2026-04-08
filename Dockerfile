@@ -20,6 +20,43 @@
 FROM node:20-slim AS frontend-build
 WORKDIR /app/frontend
 
+# Vite bakes VITE_* env vars into the static bundle at build time. We
+# accept them as build ARGs so Render's ``envVars`` block (see render.yaml)
+# can flow them through on every build without rebuilding the image
+# locally. ARGs default to the empty string; frontend/src/config/legal.js
+# then falls back to its hard-coded TODO_LEGAL placeholders, which the
+# Privacy/Terms pages render with a loud amber warning banner.
+ARG VITE_LEGAL_COMPANY_NAME=""
+ARG VITE_LEGAL_COMPANY_LEGAL_NAME=""
+ARG VITE_LEGAL_COMPANY_REGISTRATION=""
+ARG VITE_LEGAL_REGISTERED_ADDRESS=""
+ARG VITE_LEGAL_JURISDICTION_CITY=""
+ARG VITE_LEGAL_PRIVACY_EMAIL=""
+ARG VITE_LEGAL_SUPPORT_EMAIL=""
+ARG VITE_LEGAL_GRIEVANCE_OFFICER_NAME=""
+ARG VITE_LEGAL_GRIEVANCE_OFFICER_EMAIL=""
+ARG VITE_LEGAL_GRIEVANCE_OFFICER_PHONE=""
+ARG VITE_LEGAL_GRIEVANCE_OFFICER_ADDRESS=""
+ARG VITE_LEGAL_PRIVACY_LAST_UPDATED=""
+ARG VITE_LEGAL_TERMS_LAST_UPDATED=""
+ARG VITE_LEGAL_HOSTING_REGION=""
+ARG VITE_LEGAL_PLANNED_HOSTING_REGION=""
+ENV VITE_LEGAL_COMPANY_NAME=${VITE_LEGAL_COMPANY_NAME}
+ENV VITE_LEGAL_COMPANY_LEGAL_NAME=${VITE_LEGAL_COMPANY_LEGAL_NAME}
+ENV VITE_LEGAL_COMPANY_REGISTRATION=${VITE_LEGAL_COMPANY_REGISTRATION}
+ENV VITE_LEGAL_REGISTERED_ADDRESS=${VITE_LEGAL_REGISTERED_ADDRESS}
+ENV VITE_LEGAL_JURISDICTION_CITY=${VITE_LEGAL_JURISDICTION_CITY}
+ENV VITE_LEGAL_PRIVACY_EMAIL=${VITE_LEGAL_PRIVACY_EMAIL}
+ENV VITE_LEGAL_SUPPORT_EMAIL=${VITE_LEGAL_SUPPORT_EMAIL}
+ENV VITE_LEGAL_GRIEVANCE_OFFICER_NAME=${VITE_LEGAL_GRIEVANCE_OFFICER_NAME}
+ENV VITE_LEGAL_GRIEVANCE_OFFICER_EMAIL=${VITE_LEGAL_GRIEVANCE_OFFICER_EMAIL}
+ENV VITE_LEGAL_GRIEVANCE_OFFICER_PHONE=${VITE_LEGAL_GRIEVANCE_OFFICER_PHONE}
+ENV VITE_LEGAL_GRIEVANCE_OFFICER_ADDRESS=${VITE_LEGAL_GRIEVANCE_OFFICER_ADDRESS}
+ENV VITE_LEGAL_PRIVACY_LAST_UPDATED=${VITE_LEGAL_PRIVACY_LAST_UPDATED}
+ENV VITE_LEGAL_TERMS_LAST_UPDATED=${VITE_LEGAL_TERMS_LAST_UPDATED}
+ENV VITE_LEGAL_HOSTING_REGION=${VITE_LEGAL_HOSTING_REGION}
+ENV VITE_LEGAL_PLANNED_HOSTING_REGION=${VITE_LEGAL_PLANNED_HOSTING_REGION}
+
 # Use a clean, reproducible install if a lockfile is present, fall back to
 # ``npm install`` so the build never wedges on a missing lockfile.
 COPY frontend/package*.json ./
@@ -102,9 +139,11 @@ COPY backend /app/backend
 # Install Python deps. ``--no-cache-dir`` keeps the layer small.
 RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
-# Seed the SQLite DB at build time so the first request to /api/invoices
-# returns the 50 fixture rows. The seed script is idempotent.
-RUN cd /app/backend && python seed.py
+# NOTE: we intentionally do NOT run seed.py at build time any more. Once
+# the DB backend became Render Postgres the build context has no network
+# access to the DB, and running seed.py against SQLite at build time would
+# write a stale file that the persistent disk then shadowed. Migrations +
+# idempotent seed now run at container start (see start.sh).
 
 # Render injects $PORT; default to 10000 if running locally.
 EXPOSE 10000

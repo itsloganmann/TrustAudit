@@ -2,12 +2,7 @@ import { useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { Shield, MessageCircle, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth.js";
-
-const WHATSAPP_NUMBER_RAW = "14155238886";
-const JOIN_CODE = "crop-conversation";
-const WA_LINK = `https://wa.me/${WHATSAPP_NUMBER_RAW}?text=${encodeURIComponent(
-  `join ${JOIN_CODE}`
-)}`;
+import { WA_LINK, WHATSAPP_NUMBER_DISPLAY } from "../../config/whatsapp.js";
 
 /**
  * Mobile-first authenticated shell for `/driver/*` routes.
@@ -100,10 +95,10 @@ export default function DriverShell() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[15px] text-white font-bold tracking-tight">
-                Send a new challan via WhatsApp
+                Send a bill photo on WhatsApp
               </p>
               <p className="text-[12px] text-slate-400 mt-0.5">
-                Tap to open WhatsApp · +1 415 523 8886
+                Tap to open WhatsApp · {WHATSAPP_NUMBER_DISPLAY}
               </p>
             </div>
             <div className="text-[11px] text-emerald-300 font-semibold uppercase tracking-widest hidden sm:inline">

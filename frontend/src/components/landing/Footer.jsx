@@ -1,4 +1,6 @@
-import { Shield, Github, Mail } from "lucide-react";
+import { Shield, Github, Mail, Scale } from "lucide-react";
+import { Link } from "react-router-dom";
+import LEGAL from "../../config/legal.js";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -13,7 +15,7 @@ export default function Footer() {
                 <Shield size={13} className="text-slate-950" strokeWidth={2.5} />
               </div>
               <span className="text-white font-semibold text-[14px] tracking-tight">
-                TrustAudit
+                {LEGAL.companyName}
               </span>
               <span className="text-[9px] text-slate-500 font-semibold px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08]">
                 43B(h)
@@ -21,12 +23,13 @@ export default function Footer() {
             </div>
             <p className="text-[12px] text-slate-500 leading-relaxed">
               Real-time Section 43B(h) compliance for Indian MSME payments —
-              from WhatsApp to ITR in under 15 seconds.
+              from a paper bill on WhatsApp to your CFO dashboard in under
+              20 seconds.
             </p>
           </div>
 
           {/* Links */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
             <div>
               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
                 Product
@@ -39,13 +42,13 @@ export default function Footer() {
                 </li>
                 <li>
                   <a href="#try-live" className="hover:text-white transition-colors">
-                    Try live demo
+                    Try it now
                   </a>
                 </li>
                 <li>
-                  <a href="/live" className="hover:text-white transition-colors">
+                  <Link to="/live" className="hover:text-white transition-colors">
                     /live dashboard
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a href="#faq" className="hover:text-white transition-colors">
@@ -56,22 +59,49 @@ export default function Footer() {
             </div>
             <div>
               <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
-                Resources
+                Account
               </p>
               <ul className="space-y-2 text-[12px] text-slate-400">
                 <li>
-                  <a href="/about" className="hover:text-white transition-colors">
+                  <Link to="/about" className="hover:text-white transition-colors">
                     About the team
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/auth/vendor/signin" className="hover:text-white transition-colors">
+                  <Link to="/auth/vendor/signin" className="hover:text-white transition-colors">
                     Vendor sign-in
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/auth/vendor/signup" className="hover:text-white transition-colors">
+                  <Link to="/auth/vendor/signup" className="hover:text-white transition-colors">
                     Get started
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-3">
+                Legal
+              </p>
+              <ul className="space-y-2 text-[12px] text-slate-400">
+                <li>
+                  <Link to="/privacy" className="hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/terms" className="hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href={`mailto:${LEGAL.grievanceOfficerEmail}`}
+                    className="hover:text-white transition-colors inline-flex items-center gap-1.5"
+                    title="Grievance Officer (DPDP Act Rule 5(9))"
+                  >
+                    <Scale size={11} />
+                    Grievance Officer
                   </a>
                 </li>
               </ul>
@@ -83,11 +113,11 @@ export default function Footer() {
               <ul className="space-y-2 text-[12px] text-slate-400">
                 <li>
                   <a
-                    href="mailto:contact@trustaudit.example"
+                    href={`mailto:${LEGAL.supportEmail}`}
                     className="hover:text-white transition-colors inline-flex items-center gap-1.5"
                   >
                     <Mail size={11} />
-                    contact
+                    {LEGAL.supportEmail}
                   </a>
                 </li>
                 <li>
@@ -107,9 +137,12 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/[0.04] flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-[11px] text-slate-600">
-          <p>© {year} TrustAudit. Built for Indian MSME compliance.</p>
+          <p>
+            © {year} {LEGAL.companyLegalName}. Made in India for Indian MSMEs.
+          </p>
           <p className="italic">
-            TrustAudit is a YC demo. Not a substitute for ITR filing advice.
+            TrustAudit surfaces deadlines and reads AI-extracted fields. It is
+            not a substitute for professional tax or legal advice.
           </p>
         </div>
       </div>

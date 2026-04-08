@@ -149,7 +149,7 @@ function Hero() {
             className="chip mb-8 !bg-violet-500/8 !border-violet-400/30 !text-violet-200"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#a78bfa] pulse-dot" />
-            Live · Compliance Engine v2
+            Live on WhatsApp · India
           </motion.div>
 
           <motion.h1
@@ -158,13 +158,13 @@ function Hero() {
             transition={{ duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
             className="aurora-headline text-[64px] md:text-[96px] leading-[0.92] text-white"
           >
-            The end of the
+            Stop paying tax on
             <br />
             <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-amber-300 bg-clip-text text-transparent">
-              ₹12,000 crore
+              money you
             </span>
             <br />
-            <span className="font-display-italic text-violet-200/80">tax cliff.</span>
+            <span className="font-display-italic text-violet-200/80">already spent.</span>
           </motion.h1>
 
           <motion.p
@@ -173,10 +173,11 @@ function Hero() {
             transition={{ duration: 0.7, delay: 0.16 }}
             className="mt-10 text-[16px] md:text-[17px] text-violet-100/60 max-w-xl leading-relaxed font-light"
           >
-            TrustAudit turns every WhatsApp challan into a real-time Section 43B(h)
-            compliance shield. Drivers snap photos. Your CFO sees a filing-ready
-            PDF in <span className="font-mono text-violet-200">15 seconds</span>.
-            Zero missed deadlines. Zero disallowed deductions.
+            India has a rule: if you pay a small supplier more than{" "}
+            <span className="font-mono text-violet-200">45 days</span> late,
+            you lose the tax break on that bill forever. TrustAudit watches
+            the clock on every paper bill your drivers pick up, so you never
+            miss it. No app. No login. No typing.
           </motion.p>
 
           <motion.div

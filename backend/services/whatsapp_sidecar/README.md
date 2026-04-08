@@ -12,7 +12,8 @@ never imports Baileys directly.
 - Baileys is Node-only, and we want the Python backend to stay lightweight.
 - Each WhatsApp account maps to one sidecar process; scaling is horizontal.
 - If the sidecar is down, the Python `BaileysClient.health()` reports
-  `"unreachable"` and the backend can fall back to `mock` or `twilio`.
+  `"unreachable"` and the backend can fall back to `mock` (for fixture
+  tests + local dev). Twilio is no longer a supported fallback.
 
 ## Install
 

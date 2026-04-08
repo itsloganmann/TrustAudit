@@ -1,72 +1,129 @@
-# Render.com Blueprint -- Single Web Service (Docker)
+# Render.com Blueprint — TrustAudit production.
 #
-# Builds the multi-stage Dockerfile, then runs uvicorn behind Render's L7
-# health check at /health. All secrets are marked ``sync: false`` so they
-# are pasted into the Render dashboard rather than committed to git.
+# Single Docker web service + managed Postgres + 1GB persistent disk.
+# The Docker build produces: frontend/dist, the baileys sidecar's
+# node_modules, and the Python backend. ``start.sh`` orchestrates at
+# container start:
 #
-# After editing this file, push to main and Render will auto-redeploy.
+#   1. mkdir the persistent-disk subdirs (/app/data/baileys_sessions,
+#      /app/data/uploads)
+#   2. alembic upgrade head against $DATABASE_URL (Render Postgres)
+#   3. python seed.py (idempotent no-op if DB already populated)
+#   4. launch the baileys sidecar on :3001 in background (if
+#      WHATSAPP_PROVIDER=baileys)
+#   5. exec uvicorn on $PORT
+#
+# All secrets are ``sync: false`` so they stay in the Render dashboard
+# and never land in git.
 
 services:
   - type: web
     name: trustaudit
     runtime: docker
-    plan: free
+    plan: starter                    # was free — upgraded for always-on + persistent disk
     region: oregon
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     autoDeploy: true
 
+    disk:
+      name: trustaudit-data
+      mountPath: /app/data
+      sizeGB: 1
+
     envVars:
-      # ---------------- Core app ----------------
+      # ---------------- Core ----------------
       - key: APP_ENV
         value: production
       - key: BASE_URL
-        value: https://trustaudit.onrender.com
+        value: https://trustaudit-wxd7.onrender.com
       - key: JWT_SECRET
-        sync: false                       # set in Render dashboard
+        sync: false                  # openssl rand -hex 32, paste in dashboard
       - key: SUBMIT_CONFIDENCE_THRESHOLD
         value: "0.85"
+
+      # ---------------- Database (Render Postgres add-on) ----------------
+      - key: DATABASE_URL
+        fromDatabase:
+          name: trustaudit-pg
+          property: connectionString
 
       # ---------------- Vision (Gemini) ----------------
       - key: VISION_PROVIDER
         value: gemini
       - key: GEMINI_API_KEY
-        sync: false                       # set in Render dashboard
+        sync: false                  # https://aistudio.google.com/app/apikey
       - key: GEMINI_MODEL
         value: gemini-flash-latest
 
-      # ---------------- WhatsApp (Twilio sandbox) ----------------
+      # ---------------- WhatsApp (Baileys in-container) ----------------
       - key: WHATSAPP_PROVIDER
-        value: twilio
-      - key: TWILIO_ACCOUNT_SID
-        sync: false                       # set in Render dashboard
-      - key: TWILIO_AUTH_TOKEN
-        sync: false                       # set in Render dashboard (re-paste after rotate)
-      - key: TWILIO_PHONE_NUMBER
-        value: "+18788801359"
-      - key: TWILIO_WHATSAPP_FROM
-        value: "whatsapp:+14155238886"
-      - key: TWILIO_SANDBOX_JOIN_CODE
-        value: crop-conversation
-      - key: TWILIO_VALIDATE_SIGNATURE
-        value: "1"
+        value: baileys
+      - key: WHATSAPP_SIDECAR_URL
+        value: http://localhost:3001
+      - key: BAILEYS_SESSIONS_DIR
+        value: /app/data/baileys_sessions
+      - key: UPLOADS_DIR
+        value: /app/data/uploads
+      - key: PAIRING_PHONE
+        sync: false                  # e.g. 14085959751 — set only during first pairing
+      - key: ADMIN_TOKEN
+        sync: false                  # openssl rand -hex 24, guards /api/admin/*
 
-      # ---------------- Email ----------------
+      # ---------------- Email (Resend, swapped out of mock) ----------------
       - key: EMAIL_PROVIDER
-        value: mock
-      # - key: RESEND_API_KEY
-      #   sync: false                     # uncomment + paste when EMAIL_PROVIDER=resend
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false                  # paste the Resend API key in the dashboard
 
       # ---------------- OAuth ----------------
       - key: GOOGLE_OAUTH_CLIENT_ID
         value: 166888028367-86gi8h6lttlepkhl0ri7dqcllk53l8vk.apps.googleusercontent.com
-      # - key: FACEBOOK_APP_ID
-      #   sync: false                     # uncomment + paste once Facebook app exists
-
-      # ---------------- Optional fallback LLM ----------------
-      # - key: ANTHROPIC_API_KEY
-      #   sync: false
 
       # ---------------- Demo gating ----------------
       - key: DEMO_AT
         value: "2026-04-07T09:00+05:30"
+
+      # ---------------- Legal / DPDP identity (Vite build-time) ----------------
+      # These flow from Render dashboard env → Docker --build-arg → Vite
+      # build → frontend/src/config/legal.js → Privacy/Terms pages.
+      # Every field is sync:false because the correct values depend on
+      # the registered entity and lawyer review. Until they are set, the
+      # Privacy/Terms pages render a loud amber banner that surfaces the
+      # unresolved fields to every visitor. See PRODUCTION_READINESS.md
+      # at the repo root for the full checklist.
+      - key: VITE_LEGAL_COMPANY_NAME
+        sync: false                   # display name, e.g. "TrustAudit"
+      - key: VITE_LEGAL_COMPANY_LEGAL_NAME
+        sync: false                   # registered entity name
+      - key: VITE_LEGAL_COMPANY_REGISTRATION
+        sync: false                   # CIN / LLPIN / GSTIN
+      - key: VITE_LEGAL_REGISTERED_ADDRESS
+        sync: false                   # full postal address
+      - key: VITE_LEGAL_JURISDICTION_CITY
+        sync: false                   # e.g. Bengaluru
+      - key: VITE_LEGAL_PRIVACY_EMAIL
+        sync: false                   # privacy@...
+      - key: VITE_LEGAL_SUPPORT_EMAIL
+        sync: false                   # support@...
+      - key: VITE_LEGAL_GRIEVANCE_OFFICER_NAME
+        sync: false                   # DPDP Rule 5(9) appointee
+      - key: VITE_LEGAL_GRIEVANCE_OFFICER_EMAIL
+        sync: false
+      - key: VITE_LEGAL_GRIEVANCE_OFFICER_PHONE
+        sync: false
+      - key: VITE_LEGAL_GRIEVANCE_OFFICER_ADDRESS
+        sync: false
+      - key: VITE_LEGAL_PRIVACY_LAST_UPDATED
+        sync: false                   # bump on every material amendment
+      - key: VITE_LEGAL_TERMS_LAST_UPDATED
+        sync: false
+      - key: VITE_LEGAL_HOSTING_REGION
+        sync: false                   # e.g. "United States (Render Oregon)"
+      - key: VITE_LEGAL_PLANNED_HOSTING_REGION
+        sync: false                   # e.g. "India (Mumbai)"
+
+databases:
+  - name: trustaudit-pg
+    plan: starter                    # 1GB managed Postgres
+    region: oregon

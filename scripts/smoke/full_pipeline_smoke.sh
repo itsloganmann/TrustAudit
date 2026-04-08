@@ -97,10 +97,10 @@ assert_body_contains "TrustAudit" "GET / body"
 
 code=$(http GET "$BASE_URL/api/webhook/whatsapp/health")
 assert_status "$code" "200" "GET /api/webhook/whatsapp/health"
-# health body shape: { active_provider, last_inbound_at, providers: { mock: {...}, twilio: {...}, baileys: {...} } }
+# health body shape: { active_provider, last_inbound_at, providers: { mock: {...}, baileys: {...} } }
 providers=$(body | jq -r '.providers | keys | join(",")' 2>/dev/null || echo "")
 active=$(body | jq -r '.active_provider // empty' 2>/dev/null || echo "")
-if [ -n "$providers" ] && echo "$providers" | grep -q "mock\|twilio\|baileys"; then
+if [ -n "$providers" ] && echo "$providers" | grep -q "mock\|baileys"; then
   pass "WhatsApp health providers=[$providers] active=$active"
 else
   fail "WhatsApp health body missing providers map. body=$(body | head -c 200)"
@@ -120,7 +120,7 @@ SMOKE_SESSION="smoke-$(date +%s)-$$"
 code=$(http POST "$BASE_URL/api/demo/new-session?custom_id=$SMOKE_SESSION")
 assert_status "$code" "200" "POST /api/demo/new-session?custom_id=$SMOKE_SESSION"
 assert_json_field '.session_id' "$SMOKE_SESSION" "demo session_id echoes custom_id"
-assert_json_field '.whatsapp_number' "+14155238886" "demo whatsapp_number"
+assert_json_field '.whatsapp_number' "+14085959751" "demo whatsapp_number"
 
 # Collision should now 409 (adversary fix #7).
 code=$(http POST "$BASE_URL/api/demo/new-session?custom_id=$SMOKE_SESSION")

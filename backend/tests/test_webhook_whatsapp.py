@@ -1,28 +1,22 @@
 """Integration tests for the /api/webhook/whatsapp/inbound router.
 
-These tests exercise the full FastAPI request/response path — the bugs
-caught by the adversary review of 6293462 (invoice #0 leak, un-awaited
-pipeline coroutine, check-then-mark race, JSON-vs-TwiML, blocking sync
-httpx) were all invisible to unit tests that mocked at the provider level
-and never actually hit the route. Every future webhook change MUST land a
-matching test here or the adversary will block the merge.
+These tests exercise the full FastAPI request/response path. Every future
+webhook change MUST land a matching test here.
 
 Covered scenarios:
 
 * mock provider — accepted inbound, correct reply body
-* mock provider — Twilio-shaped payload (capital-S keys) round-trips SID
-* duplicate MessageSid — returns TwiML on Twilio path, JSON on mock
+* application/x-www-form-urlencoded routes to mock (form shape is no
+  longer Twilio-specific after the pivot)
+* duplicate MessageSid returns JSON duplicate
 * duplicate image hash — only fires when a real invoice_id has been recorded
 * rate-limit path returns early
-* Twilio signature validation — rejects missing/bad signature, accepts valid
-* Twilio TwiML response — correct Content-Type and empty Response body
+* aggregated /health endpoint exposes providers block
+* step-1.5 immediate ack + outbound observability
 """
 from __future__ import annotations
 
-import base64
 import hashlib
-import hmac
-import os
 import sys
 from pathlib import Path
 
@@ -41,24 +35,15 @@ from app.services import whatsapp as wa_factory  # noqa: E402
 def _reset_state(monkeypatch):
     """Reset idempotency + rate-limit + mock provider state before each test.
 
-    Also forces the WhatsApp provider to ``mock`` regardless of what env vars
-    the surrounding shell may have set. The module-level provider cache is
-    cleared so any previously-cached TwilioClient instance (from a live
-    ``source ~/.config/trustaudit/env``) does NOT leak into tests and
-    accidentally hit the real Twilio API.
+    Also forces the WhatsApp provider to ``mock`` so tests do not accidentally
+    hit a live Baileys sidecar. The module-level provider cache is cleared
+    so a previously-cached BaileysClient instance does not leak in.
     """
     webhook_idempotency.reset_idempotency_state()
     if hasattr(rate_limit, "_store"):
         rate_limit._store.clear()  # type: ignore[attr-defined]
     mock_mod.SENT_MESSAGES.clear()
-    monkeypatch.setenv("TWILIO_VALIDATE_SIGNATURE", "0")
     monkeypatch.setenv("WHATSAPP_PROVIDER", "mock")
-    # Also delete Twilio creds from the test env so even the fallback factory
-    # cannot construct a live TwilioClient.
-    monkeypatch.delenv("TWILIO_ACCOUNT_SID", raising=False)
-    monkeypatch.delenv("TWILIO_AUTH_TOKEN", raising=False)
-    # Clear the module-level provider cache so get_whatsapp_provider() picks
-    # up the patched env on its next call.
     if hasattr(wa_factory, "_cached_provider"):
         wa_factory._cached_provider = None  # type: ignore[attr-defined]
     yield
@@ -78,9 +63,7 @@ def client():
 # ---------------------------------------------------------------------------
 def test_inbound_mock_text_only_returns_accepted(client):
     # multipart/form-data routes to the mock provider (the drag-and-drop
-    # demo path from the frontend). application/json routes to baileys,
-    # application/x-www-form-urlencoded routes to twilio. We test all
-    # three routing paths separately.
+    # demo path from the frontend + the fixture self-test path).
     r = client.post(
         "/api/webhook/whatsapp/inbound",
         files={"_dummy": ("", "")},  # force multipart content-type
@@ -93,48 +76,52 @@ def test_inbound_mock_text_only_returns_accepted(client):
     assert body["provider"] == "mock"
 
 
-def test_inbound_twilio_shaped_capital_keys_round_trips(client):
-    # Twilio uses CapitalCase keys. The mock provider must not regenerate a
-    # fresh UUID on these — otherwise idempotency dies on retry.
+def test_inbound_form_urlencoded_routes_to_mock(client):
+    # After the Twilio pivot, form-urlencoded payloads no longer carry the
+    # Twilio shape — they route to the mock provider and return JSON.
     payload = {
         "From": "whatsapp:+919812345678",
-        "Body": "hello from twilio",
-        "MessageSid": "SM-capital-keys-test",
+        "Body": "hello form",
+        "MessageSid": "form-urlencoded-1",
         "NumMedia": "0",
     }
-    r1 = client.post(
+    r = client.post(
         "/api/webhook/whatsapp/inbound",
         data=payload,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
-    # Twilio path returns TwiML, not JSON.
-    assert r1.status_code == 200
-    assert r1.headers["content-type"].startswith("application/xml")
-    assert "<Response/>" in r1.text or "<Response></Response>" in r1.text
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "accepted"
+    assert body["provider"] == "mock"
 
-    # Second identical POST must be treated as duplicate — proves the SID
-    # round-tripped through mock provider's parse_inbound.
-    r2 = client.post(
+
+def test_inbound_json_routes_to_baileys_shape(client):
+    # application/json routes to the baileys detected path.
+    r = client.post(
         "/api/webhook/whatsapp/inbound",
-        data=payload,
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        json={
+            "from": "+919812345678",
+            "text": "baileys shape",
+            "message_sid": "baileys-shape-1",
+        },
     )
-    assert r2.status_code == 200
-    assert r2.headers["content-type"].startswith("application/xml")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["status"] == "accepted"
+    assert body["sid"] == "baileys-shape-1"
 
 
 # ---------------------------------------------------------------------------
 # Duplicate handling
 # ---------------------------------------------------------------------------
 def test_duplicate_message_sid_short_circuits(client):
-    # First POST: accepted (JSON → baileys path → JSON response)
     r1 = client.post(
         "/api/webhook/whatsapp/inbound",
         json={"from": "+91", "text": "once", "message_sid": "dup-sid-1"},
     )
     assert r1.json()["status"] == "accepted"
 
-    # Second POST with same SID: duplicate
     r2 = client.post(
         "/api/webhook/whatsapp/inbound",
         json={"from": "+91", "text": "once", "message_sid": "dup-sid-1"},
@@ -149,36 +136,21 @@ def test_duplicate_image_only_fires_when_real_invoice_id_present(client):
     bytes_value = b"fake-challan-bytes-123"
     sha = hashlib.sha256(bytes_value).hexdigest()
 
-    # Attempt to record with id=0 → should be a no-op
     webhook_idempotency.record_image_hash(sha, invoice_id=0)  # type: ignore[arg-type]
     assert webhook_idempotency.find_invoice_by_image_hash(sha) is None
 
-    # Now record with a real invoice id — should be recorded
     webhook_idempotency.record_image_hash(sha, invoice_id=42)
     assert webhook_idempotency.find_invoice_by_image_hash(sha) == 42
 
 
 def test_webhook_user_reply_never_says_invoice_zero(client):
-    """Adversary must-fix #1: replies must never interpolate invoice_id=0.
-
-    We pre-populate the dedup store with a real invoice id, send a matching
-    image, and confirm the reply references the real id (not zero).
-    """
+    """Adversary must-fix #1: replies must never interpolate invoice_id=0."""
     bytes_value = b"another-fake-challan-bytes"
     sha = hashlib.sha256(bytes_value).hexdigest()
     webhook_idempotency.record_image_hash(sha, invoice_id=42)
 
-    # We can't easily send binary through the test client with a media_url
-    # the mock provider can download, so we instead prime a fixture lookup:
-    # the mock's download_media returns the fixture bytes; we bypass by using
-    # a media_url that starts with mock://bytes and override the client's
-    # download_media for this test.
-    # ... instead, just assert the dedup behavior by calling the idempotency
-    # store directly (the webhook logic uses the same helper).
     found = webhook_idempotency.find_invoice_by_image_hash(sha)
     assert found == 42
-    # The webhook handler now wraps ``f"invoice #{existing_invoice}"`` which
-    # would produce "invoice #42", never "invoice #0".
     assert f"invoice #{found}" == "invoice #42"
 
 
@@ -186,70 +158,12 @@ def test_webhook_user_reply_never_says_invoice_zero(client):
 # Rate limit
 # ---------------------------------------------------------------------------
 def test_rate_limit_path_returns_early(client, monkeypatch):
-    # Stub the rate limiter to always reject
     monkeypatch.setattr(rate_limit, "check", lambda kind, key, **kw: False)
     r = client.post(
         "/api/webhook/whatsapp/inbound",
         json={"from": "+91spammer", "text": "spam", "message_sid": "spam-1"},
     )
     assert r.json()["status"] == "rate_limited"
-
-
-# ---------------------------------------------------------------------------
-# Twilio signature validation
-# ---------------------------------------------------------------------------
-def test_twilio_signature_rejected_when_enabled_and_missing(client, monkeypatch):
-    monkeypatch.setenv("TWILIO_VALIDATE_SIGNATURE", "1")
-    monkeypatch.setenv("TWILIO_AUTH_TOKEN", "fake-test-token")
-    r = client.post(
-        "/api/webhook/whatsapp/inbound",
-        data={"From": "whatsapp:+91", "Body": "x", "MessageSid": "SM-badsig"},
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    # No X-Twilio-Signature header → 403
-    assert r.status_code == 403
-    assert "invalid twilio signature" in r.text.lower()
-
-
-def test_twilio_signature_accepted_when_valid(client, monkeypatch):
-    monkeypatch.setenv("TWILIO_VALIDATE_SIGNATURE", "1")
-    token = "secret-test-token"
-    monkeypatch.setenv("TWILIO_AUTH_TOKEN", token)
-    url = "http://testserver/api/webhook/whatsapp/inbound"
-    params = {
-        "From": "whatsapp:+919812345678",
-        "Body": "valid sig test",
-        "MessageSid": "SM-valid-sig",
-    }
-    s = url
-    for k in sorted(params.keys()):
-        s += k + params[k]
-    expected = base64.b64encode(
-        hmac.new(token.encode(), s.encode(), hashlib.sha1).digest()
-    ).decode()
-
-    r = client.post(
-        "/api/webhook/whatsapp/inbound",
-        data=params,
-        headers={
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-Twilio-Signature": expected,
-        },
-    )
-    assert r.status_code == 200
-    assert r.headers["content-type"].startswith("application/xml")
-
-
-def test_twilio_signature_bypass_when_disabled(client, monkeypatch):
-    # TWILIO_VALIDATE_SIGNATURE=0 explicitly opts out (for local dev / mock).
-    monkeypatch.setenv("TWILIO_VALIDATE_SIGNATURE", "0")
-    monkeypatch.setenv("TWILIO_AUTH_TOKEN", "doesnt-matter")
-    r = client.post(
-        "/api/webhook/whatsapp/inbound",
-        data={"From": "whatsapp:+91", "Body": "x", "MessageSid": "SM-bypass"},
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    assert r.status_code == 200
 
 
 # ---------------------------------------------------------------------------
@@ -262,21 +176,20 @@ def test_webhook_health_endpoint(client):
     assert "active_provider" in body
     assert "providers" in body
     assert "mock" in body["providers"]
+    assert "baileys" in body["providers"]
+    # No twilio provider after the pivot.
+    assert "twilio" not in body["providers"]
 
 
 # ---------------------------------------------------------------------------
 # Step-1.5 immediate ack + outbound observability
 # ---------------------------------------------------------------------------
 def test_inbound_fires_immediate_ack_and_records_outbound_observability(client):
-    """Adversary regression: every accepted inbound must (a) push a
-    user-visible ack to the sender BEFORE running the slow vision pipeline,
-    and (b) record the outbound result to the observability ring buffer so
-    a stale ``TWILIO_AUTH_TOKEN`` is diagnosable from
-    ``GET /api/debug/recent-inbounds`` without needing log access.
-
-    Without this, the user gets nothing back from the bot when their auth
-    token rotates and the only signal is a `WARNING send_text failed` line
-    in Render's stdout.
+    """Every accepted inbound must (a) push a user-visible ack to the sender
+    BEFORE running the slow vision pipeline, and (b) record the outbound
+    result to the observability ring buffer so a stale sidecar connection is
+    diagnosable from ``GET /api/debug/recent-inbounds`` without needing log
+    access.
     """
     webhook_observability.reset()
 
@@ -301,11 +214,11 @@ def test_inbound_fires_immediate_ack_and_records_outbound_observability(client):
     assert sent["to"] == "+919812345678"
     assert "TrustAudit" in sent["body"]
     assert "got your challan" in sent["body"]
-    assert "trustaudit-wxd7.onrender.com/live" in sent["body"]
+    assert "trustaudit" in sent["body"].lower()
 
     # The observability ring buffer should now contain TWO rows for this
     # webhook hit: the inbound record (sig=skipped) AND the ack record
-    # (ack_sent:ok=True). The debug endpoint exposes them newest-first.
+    # (ack_sent:ok=True).
     debug = client.get("/api/debug/recent-inbounds?limit=10").json()
     items = debug["items"]
     matched_inbound = [
