@@ -36,7 +36,7 @@ services:
       - key: APP_ENV
         value: production
       - key: BASE_URL
-        value: https://trustaudit.onrender.com
+        value: https://trustaudit-wxd7.onrender.com
       - key: JWT_SECRET
         sync: false                  # openssl rand -hex 32, paste in dashboard
       - key: SUBMIT_CONFIDENCE_THRESHOLD
