@@ -99,7 +99,7 @@ COPY backend/services/whatsapp_sidecar/ ./
 # ---------------------------------------------------------------------------
 # Stage 3: runtime image (Python 3.11 + Node 20 + WeasyPrint deps)
 # ---------------------------------------------------------------------------
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # WeasyPrint system libraries on Debian Bookworm slim:
 #   * libcairo2, libpango-1.0-0, libpangocairo-1.0-0 -- text/PDF rendering
