@@ -17,7 +17,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: build the frontend (Vite -> static files in frontend/dist)
 # ---------------------------------------------------------------------------
-FROM node:20-slim AS frontend-build
+FROM node:25-slim AS frontend-build
 WORKDIR /app/frontend
 
 # Vite bakes VITE_* env vars into the static bundle at build time. We
@@ -73,7 +73,7 @@ RUN npm run build
 # ---------------------------------------------------------------------------
 # Stage 2: install the baileys sidecar's npm dependencies
 # ---------------------------------------------------------------------------
-FROM node:20-slim AS sidecar-build
+FROM node:25-slim AS sidecar-build
 WORKDIR /app/sidecar
 
 # baileys' transitive deps include a git-source package (libsignal-node).
