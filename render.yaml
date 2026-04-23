@@ -68,7 +68,9 @@ services:
       - key: PAIRING_PHONE
         sync: false                  # e.g. 14085959751 — set only during first pairing
       - key: ADMIN_TOKEN
-        sync: false                  # openssl rand -hex 24, guards /api/admin/*
+        sync: false                  # openssl rand -hex 24, guards /api/admin/* and /api/debug/*
+      - key: PILOT_ADMIN_TOKEN
+        sync: false                  # openssl rand -hex 24, guards GET /api/pilot/applications
 
       # ---------------- Email (Resend, swapped out of mock) ----------------
       - key: EMAIL_PROVIDER

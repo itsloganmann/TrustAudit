@@ -94,7 +94,7 @@ Before hitting "deploy" for the first real customer:
 - [ ] Persistent disk `trustaudit-data`, 1GB, mounted at `/app/data`.
 - [ ] Env var `DATABASE_URL` — auto-wired from `trustaudit-pg` via `render.yaml::fromDatabase`.
 - [ ] Env var `GEMINI_API_KEY` — paste from https://aistudio.google.com/app/apikey. **Verify not using free tier for production** — free-tier Gemini retains data for training. Use paid-tier API key only.
-- [ ] Env var `RESEND_API_KEY` — the value in memory is `re_4ZE3c7wq_...`. Paste in Render dashboard, do not commit.
+- [ ] Env var `RESEND_API_KEY` — rotate via the Resend dashboard and paste the new value directly into Render. Never commit any fragment of the key (including prefixes) to this repo.
 - [ ] Env var `ADMIN_TOKEN` — `openssl rand -hex 24`. This unlocks the `/api/admin/baileys/*` endpoints. Store in 1Password or Bitwarden, never paste in Slack.
 - [ ] Env var `JWT_SECRET` — `openssl rand -hex 32`. Session cookie HMAC key. Same storage rules.
 - [ ] Env var `PAIRING_PHONE` — `14085959751` (no +, no spaces). Drives the Baileys pairing-code flow.

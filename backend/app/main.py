@@ -30,9 +30,9 @@ from .routes.pilot import router as pilot_router
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="TrustAudit -- Tax Shield API",
-    description="43B(h) compliance engine for Indian MSME payments",
-    version="0.1.0",
+    title="TrustAudit API",
+    description="Decision layer for invoice acceptance. Built for AP teams at Indian enterprises.",
+    version="0.2.0",
 )
 
 # CORS -- explicit allowlist (adversary 7926af6 #5).
@@ -64,7 +64,7 @@ app.add_middleware(
     allow_origin_regex=_preview_regex,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["content-type", "authorization", "x-requested-with", "x-demo-seed-token"],
+    allow_headers=["content-type", "authorization", "x-requested-with", "x-demo-seed-token", "x-admin-token"],
 )
 
 # Serve uploaded challan images. Honors UPLOADS_DIR so Render can point
