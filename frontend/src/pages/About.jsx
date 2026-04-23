@@ -69,13 +69,15 @@ const COFOUNDERS = [
     photoFallback: "/team/arnav.svg",
     bio:
       "Runs strategy, GTM, and partnerships. Deep roots in the Indian " +
-      "enterprise and MSME ecosystem. GTM intern at Carbyn AI. Leading " +
-      "TrustAudit's pilots with AP teams in pharma distribution, " +
-      "manufacturing, and industrial procurement.",
+      "enterprise and MSME ecosystem. GTM intern at Carbyn AI. Ran the " +
+      "Senior Story Project for 6 years, managing a team of 125+ " +
+      "volunteers. Leading TrustAudit's pilots with AP teams in pharma " +
+      "distribution, manufacturing, and industrial procurement.",
     credentials: [
       { icon: Briefcase, label: "Strategy & GTM · Partnerships" },
       { icon: GraduationCap, label: "UC Berkeley Haas School of Business" },
       { icon: Rocket, label: "GTM Intern @ Carbyn AI" },
+      { icon: Users, label: "Senior Story Project · 125+ volunteers (6 yrs)" },
     ],
     links: [
       {
