@@ -43,15 +43,15 @@ export default function ComplianceFormViewer({
 
   return (
     <div
-      className={`rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden ${className}`}
+      className={`rounded-xl bg-white border border-zinc-200 overflow-hidden ${className}`}
     >
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.02]">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-200 bg-zinc-50">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
-            <FileText size={11} className="text-slate-400" />
+          <div className="w-6 h-6 rounded-md bg-white border border-zinc-200 flex items-center justify-center">
+            <FileText size={11} className="text-zinc-500" />
           </div>
-          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">
+          <p className="text-[10px] text-zinc-700 uppercase tracking-widest font-semibold">
             Compliance Filing
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function ComplianceFormViewer({
       </div>
 
       {/* Viewer body */}
-      <div className="relative bg-slate-950/50" style={{ height }}>
+      <div className="relative bg-zinc-50" style={{ height }}>
         {!loaded && !errored && (
           <div className="absolute inset-0 flex items-center justify-center">
             <motion.div
@@ -81,8 +81,8 @@ export default function ComplianceFormViewer({
               transition={{ duration: 1.4, repeat: Infinity }}
               className="flex flex-col items-center gap-2"
             >
-              <Loader2 size={18} className="text-slate-500 animate-spin" />
-              <p className="text-[10px] text-slate-600 uppercase tracking-widest">
+              <Loader2 size={18} className="text-zinc-500 animate-spin" />
+              <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
                 Loading PDF
               </p>
             </motion.div>
@@ -91,13 +91,13 @@ export default function ComplianceFormViewer({
 
         {errored ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-            <FileText size={20} className="text-slate-700" />
-            <p className="text-[11px] text-slate-500">Could not load PDF.</p>
+            <FileText size={20} className="text-zinc-400" />
+            <p className="text-[11px] text-zinc-500">Could not load PDF.</p>
             <a
               href={pdfUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-[10px] text-blue-400 hover:underline"
+              className="text-[10px] text-emerald-700 hover:underline"
             >
               Open in new tab
             </a>
@@ -118,7 +118,7 @@ export default function ComplianceFormViewer({
 
 function ToolbarButton({ icon: Icon, label, onClick, href, target, download }) {
   const cls =
-    "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-slate-400 hover:text-white hover:bg-white/[0.05] border border-transparent hover:border-white/[0.08] transition-colors";
+    "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] text-zinc-600 hover:text-zinc-900 hover:bg-white border border-transparent hover:border-zinc-200 transition-colors";
   if (href) {
     return (
       <a

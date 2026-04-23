@@ -73,50 +73,50 @@ export default function ProviderHealthPanel({
 
   return (
     <div
-      className={`rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden ${className}`}
+      className={`rounded-xl bg-white border border-zinc-200 overflow-hidden ${className}`}
     >
       <div className="px-4 py-3 flex items-center gap-3">
         <div
           className={`w-9 h-9 rounded-lg flex items-center justify-center border ${
             healthy === false
-              ? "bg-rose-500/10 border-rose-500/25"
+              ? "bg-red-50 border-red-200"
               : healthy === true
-              ? "bg-emerald-500/10 border-emerald-500/25"
-              : "bg-white/[0.04] border-white/[0.08]"
+              ? "bg-emerald-50 border-emerald-200"
+              : "bg-zinc-50 border-zinc-200"
           }`}
         >
           {healthy === false ? (
-            <AlertCircle size={14} className="text-rose-400" />
+            <AlertCircle size={14} className="text-red-700" />
           ) : healthy === true ? (
-            <Radio size={14} className="text-emerald-400" />
+            <Radio size={14} className="text-emerald-700" />
           ) : (
-            <Radio size={14} className="text-slate-400" />
+            <Radio size={14} className="text-zinc-500" />
           )}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-[11px] text-white font-semibold tracking-tight uppercase">
+            <p className="text-[11px] text-zinc-900 font-semibold tracking-tight uppercase">
               {data.provider || "unknown"}
             </p>
             {healthy === true && (
               <motion.span
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="inline-flex items-center gap-1 text-[9px] text-emerald-300 font-mono uppercase tracking-wider"
+                className="inline-flex items-center gap-1 text-[9px] text-emerald-700 font-mono uppercase tracking-wider"
               >
-                <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                <span className="w-1 h-1 rounded-full bg-emerald-500" />
                 live
               </motion.span>
             )}
             {healthy === false && (
-              <span className="text-[9px] text-rose-300 font-mono uppercase tracking-wider">
+              <span className="text-[9px] text-red-700 font-mono uppercase tracking-wider">
                 degraded
               </span>
             )}
           </div>
           <p
-            className="text-[9px] text-slate-600 font-mono mt-0.5"
+            className="text-[9px] text-zinc-500 font-mono mt-0.5"
             data-tick={tick}
           >
             last success {formatRelative(data.last_success_at)}
@@ -129,7 +129,7 @@ export default function ProviderHealthPanel({
             setLoading(true);
             load();
           }}
-          className="p-1.5 rounded-md hover:bg-white/[0.05] text-slate-500 hover:text-white transition-colors"
+          className="p-1.5 rounded-md hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 transition-colors"
           aria-label="Refresh provider health"
         >
           <RefreshCw size={11} className={loading ? "animate-spin" : ""} />
@@ -137,24 +137,24 @@ export default function ProviderHealthPanel({
       </div>
 
       {(data.inbound_24h !== null || data.error_rate_24h !== null) && (
-        <div className="px-4 py-2 border-t border-white/[0.06] grid grid-cols-2 gap-3 text-[10px]">
+        <div className="px-4 py-2 border-t border-zinc-200 grid grid-cols-2 gap-3 text-[10px]">
           <div>
-            <p className="text-slate-600 uppercase tracking-widest text-[8px]">
+            <p className="text-zinc-500 uppercase tracking-widest text-[8px]">
               Inbound 24h
             </p>
-            <p className="text-white font-mono tabular-nums">
+            <p className="text-zinc-900 font-mono tabular-nums">
               {data.inbound_24h ?? "—"}
             </p>
           </div>
           <div>
-            <p className="text-slate-600 uppercase tracking-widest text-[8px]">
+            <p className="text-zinc-500 uppercase tracking-widest text-[8px]">
               Error rate
             </p>
             <p
               className={`font-mono tabular-nums ${
                 (data.error_rate_24h ?? 0) > 0.05
-                  ? "text-rose-300"
-                  : "text-emerald-300"
+                  ? "text-red-700"
+                  : "text-emerald-700"
               }`}
             >
               {data.error_rate_24h !== null

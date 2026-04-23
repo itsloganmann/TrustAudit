@@ -9,7 +9,6 @@ import {
   Camera,
   ShieldCheck,
   AlertTriangle,
-  ArrowRight,
   Scan,
   Sparkles,
 } from "lucide-react";
@@ -24,16 +23,14 @@ import { api, ApiError } from "../lib/api";
    ───────────────────────────────────────────── */
 
 const backdrop = {
-  hidden: { opacity: 0, backdropFilter: "blur(0px)" },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    backdropFilter: "blur(18px)",
-    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
+    transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
   },
   exit: {
     opacity: 0,
-    backdropFilter: "blur(0px)",
-    transition: { duration: 0.22, ease: "easeIn" },
+    transition: { duration: 0.18, ease: "easeIn" },
   },
 };
 
@@ -124,31 +121,31 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[900px] bg-slate-950/95 backdrop-blur-xl border-l border-white/[0.06] flex flex-col will-change-transform"
+            className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-[900px] bg-white border-l border-zinc-200 shadow-sm flex flex-col will-change-transform"
             onClick={(e) => e.stopPropagation()}
           >
             {/* ── Header ── */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
-                  <FileText size={14} className="text-slate-400" />
+                <div className="w-8 h-8 rounded-lg bg-zinc-50 border border-zinc-200 flex items-center justify-center">
+                  <FileText size={14} className="text-zinc-500" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-[15px] text-white font-semibold tracking-tight">
+                    <h2 className="text-[15px] text-zinc-900 font-semibold tracking-tight">
                       {invoice.invoice_number}
                     </h2>
                     <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                         ok
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : "bg-red-50 text-red-700 border-red-200"
                       }`}
                     >
-                      {ok ? "VERIFIED" : "PENDING"}
+                      {ok ? "Clear to claim" : "Missing proof"}
                     </span>
                   </div>
-                  <p className="text-[12px] text-slate-500 mt-0.5">
+                  <p className="text-[12px] text-zinc-500 mt-0.5">
                     {invoice.vendor_name} / {invoice.gstin}
                   </p>
                 </div>
@@ -157,7 +154,7 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                 onClick={onClose}
                 whileHover={shouldReduceMotion ? undefined : { scale: 1.03, transition: { type: "spring", stiffness: 300, damping: 24 } }}
                 whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
-                className="w-8 h-8 rounded-lg bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] flex items-center justify-center text-slate-500 hover:text-white transition-colors"
+                className="w-8 h-8 rounded-lg bg-white hover:bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors"
               >
                 <X size={14} />
               </motion.button>
@@ -165,22 +162,22 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
 
             {/* ── Body: Justification canvas + two columns ── */}
             <div className="flex-1 overflow-y-auto">
-              {/* 3D justification canvas */}
+              {/* Decision summary */}
               <div className="px-5 pt-5">
                 <div className="flex items-center justify-between mb-3">
-                  <SectionHeader icon={Sparkles} title="Justification Intelligence" />
+                  <SectionHeader icon={Sparkles} title="Decision summary" />
                   {justificationStatus === "loading" && (
-                    <span className="text-[10px] text-slate-500 uppercase tracking-wider">
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider">
                       Loading...
                     </span>
                   )}
                   {justificationStatus === "error" && (
-                    <span className="text-[10px] text-rose-400 uppercase tracking-wider">
+                    <span className="text-[10px] text-red-700 uppercase tracking-wider">
                       Unavailable
                     </span>
                   )}
                   {justificationStatus === "unauthorized" && (
-                    <span className="text-[10px] text-amber-400 uppercase tracking-wider">
+                    <span className="text-[10px] text-amber-700 uppercase tracking-wider">
                       Sign in to view
                     </span>
                   )}
@@ -198,26 +195,26 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
 
               <div className="grid grid-cols-2 gap-0 h-full">
                 {/* LEFT: WhatsApp Chat Simulation */}
-                <div className="border-r border-white/[0.06] p-5 flex flex-col">
-                  <SectionHeader icon={MessageSquare} title="WhatsApp Evidence Trail" />
+                <div className="border-r border-zinc-200 p-5 flex flex-col">
+                  <SectionHeader icon={MessageSquare} title="Proof trail" />
 
-                  <div className="mt-4 flex-1 rounded-xl bg-slate-900/60 border border-white/[0.06] overflow-hidden flex flex-col">
+                  <div className="mt-4 flex-1 rounded-xl bg-zinc-50 border border-zinc-200 overflow-hidden flex flex-col">
                     {/* Chat header */}
-                    <div className="px-4 py-3 bg-white/[0.03] border-b border-white/[0.06] flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                        <span className="text-[11px] font-bold text-emerald-400">DR</span>
+                    <div className="px-4 py-3 bg-white border-b border-zinc-200 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <span className="text-[11px] font-bold text-emerald-700">DR</span>
                       </div>
                       <div>
-                        <p className="text-[12px] text-white font-medium">Driver - {invoice.vendor_name}</p>
-                        <p className="text-[10px] text-emerald-400">online</p>
+                        <p className="text-[12px] text-zinc-900 font-medium">Supplier driver - {invoice.vendor_name}</p>
+                        <p className="text-[10px] text-emerald-700">online</p>
                       </div>
                     </div>
 
                     {/* Chat messages */}
-                    <div className="flex-1 p-4 space-y-3 bg-[#0a0f1a]">
+                    <div className="flex-1 p-4 space-y-3 bg-zinc-50">
                       {/* System message */}
                       <div className="text-center">
-                        <span className="text-[9px] text-slate-600 bg-slate-800/50 px-2 py-0.5 rounded-full">
+                        <span className="text-[9px] text-zinc-500 bg-white border border-zinc-200 px-2 py-0.5 rounded-full">
                           TODAY
                         </span>
                       </div>
@@ -229,11 +226,11 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                         transition={{ delay: 0.3 }}
                         className="flex justify-start"
                       >
-                        <div className="bg-slate-800/80 border border-white/[0.06] rounded-xl rounded-tl-sm px-3 py-2 max-w-[80%]">
-                          <p className="text-[11px] text-slate-300">
+                        <div className="bg-white border border-zinc-200 rounded-xl rounded-tl-sm px-3 py-2 max-w-[80%]">
+                          <p className="text-[11px] text-zinc-700">
                             Sir, uploading challan for {invoice.vendor_name}
                           </p>
-                          <p className="text-[9px] text-slate-600 mt-1 text-right">10:32 AM</p>
+                          <p className="text-[9px] text-zinc-500 mt-1 text-right">10:32 AM</p>
                         </div>
                       </motion.div>
 
@@ -244,12 +241,12 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                         transition={{ delay: 0.6 }}
                         className="flex justify-start"
                       >
-                        <div className="bg-slate-800/80 border border-white/[0.06] rounded-xl rounded-tl-sm p-1.5 max-w-[75%]">
+                        <div className="bg-white border border-zinc-200 rounded-xl rounded-tl-sm p-1.5 max-w-[75%]">
                           {/* Simulated challan image */}
-                          <div className="rounded-lg bg-white p-3 aspect-[4/3] flex flex-col justify-between text-slate-900">
-                            <div className="text-center border-b border-slate-200 pb-2">
-                              <p className="text-[9px] font-bold tracking-wide">TAX CHALLAN</p>
-                              <p className="text-[7px] text-slate-500">Government of India - Income Tax Department</p>
+                          <div className="rounded-lg bg-white border border-zinc-200 p-3 aspect-[4/3] flex flex-col justify-between text-zinc-900">
+                            <div className="text-center border-b border-zinc-200 pb-2">
+                              <p className="text-[9px] font-bold tracking-wide">DELIVERY CHALLAN</p>
+                              <p className="text-[7px] text-zinc-500">Acceptance proof submitted by supplier driver</p>
                             </div>
                             <div className="space-y-1 text-[8px] flex-1 py-2">
                               <ChallanLine label="Challan No" value={`ITNS-${invoice.invoice_number}`} />
@@ -262,22 +259,22 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                               />
                               <ChallanLine label="Date" value={invoice.date_of_acceptance} />
                             </div>
-                            <div className="border-t border-slate-200 pt-1.5 flex items-center justify-between">
-                              <span className="text-[7px] text-slate-400">Auto-verified</span>
+                            <div className="border-t border-zinc-200 pt-1.5 flex items-center justify-between">
+                              <span className="text-[7px] text-zinc-400">Auto-verified</span>
                               {ok && (
-                                <div className="w-8 h-8 rounded-full border border-emerald-400/40 flex items-center justify-center rotate-[-12deg]">
-                                  <span className="text-[5px] text-emerald-500 font-bold text-center leading-tight">
-                                    VERIFIED
+                                <div className="w-8 h-8 rounded-full border border-emerald-400 flex items-center justify-center rotate-[-12deg]">
+                                  <span className="text-[5px] text-emerald-700 font-bold text-center leading-tight">
+                                    CLEARED
                                   </span>
                                 </div>
                               )}
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5 px-1.5 py-1">
-                            <Camera size={10} className="text-slate-500" />
-                            <p className="text-[10px] text-slate-400">challan_photo.jpg</p>
+                            <Camera size={10} className="text-zinc-500" />
+                            <p className="text-[10px] text-zinc-600">challan_photo.jpg</p>
                           </div>
-                          <p className="text-[9px] text-slate-600 px-1.5 pb-0.5 text-right">10:33 AM</p>
+                          <p className="text-[9px] text-zinc-500 px-1.5 pb-0.5 text-right">10:33 AM</p>
                         </div>
                       </motion.div>
 
@@ -289,12 +286,12 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                           transition={{ delay: 0.9 }}
                           className="flex justify-end"
                         >
-                          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl rounded-tr-sm px-3 py-2 max-w-[80%]">
-                            <p className="text-[11px] text-emerald-300">
-                              Challan verified. Date of acceptance confirmed: {invoice.date_of_acceptance}.
-                              43B(h) compliance secured.
+                          <div className="bg-emerald-50 border border-emerald-200 rounded-xl rounded-tr-sm px-3 py-2 max-w-[80%]">
+                            <p className="text-[11px] text-emerald-700">
+                              Proof matched. Date of acceptance confirmed: {invoice.date_of_acceptance}.
+                              Invoice is cleared to claim.
                             </p>
-                            <p className="text-[9px] text-emerald-600 mt-1 text-right">10:33 AM</p>
+                            <p className="text-[9px] text-emerald-700 mt-1 text-right">10:33 AM</p>
                           </div>
                         </motion.div>
                       )}
@@ -306,9 +303,9 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                           transition={{ delay: 0.9 }}
                           className="flex justify-center pt-4"
                         >
-                          <div className="flex items-center gap-2 text-[11px] text-rose-400 bg-rose-500/8 px-3 py-2 rounded-lg border border-rose-500/15">
+                          <div className="flex items-center gap-2 text-[11px] text-red-700 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
                             <AlertTriangle size={12} />
-                            Awaiting challan upload from driver
+                            Awaiting acceptance proof from supplier driver
                           </div>
                         </motion.div>
                       )}
@@ -318,17 +315,17 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
 
                 {/* RIGHT: Extracted Data + Compliance */}
                 <div className="p-5 flex flex-col gap-5">
-                  <SectionHeader icon={Scan} title="Extracted Verification Data" />
+                  <SectionHeader icon={Scan} title="Extracted fields" />
 
                   {/* Invoice details */}
-                  <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
-                    <div className="px-4 py-2.5 bg-white/[0.02] border-b border-white/[0.06]">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-                        Invoice Record
+                  <div className="rounded-xl bg-white border border-zinc-200 overflow-hidden">
+                    <div className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-200">
+                      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+                        Invoice record
                       </p>
                     </div>
                     <div className="px-4 py-1">
-                      <DataRow label="Vendor" value={invoice.vendor_name} />
+                      <DataRow label="Supplier" value={invoice.vendor_name} />
                       <DataRow label="GSTIN" value={invoice.gstin} mono />
                       <DataRow label="Invoice #" value={invoice.invoice_number} mono />
                       <DataRow
@@ -336,18 +333,18 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                         value={`INR ${invoice.invoice_amount.toLocaleString("en-IN")}`}
                         bold
                       />
-                      <DataRow label="Invoice Date" value={invoice.invoice_date} />
-                      <DataRow label="Date of Acceptance" value={invoice.date_of_acceptance} highlight />
-                      <DataRow label="43B(h) Deadline" value={invoice.deadline_43bh} />
+                      <DataRow label="Invoice date" value={invoice.invoice_date} />
+                      <DataRow label="Date of acceptance" value={invoice.date_of_acceptance} highlight />
+                      <DataRow label="Payment window ends" value={invoice.deadline_43bh} />
                       <DataRow
-                        label="Days Remaining"
-                        value={invoice.days_remaining <= 0 ? "OVERDUE" : `${invoice.days_remaining} days`}
+                        label="Days until window closes"
+                        value={invoice.days_remaining <= 0 ? "Window closed" : `${invoice.days_remaining} days`}
                         color={
                           invoice.days_remaining <= 3
-                            ? "#f43f5e"
+                            ? "#dc2626"
                             : invoice.days_remaining <= 14
-                            ? "#f59e0b"
-                            : "#10b981"
+                            ? "#d97706"
+                            : "#047857"
                         }
                       />
                     </div>
@@ -362,45 +359,45 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4 }}
-                      className="rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden"
+                      className="rounded-xl bg-white border border-zinc-200 overflow-hidden"
                     >
-                      <div className="px-4 py-2.5 bg-emerald-500/5 border-b border-emerald-500/10">
-                        <p className="text-[10px] text-emerald-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
+                      <div className="px-4 py-2.5 bg-emerald-50 border-b border-emerald-200">
+                        <p className="text-[10px] text-emerald-700 uppercase tracking-widest font-semibold flex items-center gap-1.5">
                           <ShieldCheck size={11} />
-                          Vision AI Extraction
+                          Vision AI extraction
                         </p>
                       </div>
                       <div className="p-3 grid grid-cols-2 gap-2">
-                        <VerificationBadge label="OCR Confidence" value="98.7%" ok />
-                        <VerificationBadge label="Date Extracted" value={invoice.date_of_acceptance} ok />
-                        <VerificationBadge label="GSTIN Match" value="Confirmed" ok />
-                        <VerificationBadge label="Amount Match" value="Confirmed" ok />
+                        <VerificationBadge label="OCR confidence" value="98.7%" ok />
+                        <VerificationBadge label="Acceptance date" value={invoice.date_of_acceptance} ok />
+                        <VerificationBadge label="GSTIN match" value="Confirmed" ok />
+                        <VerificationBadge label="Amount match" value="Confirmed" ok />
                         <VerificationBadge label="Signature" value="Detected" ok />
-                        <VerificationBadge label="Stamp Seal" value="Present" ok />
+                        <VerificationBadge label="Stamp seal" value="Present" ok />
                       </div>
                     </motion.div>
                   )}
 
                   {/* Compliance Timeline */}
-                  <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
-                    <div className="px-4 py-2.5 bg-white/[0.02] border-b border-white/[0.06]">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-                        Compliance Timeline
+                  <div className="rounded-xl bg-white border border-zinc-200 overflow-hidden">
+                    <div className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-200">
+                      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+                        Decision trail
                       </p>
                     </div>
                     <div className="p-4 space-y-3">
                       <TimelineStep
-                        label="Invoice Created"
+                        label="Invoice created"
                         date={invoice.invoice_date}
                         done
                       />
                       <TimelineStep
-                        label="Date of Acceptance"
+                        label="Date of acceptance"
                         date={invoice.date_of_acceptance}
                         done
                       />
                       <TimelineStep
-                        label="WhatsApp Challan Upload"
+                        label="Acceptance proof received"
                         date={
                           ok && invoice.verified_at
                             ? new Date(invoice.verified_at).toLocaleDateString()
@@ -409,7 +406,7 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
                         done={ok}
                       />
                       <TimelineStep
-                        label="43B(h) Tax Shield Secured"
+                        label="Cleared to claim"
                         date={
                           ok && invoice.verified_at
                             ? new Date(invoice.verified_at).toLocaleDateString()
@@ -434,11 +431,11 @@ export default function InvoiceDetailSheet({ invoice, onClose }) {
 
 function SectionHeader({ icon: Icon, title }) {
   return (
-    <div className="flex items-center gap-2 relative glass-shimmer rounded-md pr-2">
-      <div className="w-6 h-6 rounded-md bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
-        <Icon size={12} className="text-slate-400" />
+    <div className="flex items-center gap-2 relative rounded-md pr-2">
+      <div className="w-6 h-6 rounded-md bg-zinc-50 border border-zinc-200 flex items-center justify-center">
+        <Icon size={12} className="text-zinc-500" />
       </div>
-      <p className="text-[12px] text-white font-semibold tracking-tight">{title}</p>
+      <p className="text-[12px] text-zinc-900 font-semibold tracking-tight">{title}</p>
     </div>
   );
 }
@@ -446,7 +443,7 @@ function SectionHeader({ icon: Icon, title }) {
 function ChallanLine({ label, value, bold }) {
   return (
     <div className="flex justify-between">
-      <span className="text-slate-500">{label}</span>
+      <span className="text-zinc-500">{label}</span>
       <span className={bold ? "font-bold" : "font-medium"}>{value}</span>
     </div>
   );
@@ -454,13 +451,13 @@ function ChallanLine({ label, value, bold }) {
 
 function DataRow({ label, value, mono, bold, color, highlight }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
-      <span className="text-[10px] text-slate-500 uppercase tracking-wider">{label}</span>
+    <div className="flex items-center justify-between py-2 border-b border-zinc-100 last:border-0">
+      <span className="text-[10px] text-zinc-500 uppercase tracking-wider">{label}</span>
       <span
         className={`text-[12px] ${bold ? "font-semibold" : "font-medium"} ${
           mono ? "font-mono text-[11px]" : ""
-        } ${highlight ? "text-blue-400" : ""}`}
-        style={{ color: color || (bold ? "#f8fafc" : highlight ? undefined : "#94a3b8") }}
+        } ${highlight ? "text-blue-700" : ""}`}
+        style={{ color: color || (bold ? "#09090b" : highlight ? undefined : "#3f3f46") }}
       >
         {value}
       </span>
@@ -468,13 +465,13 @@ function DataRow({ label, value, mono, bold, color, highlight }) {
   );
 }
 
-function VerificationBadge({ label, value, ok }) {
+function VerificationBadge({ label, value }) {
   return (
-    <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5 flex items-start gap-2">
-      <CheckCircle2 size={12} className="text-emerald-400 mt-0.5 shrink-0" />
+    <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2.5 flex items-start gap-2">
+      <CheckCircle2 size={12} className="text-emerald-700 mt-0.5 shrink-0" />
       <div>
-        <p className="text-[9px] text-slate-500 leading-tight">{label}</p>
-        <p className="text-[11px] text-emerald-400 font-semibold mt-0.5">{value}</p>
+        <p className="text-[9px] text-zinc-500 leading-tight">{label}</p>
+        <p className="text-[11px] text-emerald-700 font-semibold mt-0.5">{value}</p>
       </div>
     </div>
   );
@@ -487,25 +484,25 @@ function TimelineStep({ label, date, done, last }) {
         <div
           className={`w-6 h-6 rounded-lg flex items-center justify-center ${
             done
-              ? "bg-emerald-500/10 border border-emerald-500/20"
-              : "bg-white/[0.03] border border-white/[0.08]"
+              ? "bg-emerald-50 border border-emerald-200"
+              : "bg-white border border-zinc-200"
           }`}
         >
           {done ? (
-            <CheckCircle2 size={12} className="text-emerald-400" />
+            <CheckCircle2 size={12} className="text-emerald-700" />
           ) : (
-            <Clock size={12} className="text-slate-600" />
+            <Clock size={12} className="text-zinc-400" />
           )}
         </div>
         {!last && (
-          <div className={`w-px h-4 mt-1 ${done ? "bg-emerald-500/20" : "bg-white/[0.06]"}`} />
+          <div className={`w-px h-4 mt-1 ${done ? "bg-emerald-200" : "bg-zinc-200"}`} />
         )}
       </div>
       <div className="flex-1 min-w-0 pt-0.5">
-        <p className={`text-[11px] font-medium ${done ? "text-slate-300" : "text-slate-600"}`}>
+        <p className={`text-[11px] font-medium ${done ? "text-zinc-700" : "text-zinc-400"}`}>
           {label}
         </p>
-        {date && <p className="text-[9px] text-slate-600 font-mono mt-0.5">{date}</p>}
+        {date && <p className="text-[9px] text-zinc-500 font-mono mt-0.5">{date}</p>}
       </div>
     </div>
   );

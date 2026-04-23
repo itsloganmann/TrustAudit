@@ -9,17 +9,17 @@ export default function VendorSignup() {
   return (
     <AuthShell
       role="vendor"
-      eyebrow="Enterprise signup"
-      title="Protect every ₹ of your 43B(h) deductions."
-      subtitle="Two minutes to set up. Connect your suppliers, invite your drivers, and watch your compliance shield go live."
+      eyebrow="AP team signup"
+      title="Know which supplier invoices are safe to pay."
+      subtitle="Two minutes to set up. Connect your suppliers, invite their drivers, and start seeing AP decisions in real time."
       footer={
         <div className="space-y-3">
           <RoleSwitcher currentRole="vendor" mode="signup" />
-          <p className="text-center text-[12px] text-slate-500">
+          <p className="text-center text-[12px] text-zinc-600">
             Already have an account?{" "}
             <Link
               to="/auth/vendor/signin"
-              className="text-white font-medium hover:text-emerald-300 transition-colors"
+              className="text-emerald-700 font-medium hover:text-emerald-800 transition-colors"
             >
               Sign in →
             </Link>
@@ -29,7 +29,7 @@ export default function VendorSignup() {
     >
       <ProviderButtons role="vendor" onError={(e) => toast.error(e.message)} />
       <EmailPasswordForm role="vendor" mode="signup" />
-      <p className="text-[10px] text-slate-600 text-center leading-relaxed">
+      <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
         By creating an account you agree to our terms and privacy policy.
         We'll never share your invoice data with third parties.
       </p>

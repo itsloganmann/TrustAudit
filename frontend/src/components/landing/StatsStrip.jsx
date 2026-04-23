@@ -28,7 +28,7 @@ function useCountUp(target, durationMs, shouldStart) {
   return display;
 }
 
-function Stat({ label, value, prefix = "", suffix = "", decimals = 0, color = "#f8fafc", shouldStart }) {
+function Stat({ label, value, prefix = "", suffix = "", decimals = 0, color = "#09090b", shouldStart }) {
   const display = useCountUp(value, 1400, shouldStart);
   const formatted = display.toLocaleString("en-IN", {
     minimumFractionDigits: decimals,
@@ -36,7 +36,7 @@ function Stat({ label, value, prefix = "", suffix = "", decimals = 0, color = "#
   });
   return (
     <div className="text-center md:text-left">
-      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium mb-1.5">
+      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-medium mb-1.5">
         {label}
       </p>
       <p
@@ -52,10 +52,10 @@ function Stat({ label, value, prefix = "", suffix = "", decimals = 0, color = "#
 }
 
 const DEFAULT_STATS = [
-  { label: "Tax shielded", value: 12.4, prefix: "INR ", suffix: " Cr", decimals: 1, color: "#10b981" },
-  { label: "Invoices verified", value: 2847, color: "#f8fafc" },
-  { label: "Avg OCR latency", value: 14, suffix: "s", color: "#3b82f6" },
-  { label: "Accuracy", value: 96.4, suffix: "%", decimals: 1, color: "#8b5cf6" },
+  { label: "Flow we sit under", value: 90, prefix: "$", suffix: "B", color: "#047857" },
+  { label: "Invoices ingested", value: 2847, color: "#09090b" },
+  { label: "Sectors in pilot", value: 3, color: "#09090b" },
+  { label: "Match rate", value: 96.4, suffix: "%", decimals: 1, color: "#047857" },
 ];
 
 export default function StatsStrip({ stats = DEFAULT_STATS, compact = false }) {

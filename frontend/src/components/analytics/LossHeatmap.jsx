@@ -98,27 +98,27 @@ export default function LossHeatmap({ data = [], className = "" }) {
   );
 
   function intensityColor(loss) {
-    if (!loss) return "rgba(255,255,255,0.025)";
+    if (!loss) return "#fafafa";
     const t = Math.min(1, loss / maxLoss);
-    // emerald (low) → amber → rose (high)
+    // emerald (low) → amber → red (high)
     if (t < 0.33) {
-      const a = 0.15 + t * 0.5;
-      return `rgba(16, 185, 129, ${a})`;
+      const a = 0.2 + t * 0.5;
+      return `rgba(5, 150, 105, ${a})`;
     }
     if (t < 0.66) {
       const a = 0.25 + (t - 0.33) * 0.7;
-      return `rgba(245, 158, 11, ${a})`;
+      return `rgba(217, 119, 6, ${a})`;
     }
     const a = 0.35 + (t - 0.66) * 0.65;
-    return `rgba(244, 63, 94, ${a})`;
+    return `rgba(220, 38, 38, ${a})`;
   }
 
   function borderColor(loss) {
-    if (!loss) return "rgba(255,255,255,0.04)";
+    if (!loss) return "#e4e4e7";
     const t = Math.min(1, loss / maxLoss);
-    if (t < 0.33) return "rgba(16, 185, 129, 0.35)";
-    if (t < 0.66) return "rgba(245, 158, 11, 0.4)";
-    return "rgba(244, 63, 94, 0.45)";
+    if (t < 0.33) return "#a7f3d0";
+    if (t < 0.66) return "#fde68a";
+    return "#fecaca";
   }
 
   const hoverState = hoverCell
@@ -131,19 +131,19 @@ export default function LossHeatmap({ data = [], className = "" }) {
 
   return (
     <div
-      className={`rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden ${className}`}
+      className={`rounded-xl bg-white border border-zinc-200 overflow-hidden ${className}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-            <MapIcon size={11} className="text-rose-400" />
+          <div className="w-6 h-6 rounded-md bg-red-50 border border-red-200 flex items-center justify-center">
+            <MapIcon size={11} className="text-red-700" />
           </div>
           <div>
-            <p className="text-[11px] text-white font-semibold tracking-tight">
+            <p className="text-[11px] text-zinc-900 font-semibold tracking-tight">
               Loss Exposure by State
             </p>
-            <p className="text-[9px] text-slate-600 font-mono">
+            <p className="text-[9px] text-zinc-500 font-mono">
               Total: {formatCrores(totalLoss)}
             </p>
           </div>
@@ -180,7 +180,7 @@ export default function LossHeatmap({ data = [], className = "" }) {
                   onMouseLeave={() => setHoverCell(null)}
                   whileHover={{ scale: 1.08 }}
                   transition={{ type: "spring", stiffness: 400, damping: 24 }}
-                  className="rounded-sm flex items-center justify-center text-[8px] font-bold text-white/70 hover:text-white"
+                  className="rounded-sm flex items-center justify-center text-[8px] font-bold text-zinc-900 hover:text-zinc-900"
                   style={{
                     background: intensityColor(loss),
                     border: `1px solid ${borderColor(loss)}`,
@@ -198,18 +198,18 @@ export default function LossHeatmap({ data = [], className = "" }) {
       </div>
 
       {/* Hover detail */}
-      <div className="px-4 py-2.5 border-t border-white/[0.06] bg-white/[0.02] min-h-[36px]">
+      <div className="px-4 py-2.5 border-t border-zinc-200 bg-zinc-50 min-h-[36px]">
         {hoverState ? (
           <div className="flex items-center justify-between text-[10px]">
-            <span className="text-white font-semibold tracking-tight">
+            <span className="text-zinc-900 font-semibold tracking-tight">
               {hoverState.name}
             </span>
-            <span className="text-rose-300 font-mono tabular-nums">
+            <span className="text-red-700 font-mono tabular-nums">
               {formatCrores(hoverState.loss)}
             </span>
           </div>
         ) : (
-          <p className="text-[10px] text-slate-600">
+          <p className="text-[10px] text-zinc-500">
             Hover a state to see exposure.
           </p>
         )}
@@ -221,17 +221,17 @@ export default function LossHeatmap({ data = [], className = "" }) {
 function Legend() {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[8px] text-slate-600 uppercase tracking-wider">
+      <span className="text-[8px] text-zinc-500 uppercase tracking-wider">
         Low
       </span>
       <div
         className="h-1.5 w-24 rounded-full"
         style={{
           background:
-            "linear-gradient(90deg, rgba(16,185,129,0.5), rgba(245,158,11,0.6), rgba(244,63,94,0.7))",
+            "linear-gradient(90deg, #059669, #d97706, #dc2626)",
         }}
       />
-      <span className="text-[8px] text-slate-600 uppercase tracking-wider">
+      <span className="text-[8px] text-zinc-500 uppercase tracking-wider">
         High
       </span>
     </div>

@@ -126,24 +126,24 @@ export default function WhatsAppMockPanel({
 
   return (
     <div
-      className={`rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden ${className}`}
+      className={`rounded-xl bg-white border border-zinc-200 overflow-hidden ${className}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 bg-zinc-50">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <MessageSquare size={11} className="text-emerald-400" />
+          <div className="w-6 h-6 rounded-md bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+            <MessageSquare size={11} className="text-emerald-700" />
           </div>
           <div>
-            <p className="text-[11px] text-white font-semibold tracking-tight">
+            <p className="text-[11px] text-zinc-900 font-semibold tracking-tight">
               WhatsApp Mock Panel
             </p>
-            <p className="text-[9px] text-slate-600 font-mono">
+            <p className="text-[9px] text-zinc-500 font-mono">
               Offline demo path
             </p>
           </div>
         </div>
-        <span className="text-[9px] text-emerald-300 font-mono uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+        <span className="text-[9px] text-emerald-700 font-mono uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200">
           mock
         </span>
       </div>
@@ -161,18 +161,18 @@ export default function WhatsAppMockPanel({
             onClick={() => inputRef.current?.click()}
             className={`relative h-44 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors ${
               active
-                ? "border-emerald-500/50 bg-emerald-500/5"
-                : "border-white/[0.10] hover:border-white/[0.18] hover:bg-white/[0.02]"
+                ? "border-emerald-300 bg-emerald-50"
+                : "border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
             }`}
           >
             <Upload
               size={20}
-              className={active ? "text-emerald-400" : "text-slate-500"}
+              className={active ? "text-emerald-700" : "text-zinc-500"}
             />
-            <p className="mt-2 text-[11px] text-slate-300 font-medium">
+            <p className="mt-2 text-[11px] text-zinc-700 font-medium">
               Drop a challan image
             </p>
-            <p className="text-[9px] text-slate-600 mt-0.5">
+            <p className="text-[9px] text-zinc-500 mt-0.5">
               or click to browse
             </p>
             <input
@@ -202,15 +202,15 @@ export default function WhatsAppMockPanel({
                   {r.status === "ok" ? (
                     <CheckCircle2
                       size={10}
-                      className="text-emerald-400 shrink-0"
+                      className="text-emerald-700 shrink-0"
                     />
                   ) : (
                     <AlertCircle
                       size={10}
-                      className="text-rose-400 shrink-0"
+                      className="text-red-700 shrink-0"
                     />
                   )}
-                  <span className="text-slate-400 font-mono truncate">
+                  <span className="text-zinc-600 font-mono truncate">
                     {r.name}
                   </span>
                 </motion.div>
@@ -221,7 +221,7 @@ export default function WhatsAppMockPanel({
 
         {/* Fixture list */}
         <div className="md:col-span-3">
-          <p className="text-[9px] text-slate-600 uppercase tracking-widest font-semibold mb-2">
+          <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mb-2">
             {fixtures.length} fixtures available
           </p>
           <div className="grid grid-cols-2 gap-1.5 max-h-52 overflow-y-auto pr-1">
@@ -233,20 +233,20 @@ export default function WhatsAppMockPanel({
                   type="button"
                   disabled={!!busy}
                   onClick={() => handleFixture(name)}
-                  className="group flex items-center gap-2 px-2.5 py-2 rounded-md bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] text-left transition-colors disabled:opacity-50 disabled:cursor-wait"
+                  className="group flex items-center gap-2 px-2.5 py-2 rounded-md bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-300 text-left transition-colors disabled:opacity-50 disabled:cursor-wait"
                 >
                   {isBusy ? (
                     <Loader2
                       size={11}
-                      className="text-emerald-400 animate-spin shrink-0"
+                      className="text-emerald-700 animate-spin shrink-0"
                     />
                   ) : (
                     <ImageIcon
                       size={11}
-                      className="text-slate-500 group-hover:text-slate-300 shrink-0"
+                      className="text-zinc-500 group-hover:text-zinc-700 shrink-0"
                     />
                   )}
-                  <span className="text-[10px] text-slate-400 group-hover:text-white font-mono truncate">
+                  <span className="text-[10px] text-zinc-600 group-hover:text-zinc-900 font-mono truncate">
                     {name}
                   </span>
                 </button>

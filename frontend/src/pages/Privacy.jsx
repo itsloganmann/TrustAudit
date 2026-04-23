@@ -20,18 +20,18 @@ import LEGAL, { hasUnresolvedLegalFields } from "../config/legal.js";
 export default function Privacy() {
   const unresolved = hasUnresolvedLegalFields();
   return (
-    <div className="min-h-screen bg-[#06070f] text-violet-100/70 font-sans antialiased">
-      <header className="sticky top-0 z-50 border-b border-violet-500/10 bg-[#06070f]/80 backdrop-blur-2xl">
-        <div className="max-w-4xl mx-auto px-8 h-20 flex items-center justify-between">
+    <div className="min-h-screen bg-white text-zinc-700 font-sans antialiased">
+      <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
+        <div className="max-w-4xl mx-auto px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-gradient-to-br from-violet-400 via-fuchsia-400 to-amber-300 flex items-center justify-center">
-              <Shield size={18} className="text-[#06070f]" strokeWidth={2.5} />
+            <div className="w-9 h-9 rounded-md bg-zinc-900 flex items-center justify-center">
+              <Shield size={16} className="text-white" strokeWidth={2.5} />
             </div>
             <div className="flex flex-col">
-              <span className="aurora-headline text-[22px] text-white leading-none">
+              <span className="text-zinc-900 font-semibold text-[17px] tracking-tight leading-none">
                 {LEGAL.companyName}
               </span>
-              <span className="font-mono text-[9px] text-violet-300/70 tracking-[0.3em] uppercase mt-0.5">
+              <span className="text-[10px] text-zinc-500 tracking-wide mt-0.5">
                 Privacy Policy
               </span>
             </div>
@@ -47,29 +47,29 @@ export default function Privacy() {
       </header>
 
       <main className="max-w-3xl mx-auto px-8 py-16">
-        <article className="prose-dark space-y-6">
+        <article className="space-y-6">
           <div>
-            <h1 className="text-[40px] font-bold text-white tracking-tight leading-tight mb-2">
+            <h1 className="text-[40px] font-bold text-zinc-900 tracking-tight leading-tight mb-2">
               Privacy Policy
             </h1>
-            <p className="text-[13px] text-violet-300/60">
+            <p className="text-[13px] text-zinc-500">
               Last updated: {LEGAL.privacyLastUpdated}
             </p>
           </div>
 
           {unresolved && (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 my-4 text-amber-100">
-              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-300" />
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 my-4 text-amber-800">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
               <div className="text-[13px] leading-relaxed">
-                <p className="font-semibold text-amber-200 mb-1">
+                <p className="font-semibold text-amber-800 mb-1">
                   This deployment is running with placeholder legal fields.
                 </p>
                 <p>
                   Some identity, grievance, or jurisdiction values are still
-                  marked <code className="text-amber-200">TODO_LEGAL</code>.
-                  Set the matching <code className="text-amber-200">VITE_LEGAL_*</code>{" "}
+                  marked <code className="text-amber-800">TODO_LEGAL</code>.
+                  Set the matching <code className="text-amber-800">VITE_LEGAL_*</code>{" "}
                   env vars in Render before onboarding real customers. See{" "}
-                  <code className="text-amber-200">PRODUCTION_READINESS.md</code>.
+                  <code className="text-amber-800">PRODUCTION_READINESS.md</code>.
                 </p>
               </div>
             </div>
@@ -78,11 +78,14 @@ export default function Privacy() {
           <Section title="1. Who we are">
             <p>
               {LEGAL.companyName} ("we", "us", "our") is a software service
-              that helps Indian small and medium businesses track the 45-day
-              payment deadline under Section 43B(h) of the Income Tax Act,
-              1961. We read photos of paper bills that your team sends us on
-              WhatsApp and turn them into structured records on your
-              dashboard.
+              that helps Indian AP teams at enterprises determine which
+              supplier invoices are actually safe to pay. We ingest delivery
+              and acceptance proof (WhatsApp messages, photos, PDFs, PODs,
+              GRNs, stamped paperwork), match it to the right invoice, and
+              return a verdict (clear to claim, disputed, or missing proof).
+              One use case of that decision layer is tracking the 45-day
+              payment window under Section 43B(h) of the Income Tax Act,
+              1961.
             </p>
             <p>
               <strong>Data Fiduciary (company):</strong>{" "}
@@ -98,7 +101,7 @@ export default function Privacy() {
               <strong>Contact email:</strong>{" "}
               <a
                 href={`mailto:${LEGAL.privacyEmail}`}
-                className="text-violet-300 hover:text-white"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 {LEGAL.privacyEmail}
               </a>
@@ -175,7 +178,7 @@ export default function Privacy() {
               You can withdraw consent at any time by emailing{" "}
               <a
                 href={`mailto:${LEGAL.privacyEmail}`}
-                className="text-violet-300 hover:text-white"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 {LEGAL.privacyEmail}
               </a>
@@ -272,7 +275,7 @@ export default function Privacy() {
               To exercise any of these rights, email{" "}
               <a
                 href={`mailto:${LEGAL.privacyEmail}`}
-                className="text-violet-300 hover:text-white"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 {LEGAL.privacyEmail}
               </a>
@@ -284,15 +287,15 @@ export default function Privacy() {
             <p>
               Per Rule 5(9) of the draft DPDP Rules, our Grievance Officer is:
             </p>
-            <div className="glass rounded-xl p-5 my-4">
-              <p className="text-white font-semibold">
+            <div className="rounded-xl p-5 my-4 bg-zinc-50 border border-zinc-200">
+              <p className="text-zinc-900 font-semibold">
                 {LEGAL.grievanceOfficerName}
               </p>
               <p className="text-[13px]">
                 Email:{" "}
                 <a
                   href={`mailto:${LEGAL.grievanceOfficerEmail}`}
-                  className="text-violet-300 hover:text-white"
+                  className="text-emerald-700 hover:text-emerald-800"
                 >
                   {LEGAL.grievanceOfficerEmail}
                 </a>
@@ -374,11 +377,11 @@ export default function Privacy() {
         </article>
       </main>
 
-      <footer className="border-t border-violet-500/10 mt-20 py-8">
-        <div className="max-w-4xl mx-auto px-8 text-center text-[12px] text-violet-300/50">
+      <footer className="border-t border-zinc-200 mt-20 py-8">
+        <div className="max-w-4xl mx-auto px-8 text-center text-[12px] text-zinc-500">
           <p>
             &copy; {new Date().getFullYear()} {LEGAL.companyName} ·{" "}
-            <Link to="/terms" className="hover:text-white">
+            <Link to="/terms" className="hover:text-zinc-900">
               Terms of Service
             </Link>
           </p>
@@ -391,10 +394,10 @@ export default function Privacy() {
 function Section({ title, children }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-[22px] font-semibold text-white tracking-tight mt-8">
+      <h2 className="text-[22px] font-semibold text-zinc-900 tracking-tight mt-8">
         {title}
       </h2>
-      <div className="text-[15px] leading-relaxed text-violet-100/75 space-y-3">
+      <div className="text-[15px] leading-relaxed text-zinc-700 space-y-3">
         {children}
       </div>
     </section>

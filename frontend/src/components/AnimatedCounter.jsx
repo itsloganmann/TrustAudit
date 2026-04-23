@@ -85,23 +85,17 @@ export default function AnimatedCounter({
     );
   }
 
-  // The motion.span gets a brief scale-up + emerald glow keyed to flashKey
-  // so consecutive milestones each retrigger the keyframe.
+  // The motion.span gets a brief, subtle scale pop keyed to flashKey
+  // so consecutive milestones each retrigger the keyframe. The emerald
+  // drop-shadow was removed for the light theme (too loud on white).
   return (
     <motion.span
       key={flashKey}
       className={className}
       style={style}
-      initial={{ scale: 1, filter: "drop-shadow(0 0 0 rgba(16,185,129,0))" }}
-      animate={{
-        scale: [1, 1.18, 1],
-        filter: [
-          "drop-shadow(0 0 0 rgba(16,185,129,0))",
-          "drop-shadow(0 0 12px rgba(16,185,129,0.55))",
-          "drop-shadow(0 0 0 rgba(16,185,129,0))",
-        ],
-      }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ scale: 1 }}
+      animate={{ scale: [1, 1.08, 1] }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
     >
       {prefix}{formatted}{suffix}
     </motion.span>

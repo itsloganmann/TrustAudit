@@ -16,20 +16,20 @@ import { useState } from "react";
 const STATE_CONFIG = {
   PENDING: {
     label: "Pending",
-    bg: "bg-slate-500/10",
-    text: "text-slate-300",
-    border: "border-slate-500/20",
-    dot: "bg-slate-400",
+    bg: "bg-zinc-50",
+    text: "text-zinc-700",
+    border: "border-zinc-200",
+    dot: "bg-zinc-400",
     dotPulse: false,
     Icon: Clock,
     tooltip: "Awaiting initial document upload.",
   },
   VERIFYING: {
     label: "Verifying",
-    bg: "bg-amber-500/10",
-    text: "text-amber-300",
-    border: "border-amber-500/25",
-    dot: "bg-amber-400",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
     dotPulse: true,
     Icon: Loader2,
     spin: true,
@@ -37,43 +37,40 @@ const STATE_CONFIG = {
   },
   VERIFIED: {
     label: "Verified",
-    bg: "bg-emerald-500/10",
-    text: "text-emerald-300",
-    border: "border-emerald-500/25",
-    dot: "bg-emerald-400",
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    border: "border-emerald-200",
+    dot: "bg-emerald-500",
     dotPulse: false,
     Icon: ShieldCheck,
-    glow: "0 0 12px rgba(16,185,129,0.35), 0 0 24px rgba(16,185,129,0.18)",
     tooltip: "Fields extracted with high confidence. Ready for filing.",
   },
   NEEDS_INFO: {
     label: "Needs info",
-    bg: "bg-amber-500/10",
-    text: "text-amber-300",
-    border: "border-amber-500/25",
-    dot: "bg-amber-400",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
     dotPulse: true,
     Icon: AlertTriangle,
     tooltip: "Some required fields could not be extracted.",
   },
   SUBMITTED_TO_GOV: {
     label: "Submitted",
-    bg: "bg-[rgba(251,191,36,0.10)]",
-    text: "text-amber-200",
-    border: "border-amber-300/30",
-    dot: "bg-amber-300",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
     dotPulse: false,
     Icon: Landmark,
-    glow: "0 0 14px rgba(251,191,36,0.35), 0 0 28px rgba(251,191,36,0.18)",
-    shimmer: true,
     tooltip: "Filed with the government portal.",
   },
   DISPUTED: {
     label: "Disputed",
-    bg: "bg-rose-500/10",
-    text: "text-rose-300",
-    border: "border-rose-500/25",
-    dot: "bg-rose-400",
+    bg: "bg-red-50",
+    text: "text-red-700",
+    border: "border-red-200",
+    dot: "bg-red-500",
     dotPulse: true,
     Icon: Flag,
     tooltip: "A counterparty has raised a dispute on this document.",
@@ -82,12 +79,6 @@ const STATE_CONFIG = {
 
 /**
  * Color-coded badge representing the current document state.
- *
- * @param {object} props
- * @param {DocumentState} props.state
- * @param {string[]} [props.missingFields]
- * @param {string} [props.layoutId]
- * @param {string} [props.className]
  */
 export default function DocumentStatePill({
   state = "PENDING",
@@ -115,7 +106,6 @@ export default function DocumentStatePill({
         layout
         transition={{ type: "spring", stiffness: 380, damping: 30 }}
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${cfg.bg} ${cfg.text} ${cfg.border} ${className}`}
-        style={cfg.glow ? { boxShadow: cfg.glow } : undefined}
       >
         <span
           className={`w-1 h-1 rounded-full ${cfg.dot} ${
@@ -128,33 +118,13 @@ export default function DocumentStatePill({
           strokeWidth={2.5}
         />
         <span className="leading-none">{cfg.label}</span>
-        {cfg.shimmer && (
-          <motion.span
-            aria-hidden
-            className="absolute inset-0 rounded-md pointer-events-none"
-            initial={{ backgroundPosition: "-120% 0%" }}
-            animate={{ backgroundPosition: "220% 0%" }}
-            transition={{
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 2.6,
-              ease: "linear",
-            }}
-            style={{
-              background:
-                "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%)",
-              backgroundSize: "200% 100%",
-              mixBlendMode: "screen",
-            }}
-          />
-        )}
       </motion.span>
 
       {hovered && tooltipBody && (
         <motion.span
           initial={{ opacity: 0, y: -2 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute left-1/2 -translate-x-1/2 -top-2 -translate-y-full z-50 whitespace-nowrap rounded-md border border-white/[0.08] bg-slate-900/95 px-2.5 py-1.5 text-[10px] text-slate-200 shadow-lg backdrop-blur"
+          className="absolute left-1/2 -translate-x-1/2 -top-2 -translate-y-full z-50 whitespace-nowrap rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-[10px] text-zinc-700 shadow-sm"
           role="tooltip"
         >
           {tooltipBody}

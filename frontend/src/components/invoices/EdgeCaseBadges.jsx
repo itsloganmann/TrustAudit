@@ -18,29 +18,26 @@ import {
  * @property {string} case_id
  * @property {string} case_name
  * @property {"info"|"warning"|"block"} severity
- * @property {string} [suggested_handler]
- * @property {string} [rebut_message]
- * @property {object} [metadata]
  */
 
 const SEVERITY_TOKENS = {
   info: {
-    bg: "bg-blue-500/10",
-    text: "text-blue-300",
-    border: "border-blue-500/25",
-    dot: "bg-blue-400",
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    border: "border-blue-200",
+    dot: "bg-blue-500",
   },
   warning: {
-    bg: "bg-amber-500/10",
-    text: "text-amber-300",
-    border: "border-amber-500/25",
-    dot: "bg-amber-400",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
   },
   block: {
-    bg: "bg-rose-500/10",
-    text: "text-rose-300",
-    border: "border-rose-500/25",
-    dot: "bg-rose-400",
+    bg: "bg-red-50",
+    text: "text-red-700",
+    border: "border-red-200",
+    dot: "bg-red-500",
   },
 };
 
@@ -50,7 +47,6 @@ const SEVERITY_ICON = {
   block: ShieldAlert,
 };
 
-/* Friendly icon + 1-word label per case_id (falls back to severity icon). */
 const CASE_PRESETS = {
   blurry_image: { icon: EyeOff, label: "Blurry" },
   low_resolution: { icon: ScanLine, label: "LowRes" },
@@ -68,7 +64,6 @@ function presetFor(edgeCase) {
   const preset = CASE_PRESETS[edgeCase.case_id];
   if (preset) return preset;
   const Icon = SEVERITY_ICON[edgeCase.severity] || Info;
-  // Generate a 1-word label from case_name (first word, capitalized)
   const fallback = (edgeCase.case_name || edgeCase.case_id || "Issue")
     .split(/[\s_-]+/)[0]
     .replace(/^\w/, (c) => c.toUpperCase())
@@ -103,12 +98,12 @@ function EdgeCaseChip({ edgeCase }) {
         <motion.span
           initial={{ opacity: 0, y: -2 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute left-1/2 -translate-x-1/2 -top-2 -translate-y-full z-50 min-w-[180px] max-w-[260px] rounded-md border border-white/[0.08] bg-slate-900/95 px-3 py-2 shadow-xl backdrop-blur"
+          className="absolute left-1/2 -translate-x-1/2 -top-2 -translate-y-full z-50 min-w-[180px] max-w-[260px] rounded-md border border-zinc-200 bg-white px-3 py-2 shadow-sm"
           role="tooltip"
         >
           <div className="flex items-center gap-1.5">
             <span className={`w-1 h-1 rounded-full ${tokens.dot}`} />
-            <p className="text-[10px] font-semibold text-white tracking-tight">
+            <p className="text-[10px] font-semibold text-zinc-900 tracking-tight">
               {edgeCase.case_name || edgeCase.case_id}
             </p>
             <span
@@ -118,12 +113,12 @@ function EdgeCaseChip({ edgeCase }) {
             </span>
           </div>
           {edgeCase.rebut_message && (
-            <p className="mt-1 text-[10px] text-slate-400 leading-snug">
+            <p className="mt-1 text-[10px] text-zinc-600 leading-snug">
               {edgeCase.rebut_message}
             </p>
           )}
           {edgeCase.suggested_handler && (
-            <p className="mt-1 text-[9px] text-slate-600 font-mono">
+            <p className="mt-1 text-[9px] text-zinc-500 font-mono">
               {edgeCase.suggested_handler}
             </p>
           )}
@@ -135,11 +130,6 @@ function EdgeCaseChip({ edgeCase }) {
 
 /**
  * Renders chips for an array of EdgeCaseResult objects.
- *
- * @param {object} props
- * @param {EdgeCaseResult[]} [props.cases]
- * @param {number} [props.max=4]
- * @param {string} [props.className]
  */
 export default function EdgeCaseBadges({
   cases = [],
@@ -156,7 +146,7 @@ export default function EdgeCaseBadges({
         <EdgeCaseChip key={c.case_id || i} edgeCase={c} />
       ))}
       {overflow > 0 && (
-        <span className="inline-flex items-center px-1.5 py-[3px] rounded-md text-[9px] font-semibold uppercase tracking-wider border border-white/[0.08] bg-white/[0.03] text-slate-400">
+        <span className="inline-flex items-center px-1.5 py-[3px] rounded-md text-[9px] font-semibold uppercase tracking-wider border border-zinc-200 bg-zinc-50 text-zinc-600">
           +{overflow}
         </span>
       )}

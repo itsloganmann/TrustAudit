@@ -14,30 +14,23 @@ import { QrCode as QrCodeIcon } from "lucide-react";
 export default function WhatsAppQRBlock({
   waLink,
   size = 180,
-  label = "Scan with any phone camera",
+  label = "Scan to send proof from any phone",
 }) {
   const [errored, setErrored] = useState(false);
   const src = `/api/demo/qr?text=${encodeURIComponent(waLink)}&box_size=8&border=2`;
 
   return (
     <div className="flex flex-col items-center">
-      <div
-        className="relative rounded-2xl p-3 glass"
-        style={{
-          boxShadow:
-            "0 0 48px rgba(16,185,129,0.18), inset 0 0 0 1px rgba(255,255,255,0.04)",
-        }}
-      >
+      <div className="relative rounded-2xl p-3 bg-white border border-zinc-200 shadow-sm">
         {errored ? (
           <div
-            className="flex flex-col items-center justify-center rounded-xl bg-slate-900/60 border border-white/[0.06] text-slate-500 text-[11px] text-center px-4"
+            className="flex flex-col items-center justify-center rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-500 text-[11px] text-center px-4"
             style={{ width: size, height: size }}
           >
-            <QrCodeIcon size={28} className="mb-2 opacity-40" />
+            <QrCodeIcon size={28} className="mb-2 opacity-50" />
             QR unavailable.
             <br />
             Use the tap-to-open button.
-            {/* TODO: add qrcode[pil] to requirements.txt via manager-queue */}
           </div>
         ) : (
           <img
@@ -51,7 +44,7 @@ export default function WhatsAppQRBlock({
           />
         )}
       </div>
-      <p className="mt-3 text-[11px] text-slate-500 font-medium tracking-wide">{label}</p>
+      <p className="mt-3 text-[11px] text-zinc-500 font-medium tracking-wide">{label}</p>
     </div>
   );
 }

@@ -67,48 +67,48 @@ export default function DemoAccountPrefill({ role, onPick }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-2 px-3.5 h-11 rounded-xl glass glass-hover text-left transition-all"
+        className="w-full flex items-center justify-between gap-2 px-3.5 h-11 rounded-xl bg-white border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 text-left transition-all"
       >
         <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500/30 to-blue-500/20 border border-white/[0.08] flex items-center justify-center">
-            <Sparkles size={11} className="text-violet-300" />
+          <div className="w-6 h-6 rounded-md bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+            <Sparkles size={11} className="text-emerald-700" />
           </div>
           <div>
-            <p className="text-[12px] text-white font-semibold leading-tight">
+            <p className="text-[12px] text-zinc-900 font-semibold leading-tight">
               {picked ? "Demo account loaded" : "Use a demo account"}
             </p>
-            <p className="text-[10px] text-slate-500 leading-tight mt-0.5">
+            <p className="text-[10px] text-zinc-500 leading-tight mt-0.5">
               {picked || "Pre-fill credentials in one tap"}
             </p>
           </div>
         </div>
         <ChevronDown
           size={13}
-          className={`text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
       {open && (
-        <div className="absolute z-20 mt-1.5 left-0 right-0 glass rounded-xl border border-white/[0.08] shadow-2xl shadow-slate-950/60 overflow-hidden">
+        <div className="absolute z-20 mt-1.5 left-0 right-0 bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
           {accounts.map((acc) => (
             <button
               key={acc.email}
               type="button"
               onClick={() => handlePick(acc)}
-              className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 hover:bg-white/[0.04] transition-colors text-left border-b border-white/[0.04] last:border-b-0"
+              className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 hover:bg-zinc-50 transition-colors text-left border-b border-zinc-100 last:border-b-0"
             >
               <div className="min-w-0">
-                <p className="text-[12px] text-white font-medium tracking-tight truncate">
+                <p className="text-[12px] text-zinc-900 font-medium tracking-tight truncate">
                   {acc.label}
                 </p>
-                <p className="text-[10px] text-slate-500 tabular-nums truncate">
+                <p className="text-[10px] text-zinc-500 tabular-nums truncate">
                   {acc.email}
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[10px] text-slate-600">{acc.sub}</span>
+                <span className="text-[10px] text-zinc-500">{acc.sub}</span>
                 {picked === acc.email && (
-                  <Check size={12} className="text-emerald-400" />
+                  <Check size={12} className="text-emerald-700" />
                 )}
               </div>
             </button>

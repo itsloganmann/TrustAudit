@@ -47,20 +47,20 @@ export default function DriverView() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans">
-      <Toaster position="top-center" theme="dark" />
+    <div className="min-h-screen bg-white text-zinc-700 font-sans">
+      <Toaster position="top-center" theme="light" />
 
-      <header className="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-xl border-b border-white/[0.06]">
+      <header className="sticky top-0 z-30 bg-white border-b border-zinc-200">
         <div className="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <Truck size={15} className="text-emerald-400" />
+          <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+            <Truck size={15} className="text-emerald-700" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] text-white font-bold tracking-tight">
-              My Challans
+            <p className="text-[14px] text-zinc-900 font-bold tracking-tight">
+              My submissions
             </p>
-            <p className="text-[10px] text-slate-500">
-              Driver portal · {sorted.length}
+            <p className="text-[10px] text-zinc-500">
+              Supplier driver portal · {sorted.length}
             </p>
           </div>
         </div>
@@ -73,41 +73,37 @@ export default function DriverView() {
           target="_blank"
           rel="noreferrer"
           whileTap={{ scale: 0.98 }}
-          className="block rounded-2xl p-5 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30"
-          style={{
-            boxShadow:
-              "0 12px 30px -10px rgba(16,185,129,0.55), 0 0 0 1px rgba(16,185,129,0.4) inset",
-          }}
+          className="block rounded-2xl p-5 bg-emerald-600 hover:bg-emerald-700 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
               <MessageSquare size={22} className="text-white" />
             </div>
             <div className="flex-1">
               <p className="text-[15px] text-white font-bold tracking-tight">
-                Send a new challan
+                Send acceptance proof
               </p>
-              <p className="text-[11px] text-emerald-50/90">
+              <p className="text-[11px] text-emerald-50">
                 Tap to open WhatsApp
               </p>
             </div>
-            <ChevronRight size={18} className="text-white/80" />
+            <ChevronRight size={18} className="text-white" />
           </div>
         </motion.a>
 
         {/* Submission list */}
         <div className="space-y-2">
           {loading && (
-            <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] py-12 text-center">
-              <div className="w-5 h-5 mx-auto rounded-full border-2 border-white/[0.08] border-t-white animate-spin" />
+            <div className="rounded-xl bg-white border border-zinc-200 py-12 text-center">
+              <div className="w-5 h-5 mx-auto rounded-full border-2 border-zinc-200 border-t-zinc-900 animate-spin" />
             </div>
           )}
 
           {!loading && sorted.length === 0 && (
-            <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] py-12 text-center">
-              <p className="text-[12px] text-slate-500">No submissions yet.</p>
-              <p className="text-[10px] text-slate-700 mt-1">
-                Tap the green button above to send your first challan.
+            <div className="rounded-xl bg-white border border-zinc-200 py-12 text-center">
+              <p className="text-[12px] text-zinc-600">No submissions yet.</p>
+              <p className="text-[10px] text-zinc-500 mt-1">
+                Tap the green button above to send your first acceptance proof.
               </p>
             </div>
           )}
@@ -118,14 +114,14 @@ export default function DriverView() {
               layout
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 active:bg-white/[0.04] transition-colors"
+              className="rounded-xl bg-white border border-zinc-200 p-3 active:bg-zinc-50 transition-colors"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] text-white font-semibold tracking-tight truncate">
-                    {inv.vendor_name || "Unknown vendor"}
+                  <p className="text-[12px] text-zinc-900 font-semibold tracking-tight truncate">
+                    {inv.vendor_name || "Unknown supplier"}
                   </p>
-                  <p className="text-[10px] text-slate-600 font-mono mt-0.5">
+                  <p className="text-[10px] text-zinc-500 font-mono mt-0.5">
                     {inv.invoice_number || "—"}
                   </p>
                 </div>
@@ -140,7 +136,7 @@ export default function DriverView() {
                   confidence={inv.confidence_score}
                   width={120}
                 />
-                <span className="text-[10px] text-slate-600 font-mono shrink-0">
+                <span className="text-[10px] text-zinc-500 font-mono shrink-0">
                   {formatRelative(inv.updated_at || inv.created_at)}
                 </span>
               </div>

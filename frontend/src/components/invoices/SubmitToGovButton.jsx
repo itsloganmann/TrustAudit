@@ -115,12 +115,6 @@ export default function SubmitToGovButton({
     }
   }
 
-  // ── Visual states ────────────────────────────────────────────────
-  const baseShadow =
-    "0 10px 30px -10px rgba(251,191,36,0.55), 0 0 0 1px rgba(251,191,36,0.35) inset";
-  const goldGradient =
-    "linear-gradient(135deg, #fde68a 0%, #fbbf24 45%, #d97706 100%)";
-
   return (
     <div
       className={`relative inline-flex ${className}`}
@@ -134,19 +128,11 @@ export default function SubmitToGovButton({
         whileHover={eligible ? { y: -1 } : undefined}
         whileTap={eligible ? { scale: 0.98 } : undefined}
         transition={{ type: "spring", stiffness: 400, damping: 22 }}
-        className={`relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider overflow-hidden ${
+        className={`relative inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-wider overflow-hidden border ${
           eligible
-            ? "text-slate-900 cursor-pointer"
-            : "text-slate-500 cursor-not-allowed"
+            ? "text-white bg-emerald-600 hover:bg-emerald-700 border-emerald-600 cursor-pointer"
+            : "text-zinc-500 bg-white border-zinc-200 cursor-not-allowed"
         }`}
-        style={{
-          background: eligible ? goldGradient : "rgba(255,255,255,0.04)",
-          border: eligible
-            ? "1px solid rgba(251,191,36,0.6)"
-            : "1px solid rgba(255,255,255,0.08)",
-          boxShadow: eligible ? baseShadow : "none",
-          filter: eligible ? "none" : "grayscale(1)",
-        }}
       >
         {alreadySubmitted ? (
           <>
@@ -169,26 +155,6 @@ export default function SubmitToGovButton({
             Submit to Gov
           </>
         )}
-
-        {eligible && !submitting && !alreadySubmitted && (
-          <motion.span
-            aria-hidden
-            className="absolute inset-0 pointer-events-none"
-            initial={{ x: "-120%" }}
-            animate={{ x: "220%" }}
-            transition={{
-              repeat: Infinity,
-              repeatType: "loop",
-              duration: 2.4,
-              ease: "linear",
-            }}
-            style={{
-              background:
-                "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)",
-              mixBlendMode: "overlay",
-            }}
-          />
-        )}
       </motion.button>
 
       <AnimatePresence>
@@ -197,7 +163,7 @@ export default function SubmitToGovButton({
             initial={{ opacity: 0, y: -2 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -2 }}
-            className="absolute left-1/2 -translate-x-1/2 -top-2 -translate-y-full z-50 max-w-[260px] whitespace-normal rounded-md border border-white/[0.08] bg-slate-900/95 px-3 py-1.5 text-[10px] text-slate-200 shadow-lg backdrop-blur"
+            className="absolute left-1/2 -translate-x-1/2 -top-2 -translate-y-full z-50 max-w-[260px] whitespace-normal rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-[10px] text-zinc-700 shadow-sm"
             role="tooltip"
           >
             {reason}

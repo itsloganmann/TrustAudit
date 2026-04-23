@@ -67,36 +67,36 @@ export default function VerifyEmail() {
           ? "Welcome aboard. Taking you to your dashboard."
           : status === "error"
             ? "The link may be expired or already used. Request a new one from the sign-in page."
-            : "Hang tight, this only takes a second."
+            : "Hang tight, this takes a second."
       }
     >
       <div className="flex items-center justify-center py-6">
         {status === "loading" && (
-          <Loader2 size={36} className="text-slate-400 animate-spin" />
+          <Loader2 size={36} className="text-zinc-500 animate-spin" />
         )}
         {status === "success" && (
-          <CheckCircle2 size={48} className="text-emerald-400" strokeWidth={1.5} />
+          <CheckCircle2 size={48} className="text-emerald-600" strokeWidth={1.5} />
         )}
         {status === "error" && (
-          <AlertCircle size={48} className="text-rose-400" strokeWidth={1.5} />
+          <AlertCircle size={48} className="text-red-600" strokeWidth={1.5} />
         )}
       </div>
 
       {status === "error" && (
         <>
-          <p className="text-[12px] text-rose-400 text-center">{error}</p>
+          <p className="text-[12px] text-red-700 text-center">{error}</p>
           <div className="grid grid-cols-2 gap-2">
             <Link
               to="/auth/vendor/signin"
-              className="h-11 rounded-xl glass glass-hover text-[12px] text-white font-semibold flex items-center justify-center"
+              className="btn btn-ghost btn-md"
             >
-              Vendor sign-in
+              AP team sign-in
             </Link>
             <Link
               to="/auth/driver/signin"
-              className="h-11 rounded-xl glass glass-hover text-[12px] text-white font-semibold flex items-center justify-center"
+              className="btn btn-ghost btn-md"
             >
-              Driver sign-in
+              Supplier driver sign-in
             </Link>
           </div>
         </>

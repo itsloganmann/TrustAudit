@@ -24,6 +24,7 @@ from .routes.verification import router as verification_router
 from .routes.invoice_insights import router as invoice_insights_router
 from .routes.live_stream import router as live_stream_router
 from .routes.debug_observability import router as debug_router
+from .routes.pilot import router as pilot_router
 
 # Create all tables on startup
 Base.metadata.create_all(bind=engine)
@@ -101,6 +102,7 @@ app.include_router(verification_router, prefix="/api")  # /api/verify/{id} (PUBL
 app.include_router(invoice_insights_router, prefix="/api")  # /api/invoices/{id}/annotation + /justification
 app.include_router(live_stream_router, prefix="/api")  # /api/live/stream?session=... (SSE)
 app.include_router(debug_router, prefix="/api")  # /api/debug/recent-inbounds (read-only ring buffer)
+app.include_router(pilot_router, prefix="/api")  # /api/pilot/applications (public POST, admin-gated GET)
 
 # Admin endpoints (Baileys pair code / QR / sidecar health). Only mounted
 # when ADMIN_TOKEN is set so the surface is invisible otherwise.

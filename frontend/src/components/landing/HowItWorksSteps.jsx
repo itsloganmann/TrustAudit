@@ -11,33 +11,33 @@ import {
 const STEPS = [
   {
     icon: FileImage,
-    title: "A driver gets a bill",
-    caption: "Your driver picks up a delivery and the supplier hands them a paper bill.",
-    accent: "#f59e0b",
+    title: "Proof arrives",
+    caption: "A driver snaps a delivery photo. A supplier emails a signed POD. A warehouse stamps a GRN. Every channel flows in.",
+    accent: "#059669",
   },
   {
     icon: MessageCircle,
-    title: "They snap + send",
-    caption: "They open WhatsApp and text a photo of the bill. That's it. No app. No login.",
-    accent: "#10b981",
+    title: "WhatsApp, PDF, photo",
+    caption: "We ingest from the channels your suppliers already use. No new app, no portal, nothing for them to sign up for.",
+    accent: "#059669",
   },
   {
     icon: Cpu,
-    title: "Our computer reads it",
-    caption: "In under 20 seconds we pull out the supplier name, the amount, and the date.",
-    accent: "#3b82f6",
+    title: "Match to invoice",
+    caption: "Vision and retrieval pull out vendor, quantities, dates, signatures, and bind them to the matching invoice or shipment line.",
+    accent: "#059669",
   },
   {
     icon: LayoutDashboard,
-    title: "Your CFO sees it",
-    caption: "A new row lands on the CFO dashboard with the 45-day deadline in big red numbers.",
-    accent: "#8b5cf6",
+    title: "AP gets a verdict",
+    caption: "Every invoice lands in one queue with one of three states: clear to claim, disputed, or missing proof.",
+    accent: "#059669",
   },
   {
     icon: FileBadge,
-    title: "Ready for the tax man",
-    caption: "One tap turns every paid-on-time bill into a PDF your CA can file.",
-    accent: "#f43f5e",
+    title: "Audit-ready bundle",
+    caption: "One tap exports the matched invoice, the proof evidence, and a timestamped decision trail for finance and audit.",
+    accent: "#059669",
   },
 ];
 
@@ -52,13 +52,13 @@ export default function HowItWorksSteps() {
           transition={{ type: "spring", stiffness: 90, damping: 20 }}
           className="text-center mb-14"
         >
-          <p className="text-[11px] text-emerald-400 uppercase tracking-[0.3em] font-semibold mb-3">
+          <p className="text-[11px] text-emerald-700 uppercase tracking-[0.3em] font-semibold mb-3">
             How it works
           </p>
-          <h2 className="text-[32px] md:text-[44px] font-bold text-white tracking-tight leading-tight">
-            From a paper bill to your CFO dashboard,
+          <h2 className="text-[32px] md:text-[44px] font-bold text-zinc-900 tracking-tight leading-tight">
+            From scattered proof to an AP verdict,
             <br />
-            <span className="text-slate-500">in under 20 seconds.</span>
+            <span className="text-zinc-500">in one queue.</span>
           </h2>
         </motion.div>
 
@@ -80,29 +80,22 @@ export default function HowItWorksSteps() {
                   }}
                   className="glass glass-hover rounded-2xl p-5 flex-1 flex flex-col items-center text-center group"
                 >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-105"
-                    style={{
-                      background: `${step.accent}18`,
-                      border: `1px solid ${step.accent}33`,
-                      boxShadow: `0 0 24px ${step.accent}26`,
-                    }}
-                  >
-                    <Icon size={22} strokeWidth={2} style={{ color: step.accent }} />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-105 bg-emerald-50 border border-emerald-200">
+                    <Icon size={22} strokeWidth={2} className="text-emerald-700" />
                   </div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-semibold mb-1">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-semibold mb-1">
                     Step {i + 1}
                   </p>
-                  <h3 className="text-[15px] font-semibold text-white tracking-tight mb-2">
+                  <h3 className="text-[15px] font-semibold text-zinc-900 tracking-tight mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-[12px] text-slate-400 leading-relaxed">
+                  <p className="text-[12px] text-zinc-600 leading-relaxed">
                     {step.caption}
                   </p>
                 </motion.div>
                 {i < STEPS.length - 1 && (
                   <div className="flex items-center px-1">
-                    <ArrowRight size={18} className="text-slate-700" />
+                    <ArrowRight size={18} className="text-zinc-400" />
                   </div>
                 )}
               </div>
@@ -123,23 +116,17 @@ export default function HowItWorksSteps() {
                 transition={{ delay: i * 0.08, type: "spring", stiffness: 100, damping: 20 }}
                 className="glass rounded-2xl p-5 flex items-start gap-4"
               >
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: `${step.accent}18`,
-                    border: `1px solid ${step.accent}33`,
-                  }}
-                >
-                  <Icon size={22} strokeWidth={2} style={{ color: step.accent }} />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-50 border border-emerald-200">
+                  <Icon size={22} strokeWidth={2} className="text-emerald-700" />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-semibold mb-1">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-semibold mb-1">
                     Step {i + 1}
                   </p>
-                  <h3 className="text-[16px] font-semibold text-white tracking-tight mb-1">
+                  <h3 className="text-[16px] font-semibold text-zinc-900 tracking-tight mb-1">
                     {step.title}
                   </h3>
-                  <p className="text-[13px] text-slate-400 leading-relaxed">
+                  <p className="text-[13px] text-zinc-600 leading-relaxed">
                     {step.caption}
                   </p>
                 </div>

@@ -14,9 +14,9 @@ import ProviderHealthPanel from "../components/mock/ProviderHealthPanel.jsx";
 
 const SECTIONS = [
   { key: "org", label: "Organization", Icon: Building2 },
-  { key: "filing", label: "Filing", Icon: Sliders },
+  { key: "filing", label: "Decision rules", Icon: Sliders },
   { key: "notifications", label: "Notifications", Icon: Bell },
-  { key: "api", label: "API Keys", Icon: KeyRound },
+  { key: "api", label: "API keys", Icon: KeyRound },
 ];
 
 const DEFAULT_SETTINGS = {
@@ -73,15 +73,15 @@ export default function VendorSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans">
-      <Toaster position="top-right" theme="dark" />
+    <div className="min-h-screen bg-white text-zinc-700 font-sans">
+      <Toaster position="top-right" theme="light" />
 
-      <header className="border-b border-white/[0.06] bg-slate-950/60 backdrop-blur-xl sticky top-0 z-30">
+      <header className="border-b border-zinc-200 bg-white sticky top-0 z-30">
         <div className="max-w-[1100px] mx-auto px-6 h-14 flex items-center gap-3">
-          <div className="w-7 h-7 rounded-md bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
-            <Settings size={13} className="text-slate-400" />
+          <div className="w-7 h-7 rounded-md bg-zinc-50 border border-zinc-200 flex items-center justify-center">
+            <Settings size={13} className="text-zinc-500" />
           </div>
-          <h1 className="text-[14px] text-white font-bold tracking-tight">
+          <h1 className="text-[14px] text-zinc-900 font-bold tracking-tight">
             Settings
           </h1>
         </div>
@@ -101,8 +101,8 @@ export default function VendorSettings() {
                   onClick={() => setSection(s.key)}
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium transition-colors ${
                     active
-                      ? "bg-white/[0.08] text-white border border-white/[0.1]"
-                      : "text-slate-500 hover:text-slate-200 border border-transparent hover:bg-white/[0.03]"
+                      ? "bg-zinc-100 text-zinc-900 border border-zinc-200"
+                      : "text-zinc-600 hover:text-zinc-900 border border-transparent hover:bg-zinc-50"
                   }`}
                 >
                   <Icon size={12} />
@@ -160,9 +160,9 @@ export default function VendorSettings() {
               )}
 
               {section === "filing" && (
-                <Card title="Filing rules">
+                <Card title="Decision rules">
                   <Field
-                    label={`Submission confidence threshold (${Math.round(
+                    label={`Clear-to-claim confidence threshold (${Math.round(
                       settings.submit_confidence_threshold * 100
                     )}%)`}
                   >
@@ -181,13 +181,13 @@ export default function VendorSettings() {
                       className="slider-input w-full"
                       style={{
                         background:
-                          "linear-gradient(90deg, #f43f5e 0%, #f59e0b 50%, #10b981 100%)",
+                          "linear-gradient(90deg, #dc2626 0%, #d97706 50%, #059669 100%)",
                       }}
                     />
                   </Field>
                   <Toggle
-                    label="Auto-submit verified documents"
-                    description="Skip the manual approval step when confidence is above threshold."
+                    label="Auto-clear high-confidence invoices"
+                    description="Mark invoices clear to claim without manual review when confidence is above the threshold."
                     checked={settings.auto_submit}
                     onChange={(v) => update("auto_submit", v)}
                   />
@@ -204,13 +204,13 @@ export default function VendorSettings() {
                   />
                   <Toggle
                     label="WhatsApp"
-                    description="Real-time updates on submitted documents."
+                    description="Real-time updates when invoice decisions change."
                     checked={settings.notify_whatsapp}
                     onChange={(v) => update("notify_whatsapp", v)}
                   />
                   <Toggle
                     label="SMS"
-                    description="Backup channel for critical deadlines only."
+                    description="Backup channel for closing payment windows only."
                     checked={settings.notify_sms}
                     onChange={(v) => update("notify_sms", v)}
                   />
@@ -219,11 +219,11 @@ export default function VendorSettings() {
 
               {section === "api" && (
                 <Card title="API access">
-                  <p className="text-[11px] text-slate-500">
-                    API keys are managed by your enterprise admin. Contact
-                    support to rotate or provision new keys.
+                  <p className="text-[11px] text-zinc-500">
+                    API keys are managed by your AP admin. Contact support to
+                    rotate or provision new keys.
                   </p>
-                  <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-3 font-mono text-[10px] text-slate-500">
+                  <div className="rounded-lg bg-zinc-50 border border-zinc-200 p-3 font-mono text-[10px] text-zinc-600">
                     sk-trustaudit-••••••••••••1f8a
                   </div>
                 </Card>
@@ -235,7 +235,7 @@ export default function VendorSettings() {
                   whileTap={{ scale: 0.97 }}
                   disabled={saving}
                   onClick={handleSave}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold text-white bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 disabled:opacity-50 transition-colors"
+                  className="btn btn-primary btn-md"
                 >
                   <Save size={12} />
                   {saving ? "Saving..." : "Save changes"}
@@ -250,13 +250,13 @@ export default function VendorSettings() {
 }
 
 const inputCls =
-  "w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-[12px] text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] transition-colors";
+  "w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-[12px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 transition-colors";
 
 function Card({ title, children }) {
   return (
     <div className="glass rounded-xl overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-white/[0.06]">
-        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+      <div className="px-4 py-2.5 border-b border-zinc-200">
+        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
           {title}
         </p>
       </div>
@@ -268,7 +268,7 @@ function Card({ title, children }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="block text-[10px] text-slate-500 uppercase tracking-widest mb-1.5">
+      <span className="block text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5">
         {label}
       </span>
       {children}
@@ -280,9 +280,9 @@ function Toggle({ label, description, checked, onChange }) {
   return (
     <div className="flex items-start justify-between gap-4 py-1">
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] text-white font-medium">{label}</p>
+        <p className="text-[12px] text-zinc-900 font-medium">{label}</p>
         {description && (
-          <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">
+          <p className="text-[10px] text-zinc-500 mt-0.5 leading-snug">
             {description}
           </p>
         )}
@@ -293,13 +293,13 @@ function Toggle({ label, description, checked, onChange }) {
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
-          checked ? "bg-emerald-500/60" : "bg-white/[0.08]"
+          checked ? "bg-emerald-600" : "bg-zinc-200"
         }`}
       >
         <motion.span
           layout
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-md ${
+          className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm ${
             checked ? "left-[18px]" : "left-0.5"
           }`}
         />

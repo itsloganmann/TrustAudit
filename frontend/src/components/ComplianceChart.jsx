@@ -56,31 +56,31 @@ function CustomTooltip({ active, payload, label }) {
   const atRisk = payload.find((p) => p.dataKey === "atRisk");
 
   return (
-    <div className="glass rounded-lg px-3.5 py-2.5 shadow-xl shadow-black/40 border border-white/[0.08]">
-      <p className="text-[11px] text-slate-500 font-medium mb-1.5">{label}</p>
+    <div className="rounded-lg px-3.5 py-2.5 bg-white border border-zinc-200 shadow-sm">
+      <p className="text-[11px] text-zinc-500 font-medium mb-1.5">{label}</p>
       <div className="space-y-1">
         {saved && (
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-sm bg-emerald-500" />
-            <span className="text-[12px] text-slate-400">Saved</span>
-            <span className="text-[12px] text-emerald-400 font-semibold ml-auto tabular-nums">
+            <span className="w-2 h-2 rounded-sm bg-emerald-600" />
+            <span className="text-[12px] text-zinc-600">Cleared</span>
+            <span className="text-[12px] text-emerald-700 font-semibold ml-auto tabular-nums">
               INR {saved.value.toLocaleString("en-IN")}
             </span>
           </div>
         )}
         {atRisk && (
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-sm bg-rose-500" />
-            <span className="text-[12px] text-slate-400">At Risk</span>
-            <span className="text-[12px] text-rose-400 font-semibold ml-auto tabular-nums">
+            <span className="w-2 h-2 rounded-sm bg-red-600" />
+            <span className="text-[12px] text-zinc-600">Unresolved</span>
+            <span className="text-[12px] text-red-700 font-semibold ml-auto tabular-nums">
               INR {atRisk.value.toLocaleString("en-IN")}
             </span>
           </div>
         )}
-        <div className="border-t border-white/[0.06] pt-1 mt-1">
+        <div className="border-t border-zinc-200 pt-1 mt-1">
           <div className="flex items-center gap-2">
-            <span className="text-[12px] text-slate-500">Total</span>
-            <span className="text-[12px] text-white font-semibold ml-auto tabular-nums">
+            <span className="text-[12px] text-zinc-500">Total</span>
+            <span className="text-[12px] text-zinc-900 font-semibold ml-auto tabular-nums">
               INR {((saved?.value || 0) + (atRisk?.value || 0)).toLocaleString("en-IN")}
             </span>
           </div>
@@ -112,39 +112,39 @@ export default function ComplianceChart({ stats }) {
       className="glass rounded-xl overflow-hidden h-full flex flex-col will-change-transform"
     >
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <BarChart3 size={13} className="text-slate-400" />
-            <h3 className="text-[13px] text-white font-semibold tracking-tight">
-              Risk Exposure
+            <BarChart3 size={13} className="text-zinc-500" />
+            <h3 className="text-[13px] text-zinc-900 font-semibold tracking-tight">
+              Live invoice acceptance
             </h3>
-            <span className="text-[10px] text-slate-600 font-medium">30-day window</span>
+            <span className="text-[10px] text-zinc-500 font-medium">30-day window</span>
           </div>
-          <p className="text-[10px] text-slate-500 mt-0.5 ml-[21px]">
-            43B(h) deduction recovery vs total liability
+          <p className="text-[10px] text-zinc-500 mt-0.5 ml-[21px]">
+            Cleared to claim vs unresolved payables
           </p>
         </div>
         <div className="flex items-center gap-5">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-            <span className="text-[11px] text-slate-500">Saved</span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-600" />
+            <span className="text-[11px] text-zinc-600">Cleared</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm bg-rose-500" />
-            <span className="text-[11px] text-slate-500">At Risk</span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-red-600" />
+            <span className="text-[11px] text-zinc-600">Unresolved</span>
           </div>
           <div className="text-right ml-3">
-            <span className="text-[18px] font-bold text-emerald-400 tabular-nums tracking-tight glow-emerald">
+            <span className="text-[18px] font-bold text-emerald-700 tabular-nums tracking-tight">
               {totals.rate}%
             </span>
-            <p className="text-[9px] text-slate-600 uppercase tracking-wider">recovered</p>
+            <p className="text-[9px] text-zinc-500 uppercase tracking-wider">cleared</p>
           </div>
         </div>
       </div>
 
       {/* Chart — AreaChart with gradient fills */}
-      <div className="px-2 py-3 flex-1">
+      <div className="px-2 py-3 flex-1 bg-white">
         <ResponsiveContainer width="100%" height={220}>
           <AreaChart
             data={data}
@@ -152,28 +152,28 @@ export default function ComplianceChart({ stats }) {
           >
             <defs>
               <linearGradient id="gradSaved" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#059669" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#059669" stopOpacity={0.02} />
               </linearGradient>
               <linearGradient id="gradRisk" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#dc2626" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="#dc2626" stopOpacity={0.02} />
               </linearGradient>
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.04)"
+              stroke="#e4e4e7"
               vertical={false}
             />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 9, fill: "#475569" }}
-              axisLine={{ stroke: "rgba(255,255,255,0.06)" }}
+              tick={{ fontSize: 9, fill: "#a1a1aa" }}
+              axisLine={{ stroke: "#e4e4e7" }}
               tickLine={false}
               interval={4}
             />
             <YAxis
-              tick={{ fontSize: 9, fill: "#475569" }}
+              tick={{ fontSize: 9, fill: "#a1a1aa" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) =>
@@ -183,13 +183,13 @@ export default function ComplianceChart({ stats }) {
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: "rgba(255,255,255,0.06)", strokeWidth: 1 }}
+              cursor={{ stroke: "#e4e4e7", strokeWidth: 1 }}
             />
             <Area
               type="monotone"
               dataKey="saved"
               stackId="1"
-              stroke="#10b981"
+              stroke="#059669"
               strokeWidth={1.5}
               fill="url(#gradSaved)"
             />
@@ -197,7 +197,7 @@ export default function ComplianceChart({ stats }) {
               type="monotone"
               dataKey="atRisk"
               stackId="1"
-              stroke="#f43f5e"
+              stroke="#dc2626"
               strokeWidth={1.5}
               fill="url(#gradRisk)"
             />

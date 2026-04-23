@@ -26,13 +26,13 @@ export default function DriverOnboarding() {
       eyebrow={`Step ${screen} of 2`}
       title={
         screen === 1
-          ? "Send your first challan via WhatsApp."
+          ? "Send your first acceptance proof on WhatsApp."
           : "You're all set."
       }
       subtitle={
         screen === 1
-          ? "Tap the WhatsApp number below or scan the QR code with your phone. Send a photo of a paper bill and watch it appear in your dashboard in under 20 seconds. No app. No login. No typing."
-          : "Your company will see every bill you send. We'll WhatsApp you back the moment a payment is approved."
+          ? "Tap the WhatsApp number below or scan the QR code with your phone. Send a photo of a paper bill and watch the decision appear in under 20 seconds. No app. No login. No typing."
+          : "The AP team sees every bill you send. We'll WhatsApp you back the moment the invoice is cleared to claim."
       }
     >
       <AnimatePresence mode="wait">
@@ -45,39 +45,39 @@ export default function DriverOnboarding() {
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <div className="glass rounded-xl p-5 text-center space-y-4 border border-emerald-500/15 bg-emerald-500/[0.03]">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 font-semibold tracking-wide">
+            <div className="glass rounded-xl p-5 text-center space-y-4 border-emerald-200 bg-emerald-50">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-emerald-200 text-[11px] text-emerald-700 font-semibold tracking-wide">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot" />
                 WhatsApp number
               </div>
-              <p className="text-[28px] font-bold text-white tabular-nums tracking-tight">
+              <p className="text-[28px] font-bold text-zinc-900 tabular-nums tracking-tight">
                 {WHATSAPP_NUMBER_DISPLAY}
               </p>
               <a
                 href={WA_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-[13px] tracking-tight transition-all shadow-[0_8px_32px_-12px_rgba(16,185,129,0.7)]"
+                className="btn btn-primary btn-md"
               >
                 <MessageCircle size={14} />
                 Open WhatsApp now
                 <ArrowRight size={13} />
               </a>
-              <p className="text-[10px] text-slate-500">
+              <p className="text-[10px] text-zinc-500">
                 First message:{" "}
-                <code className="text-slate-300 font-mono">{WHATSAPP_FIRST_MESSAGE}</code>
+                <code className="text-zinc-700 font-mono">{WHATSAPP_FIRST_MESSAGE}</code>
               </p>
             </div>
 
             <div className="glass rounded-xl p-5 flex items-center gap-4">
-              <div className="bg-white p-2 rounded-lg shrink-0">
+              <div className="bg-white p-2 rounded-lg shrink-0 border border-zinc-200">
                 <QRCodeSVG value={WA_LINK} size={88} level="M" />
               </div>
               <div>
-                <p className="text-[12px] text-white font-semibold">
+                <p className="text-[12px] text-zinc-900 font-semibold">
                   On a desktop? Scan this.
                 </p>
-                <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                <p className="text-[11px] text-zinc-500 leading-relaxed mt-1">
                   Opens WhatsApp on your phone with the chat pre-filled.
                 </p>
               </div>
@@ -86,7 +86,7 @@ export default function DriverOnboarding() {
             <button
               type="button"
               onClick={() => setScreen(2)}
-              className="w-full h-11 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-[13px] font-semibold transition-all flex items-center justify-center gap-2"
+              className="btn btn-ghost btn-md w-full"
             >
               I sent my first photo
               <ArrowRight size={13} />
@@ -103,28 +103,28 @@ export default function DriverOnboarding() {
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <div className="glass rounded-xl p-6 text-center space-y-3 border border-emerald-500/15 bg-emerald-500/[0.03]">
-              <CheckCircle2 size={56} className="text-emerald-400 mx-auto" strokeWidth={1.5} />
-              <p className="text-[15px] text-white font-semibold">
-                Your driver account is live.
+            <div className="glass rounded-xl p-6 text-center space-y-3 border-emerald-200 bg-emerald-50">
+              <CheckCircle2 size={56} className="text-emerald-700 mx-auto" strokeWidth={1.5} />
+              <p className="text-[15px] text-zinc-900 font-semibold">
+                Your supplier driver account is live.
               </p>
-              <p className="text-[12px] text-slate-400 leading-relaxed">
+              <p className="text-[12px] text-zinc-600 leading-relaxed">
                 From now on, every photo you send to{" "}
-                <span className="text-white font-medium">{WHATSAPP_NUMBER_DISPLAY}</span> will be
-                read by our computer in under 20 seconds. No app to install. No paperwork.
+                <span className="text-zinc-900 font-medium">{WHATSAPP_NUMBER_DISPLAY}</span> is
+                read automatically in under 20 seconds and the AP team sees the decision. No app to install. No paperwork.
               </p>
             </div>
 
             <div className="grid grid-cols-3 gap-2">
               <Tip icon={<Camera size={14} />} title="Clear photo" sub="Avoid glare" />
               <Tip icon={<MessageCircle size={14} />} title="One per msg" sub="Easier to read" />
-              <Tip icon={<CheckCircle2 size={14} />} title="Get pinged" sub="Status updates" />
+              <Tip icon={<CheckCircle2 size={14} />} title="Get pinged" sub="Decision updates" />
             </div>
 
             <button
               type="button"
               onClick={() => navigate("/driver")}
-              className="w-full h-11 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-[13px] font-semibold transition-all flex items-center justify-center gap-2"
+              className="btn btn-primary btn-md w-full"
             >
               Go to my dashboard
               <ArrowRight size={13} />
@@ -139,11 +139,11 @@ export default function DriverOnboarding() {
 function Tip({ icon, title, sub }) {
   return (
     <div className="glass rounded-xl px-3 py-3 text-center">
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-white/[0.04] text-emerald-400">
+      <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700">
         {icon}
       </span>
-      <p className="mt-2 text-[11px] text-white font-semibold leading-tight">{title}</p>
-      <p className="text-[10px] text-slate-500 leading-tight">{sub}</p>
+      <p className="mt-2 text-[11px] text-zinc-900 font-semibold leading-tight">{title}</p>
+      <p className="text-[10px] text-zinc-500 leading-tight">{sub}</p>
     </div>
   );
 }

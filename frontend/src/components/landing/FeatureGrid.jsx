@@ -11,45 +11,33 @@ import {
 const FEATURES = [
   {
     icon: Eye,
-    title: "Real-time vision OCR",
-    desc: "Gemini 2.5 Flash reads any challan photo in under 2 seconds, with field-level bounding boxes and extraction confidence per field.",
-    color: "#3b82f6",
-    bg: "rgba(59,130,246,0.12)",
-  },
-  {
-    icon: Gauge,
-    title: "Calibrated confidence",
-    desc: "Every extracted field is scored 0-100. Anything under 85 is routed through a targeted clarification, not guessed.",
-    color: "#8b5cf6",
-    bg: "rgba(139,92,246,0.12)",
+    title: "Multi-channel proof ingestion",
+    desc: "WhatsApp photos, PDFs, signed PODs, stamped GRNs, email attachments. Whatever channel your suppliers already use, we read it.",
   },
   {
     icon: Workflow,
-    title: "Stateful document pipeline",
-    desc: "PENDING → VERIFYING → VERIFIED | NEEDS_INFO → SUBMITTED_TO_GOV → DISPUTED. Every transition is auditable and replayable.",
-    color: "#10b981",
-    bg: "rgba(16,185,129,0.12)",
+    title: "Invoice-to-proof matching",
+    desc: "We bind delivery evidence to the right invoice and shipment line. Vendor, quantity, date, signature, stamp, each verified against what you were billed for.",
+  },
+  {
+    icon: Gauge,
+    title: "Clear / disputed / missing",
+    desc: "Every invoice gets one of three verdicts AP can act on. Clear to claim means finance can release. Disputed and missing-proof surface exactly what's off so a clerk can close the loop.",
   },
   {
     icon: MessageSquareWarning,
-    title: "WhatsApp-native disputes",
-    desc: "If a field is missing the bot replies to the driver in WhatsApp asking for exactly the missing piece. No portals, no apps.",
-    color: "#f59e0b",
-    bg: "rgba(245,158,11,0.12)",
+    title: "Supplier follow-up on WhatsApp",
+    desc: "If proof is missing, we message the supplier or driver in WhatsApp asking for the specific evidence. No portals, no new logins for them.",
   },
   {
     icon: FileBadge,
-    title: "Government-ready PDFs",
-    desc: "One tap generates a 43B(h) compliance form with audit trail, QR authenticity code, and letterhead — ready for ITR filing.",
-    color: "#f43f5e",
-    bg: "rgba(244,63,94,0.12)",
+    title: "Section 43B(h) use case",
+    desc: "One named decision that rides on the proof layer: we flag invoices approaching the 45-day MSME payment window so AP can release them in time to keep the buyer's deduction.",
   },
   {
     icon: Users,
-    title: "Role-scoped logins",
-    desc: "Google / Facebook / WhatsApp OTP / phone OTP / email magic. Separate vendor and driver flows with DB-backed sessions.",
-    color: "#06b6d4",
-    bg: "rgba(6,182,212,0.12)",
+    title: "Audit-ready proof bundles",
+    desc: "Every release exports a timestamped bundle: the invoice, the matched evidence, the decision trail, the clerk who approved. Finance and audit get one artifact.",
   },
 ];
 
@@ -73,16 +61,17 @@ export default function FeatureGrid() {
           transition={{ type: "spring", stiffness: 90, damping: 20 }}
           className="text-center mb-14"
         >
-          <p className="text-[11px] text-emerald-400 uppercase tracking-[0.3em] font-semibold mb-3">
-            Built for Indian CFOs
+          <p className="text-[11px] text-emerald-700 uppercase tracking-[0.3em] font-semibold mb-3">
+            Built for AP teams at Indian enterprises
           </p>
-          <h2 className="text-[32px] md:text-[44px] font-bold text-white tracking-tight leading-tight">
-            Six ways TrustAudit saves you
-            <span className="text-slate-500"> from the 45-day cliff.</span>
+          <h2 className="text-[32px] md:text-[44px] font-bold text-zinc-900 tracking-tight leading-tight">
+            The decision layer
+            <span className="text-zinc-500"> for invoice acceptance.</span>
           </h2>
-          <p className="mt-4 text-[15px] text-slate-400 max-w-2xl mx-auto">
-            Every step from a paper challan to a filed ITR Schedule BP is
-            automated, audited, and defensible under Section 43B(h).
+          <p className="mt-4 text-[15px] text-zinc-600 max-w-2xl mx-auto">
+            Every step from scattered proof to an AP verdict is ingested,
+            matched, and bundled. One queue, one audit trail, one artifact
+            per release.
           </p>
         </motion.div>
 
@@ -99,19 +88,13 @@ export default function FeatureGrid() {
                 custom={i}
                 className="glass glass-hover rounded-2xl p-6 group transition-all"
               >
-                <div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-105"
-                  style={{
-                    background: feature.bg,
-                    boxShadow: `0 0 24px ${feature.bg}`,
-                  }}
-                >
-                  <Icon size={20} strokeWidth={2} style={{ color: feature.color }} />
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 bg-emerald-50 border border-emerald-200">
+                  <Icon size={20} strokeWidth={2} className="text-emerald-700" />
                 </div>
-                <h3 className="text-[16px] font-semibold text-white tracking-tight mb-2">
+                <h3 className="text-[16px] font-semibold text-zinc-900 tracking-tight mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-[13px] text-slate-400 leading-relaxed">{feature.desc}</p>
+                <p className="text-[13px] text-zinc-600 leading-relaxed">{feature.desc}</p>
               </motion.div>
             );
           })}

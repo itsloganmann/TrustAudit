@@ -52,3 +52,9 @@ backend/uploads/
 # graphify regenerable artifacts (cache + interactive viz)
 graphify-out/cache/
 graphify-out/graph.html
+
+# Local Claude Code per-repo config
+.claude/
+
+# Playwright MCP artifacts
+.playwright-mcp/

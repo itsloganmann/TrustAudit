@@ -22,22 +22,18 @@ function riskBarColor(invoice) {
   if (invoice.state === "VERIFIED" || invoice.state === "SUBMITTED_TO_GOV") {
     return "bg-emerald-500";
   }
-  if (invoice.state === "DISPUTED") return "bg-rose-500";
+  if (invoice.state === "DISPUTED") return "bg-red-500";
   if (invoice.state === "NEEDS_INFO") return "bg-amber-500";
   if (invoice.days_remaining !== undefined) {
-    if (invoice.days_remaining <= 3) return "bg-rose-500";
+    if (invoice.days_remaining <= 3) return "bg-red-500";
     if (invoice.days_remaining <= 14) return "bg-amber-500";
   }
-  return "bg-slate-600";
+  return "bg-zinc-300";
 }
 
 /**
  * Single table row for the new vendor dashboard. Renders the same density
  * as Dashboard.jsx but adds confidence + edge cases + DocumentStatePill.
- *
- * @param {object} props
- * @param {object} props.invoice
- * @param {(invoice:object)=>void} [props.onSelect]
  */
 export default function InvoiceRow({ invoice, onSelect }) {
   const cases = Array.isArray(invoice.detected_edge_cases)
@@ -53,7 +49,7 @@ export default function InvoiceRow({ invoice, onSelect }) {
       exit="exit"
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
       onClick={() => onSelect?.(invoice)}
-      className="row-transition border-b border-white/[0.04] cursor-pointer group"
+      className="row-transition border-b border-zinc-200 cursor-pointer group"
     >
       <td className="px-4 py-3">
         <div className="flex items-center gap-2.5">
@@ -64,10 +60,10 @@ export default function InvoiceRow({ invoice, onSelect }) {
             )}`}
           />
           <div className="min-w-0">
-            <p className="text-[13px] text-white font-medium group-hover:text-blue-400 transition-colors leading-tight tracking-tight truncate">
+            <p className="text-[13px] text-zinc-900 font-medium group-hover:text-emerald-700 transition-colors leading-tight tracking-tight truncate">
               {invoice.vendor_name || "Unknown vendor"}
             </p>
-            <p className="text-[10px] text-slate-600 mt-0.5">
+            <p className="text-[10px] text-zinc-500 mt-0.5">
               {invoice.invoice_date || "—"}
             </p>
           </div>
@@ -75,19 +71,19 @@ export default function InvoiceRow({ invoice, onSelect }) {
       </td>
 
       <td className="px-3 py-3">
-        <code className="text-[10px] text-slate-500 font-mono">
+        <code className="text-[10px] text-zinc-500 font-mono">
           {invoice.gstin || "—"}
         </code>
       </td>
 
       <td className="px-3 py-3">
-        <span className="text-[12px] text-slate-400 font-mono">
+        <span className="text-[12px] text-zinc-700 font-mono">
           {invoice.invoice_number || "—"}
         </span>
       </td>
 
       <td className="px-3 py-3 text-right">
-        <span className="text-[13px] text-white font-semibold tabular-nums tracking-tight">
+        <span className="text-[13px] text-zinc-900 font-semibold tabular-nums tracking-tight">
           {formatINR(invoice.invoice_amount)}
         </span>
       </td>
@@ -103,7 +99,7 @@ export default function InvoiceRow({ invoice, onSelect }) {
         {cases.length > 0 ? (
           <EdgeCaseBadges cases={cases} max={3} />
         ) : (
-          <span className="text-[10px] text-slate-700">—</span>
+          <span className="text-[10px] text-zinc-400">—</span>
         )}
       </td>
 

@@ -107,7 +107,7 @@ export default function EmailPasswordForm({
             autoComplete="name"
             placeholder="Priya Sharma"
             {...register("full_name")}
-            className="w-full h-11 pl-9 pr-3 text-[13px] bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] transition-colors"
+            className="w-full h-11 pl-9 pr-3 text-[13px] bg-white border border-zinc-200 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 transition-colors"
           />
         </Field>
       )}
@@ -122,7 +122,7 @@ export default function EmailPasswordForm({
           autoComplete="email"
           placeholder={role === "vendor" ? "cfo@enterprise.com" : "driver@msme.com"}
           {...register("email")}
-          className="w-full h-11 pl-9 pr-3 text-[13px] bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] transition-colors"
+          className="w-full h-11 pl-9 pr-3 text-[13px] bg-white border border-zinc-200 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 transition-colors"
         />
       </Field>
 
@@ -136,24 +136,24 @@ export default function EmailPasswordForm({
           autoComplete={isSignup ? "new-password" : "current-password"}
           placeholder="••••••••"
           {...register("password")}
-          className="w-full h-11 pl-9 pr-3 text-[13px] bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] transition-colors"
+          className="w-full h-11 pl-9 pr-3 text-[13px] bg-white border border-zinc-200 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 transition-colors"
         />
       </Field>
 
       {roleMismatch && (
-        <div className="glass rounded-xl p-3 border border-amber-500/15 bg-amber-500/[0.04]">
-          <p className="text-[12px] text-amber-300 font-semibold">
+        <div className="rounded-xl p-3 border border-amber-200 bg-amber-50">
+          <p className="text-[12px] text-amber-700 font-semibold">
             Wrong sign-in page
           </p>
-          <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+          <p className="text-[11px] text-zinc-600 mt-1 leading-relaxed">
             You registered as a{" "}
-            <span className="text-white font-medium">{roleMismatch}</span>. Use the{" "}
+            <span className="text-zinc-900 font-medium">{roleMismatch}</span>. Use the{" "}
             {roleMismatch} sign-in page instead.
           </p>
           <button
             type="button"
             onClick={() => navigate(`/auth/${roleMismatch}/signin`)}
-            className="mt-2 h-8 px-3 rounded-lg bg-amber-500/15 border border-amber-500/30 text-[11px] font-semibold text-amber-200 hover:bg-amber-500/25 transition"
+            className="mt-2 h-8 px-3 rounded-lg bg-white border border-amber-200 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition"
           >
             Go to {roleMismatch} sign-in →
           </button>
@@ -161,8 +161,8 @@ export default function EmailPasswordForm({
       )}
 
       {serverError && !roleMismatch && (
-        <p className="text-[11px] text-rose-400 flex items-center gap-1.5">
-          <span className="w-1 h-1 rounded-full bg-rose-500 pulse-dot" />
+        <p className="text-[11px] text-red-700 flex items-center gap-1.5">
+          <span className="w-1 h-1 rounded-full bg-red-500 pulse-dot" />
           {serverError}
         </p>
       )}
@@ -170,7 +170,7 @@ export default function EmailPasswordForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full h-11 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-[13px] font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        className="btn btn-primary btn-md w-full"
       >
         {isSubmitting
           ? isSignup
@@ -187,18 +187,18 @@ export default function EmailPasswordForm({
 function Field({ icon, label, error, children }) {
   return (
     <label className="block">
-      <span className="text-[11px] text-slate-500 uppercase tracking-widest font-semibold">
+      <span className="text-[11px] text-zinc-500 uppercase tracking-widest font-semibold">
         {label}
       </span>
       <div className="mt-1.5 relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
           {icon}
         </span>
         {children}
       </div>
       {error && (
-        <p className="mt-1.5 text-[11px] text-rose-400 flex items-center gap-1.5">
-          <span className="w-1 h-1 rounded-full bg-rose-500 pulse-dot" />
+        <p className="mt-1.5 text-[11px] text-red-700 flex items-center gap-1.5">
+          <span className="w-1 h-1 rounded-full bg-red-500 pulse-dot" />
           {error}
         </p>
       )}

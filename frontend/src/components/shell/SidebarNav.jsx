@@ -18,8 +18,8 @@ export default function SidebarNav({ items, className = "" }) {
           className={({ isActive }) =>
             `group flex items-center gap-2.5 px-3 h-9 rounded-lg text-[12.5px] font-medium tracking-tight transition-all ${
               isActive
-                ? "bg-white/[0.08] text-white border border-white/[0.1]"
-                : "text-slate-500 hover:text-slate-200 hover:bg-white/[0.03] border border-transparent"
+                ? "bg-zinc-100 text-zinc-900 border border-zinc-200"
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent"
             }`
           }
         >
@@ -28,7 +28,7 @@ export default function SidebarNav({ items, className = "" }) {
           </span>
           <span className="flex-1">{item.label}</span>
           {typeof item.count === "number" && (
-            <span className="text-[10px] text-slate-600 tabular-nums">
+            <span className="text-[10px] text-zinc-500 tabular-nums">
               {item.count}
             </span>
           )}
