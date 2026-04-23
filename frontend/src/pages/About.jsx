@@ -62,20 +62,20 @@ const COFOUNDERS = [
     slug: "arnav",
     name: "Arnav Bhardwaj",
     role: "Co-founder & CEO",
-    tagline: "UC Berkeley Haas · Carbyn AI",
+    tagline: "UC Berkeley Haas · GTM Intern @ Carbyn AI",
     location: "San Francisco Bay Area",
     initials: "AB",
     photo: "/team/arnav.jpg",
     photoFallback: "/team/arnav.svg",
     bio:
       "Runs strategy, GTM, and partnerships. Deep roots in the Indian " +
-      "enterprise and MSME ecosystem, and the founder behind Carbyn AI. " +
-      "Leading TrustAudit's pilots with AP teams in pharma distribution, " +
+      "enterprise and MSME ecosystem. GTM intern at Carbyn AI. Leading " +
+      "TrustAudit's pilots with AP teams in pharma distribution, " +
       "manufacturing, and industrial procurement.",
     credentials: [
       { icon: Briefcase, label: "Strategy & GTM · Partnerships" },
       { icon: GraduationCap, label: "UC Berkeley Haas School of Business" },
-      { icon: Rocket, label: "Founder @ Carbyn AI" },
+      { icon: Rocket, label: "GTM Intern @ Carbyn AI" },
     ],
     links: [
       {
