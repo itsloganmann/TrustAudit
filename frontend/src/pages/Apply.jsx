@@ -66,7 +66,7 @@ function validate(form) {
   if (!form.contact_email.trim()) {
     errors.contact_email = "Email is required.";
   } else if (!isEmailShape(form.contact_email.trim())) {
-    errors.contact_email = "That email looks off — please check it.";
+    errors.contact_email = "That email looks off. Please check it.";
   }
   if (!form.ap_volume_tier) errors.ap_volume_tier = "Pick a volume tier.";
   if (!form.sectors.length) errors.sectors = "Pick at least one sector.";
@@ -317,7 +317,7 @@ export default function Apply() {
       }
     } catch {
       setServerError(
-        "Network issue — your connection dropped before we could submit. Please try again.",
+        "Network issue. Your connection dropped before we could submit. Please try again.",
       );
     } finally {
       setSubmitting(false);

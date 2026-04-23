@@ -19,25 +19,25 @@ export default function DemoAccountPrefill({ role, onPick }) {
           {
             email: "vendor@bharat.demo",
             password: "demo",
-            label: "Bharat Industries — Owner",
+            label: "Bharat Industries / Owner",
             sub: "Full vendor dashboard",
           },
           {
             email: "cfo@bharat.demo",
             password: "demo",
-            label: "Bharat Industries — CFO",
+            label: "Bharat Industries / CFO",
             sub: "Approver role",
           },
           {
             email: "admin@bharat.demo",
             password: "demo",
-            label: "Bharat Industries — Admin",
+            label: "Bharat Industries / Admin",
             sub: "User management",
           },
           {
             email: "analyst@bharat.demo",
             password: "demo",
-            label: "Bharat Industries — Analyst",
+            label: "Bharat Industries / Analyst",
             sub: "Read-only analytics",
           },
         ]
@@ -45,13 +45,13 @@ export default function DemoAccountPrefill({ role, onPick }) {
           {
             email: "driver@gupta.demo",
             password: "demo",
-            label: "Gupta Steel — Driver",
+            label: "Gupta Steel / Driver",
             sub: "MSME field agent",
           },
           {
             email: "driver@priya.demo",
             password: "demo",
-            label: "Priya Logistics — Driver",
+            label: "Priya Logistics / Driver",
             sub: "MSME field agent",
           },
         ];

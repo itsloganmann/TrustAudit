@@ -56,9 +56,8 @@ export default function ShieldHero3D() {
               Today's verdicts
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-2.5 h-6 rounded-md bg-emerald-50 border border-emerald-200 text-[11px] font-medium text-emerald-700">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Live
+          <span className="inline-flex items-center gap-1.5 px-2.5 h-6 rounded-md bg-zinc-50 border border-zinc-200 text-[11px] font-medium text-zinc-600">
+            Sample
           </span>
         </div>
 
@@ -120,11 +119,11 @@ export default function ShieldHero3D() {
 
         {/* Footer strip */}
         <div className="mt-auto px-5 py-3 border-t border-zinc-200 bg-zinc-50 flex items-center justify-between">
-          <span className="text-[11px] text-zinc-600">
-            3 verdicts in the last hour
+          <span className="text-[11px] text-zinc-500">
+            Illustrative AP queue
           </span>
-          <span className="text-[11px] text-emerald-700 font-medium">
-            97.4% match rate
+          <span className="text-[11px] text-zinc-600 font-medium">
+            3 sample verdicts
           </span>
         </div>
       </div>

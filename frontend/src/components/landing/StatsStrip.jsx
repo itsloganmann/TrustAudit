@@ -53,9 +53,9 @@ function Stat({ label, value, prefix = "", suffix = "", decimals = 0, color = "#
 
 const DEFAULT_STATS = [
   { label: "Flow we sit under", value: 90, prefix: "$", suffix: "B", color: "#047857" },
-  { label: "Invoices ingested", value: 2847, color: "#09090b" },
   { label: "Sectors in pilot", value: 3, color: "#09090b" },
-  { label: "Match rate", value: 96.4, suffix: "%", decimals: 1, color: "#047857" },
+  { label: "Open pilots", value: 0, color: "#09090b" },
+  { label: "Founders shipping", value: 2, color: "#047857" },
 ];
 
 export default function StatsStrip({ stats = DEFAULT_STATS, compact = false }) {
@@ -68,11 +68,17 @@ export default function StatsStrip({ stats = DEFAULT_STATS, compact = false }) {
       initial={{ opacity: 0, y: 16 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ type: "spring", stiffness: 80, damping: 18 }}
-      className={`glass rounded-2xl ${compact ? "px-5 py-4" : "px-8 py-6"} grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8`}
+      className={`glass rounded-2xl ${compact ? "px-5 py-4" : "px-8 py-6"}`}
     >
-      {stats.map((s) => (
-        <Stat key={s.label} {...s} shouldStart={inView} />
-      ))}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-8">
+        {stats.map((s) => (
+          <Stat key={s.label} {...s} shouldStart={inView} />
+        ))}
+      </div>
+      <p className="mt-4 text-[10px] text-zinc-400 text-center md:text-left">
+        Flow figure sourced from MSME Ministry; other numbers reflect the
+        current state of the pilot.
+      </p>
     </motion.div>
   );
 }

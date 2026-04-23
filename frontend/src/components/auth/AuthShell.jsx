@@ -136,9 +136,9 @@ function BrandPanel({ eyebrow, isDriver }) {
       </div>
 
       <div className="relative grid grid-cols-3 gap-3 text-center">
-        <Stat label="Avg decision" value="14s" />
-        <Stat label="Coverage" value="98.4%" />
-        <Stat label="Cleared" value="₹2.4Cr" />
+        <Stat label="Proof channels" value="5" />
+        <Stat label="Sectors in pilot" value="3" />
+        <Stat label="Founders shipping" value="2" />
       </div>
     </motion.section>
   );

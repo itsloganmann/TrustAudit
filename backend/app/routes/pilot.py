@@ -30,6 +30,7 @@ losing the notification. Failures are logged with ``logger.warning``.
 """
 from __future__ import annotations
 
+import hmac
 import logging
 import os
 from typing import Any, Dict, List, Optional
@@ -90,8 +91,14 @@ def _client_ip(request: Request) -> str:
 
 
 def _build_notification_body(app_row: PilotApplication) -> tuple[str, str]:
-    """Return (subject, plain-text body) for the founder notification."""
-    subject = f"New pilot application: {app_row.company_name}"
+    """Return (subject, plain-text body) for the founder notification.
+
+    The company name is stripped of CR/LF so it can't smuggle headers
+    into SMTP ``Subject`` (the Resend path is HTTP-only but SMTP fallback
+    exists and some relays do not normalize).
+    """
+    safe_company = (app_row.company_name or "").replace("\r", " ").replace("\n", " ")
+    subject = f"New pilot application: {safe_company}"
     created = (
         app_row.created_at.isoformat()
         if app_row.created_at is not None
@@ -191,10 +198,18 @@ def _serialize(row: PilotApplication) -> Dict[str, Any]:
 def _require_admin_token(x_admin_token: Optional[str]) -> None:
     """401 unless the supplied header equals ``PILOT_ADMIN_TOKEN``.
 
+    Uses ``hmac.compare_digest`` so a nonsense token at the first byte
+    doesn't return faster than one that matches up to the last byte.
     Empty / missing env var always 401s (no empty-string bypass).
     """
     expected = os.environ.get("PILOT_ADMIN_TOKEN") or ""
-    if not expected or not x_admin_token or x_admin_token != expected:
+    supplied = x_admin_token or ""
+    if not expected or not supplied:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Admin token required",
+        )
+    if not hmac.compare_digest(supplied.encode("utf-8"), expected.encode("utf-8")):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Admin token required",
