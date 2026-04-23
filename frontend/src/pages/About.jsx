@@ -68,8 +68,7 @@ const COFOUNDERS = [
     photo: "/team/arnav.jpg",
     photoFallback: "/team/arnav.svg",
     bio:
-      "Runs strategy, GTM, and partnerships. Deep roots in the Indian " +
-      "enterprise and MSME ecosystem. Founder of the Senior Story " +
+      "Runs strategy, GTM, and partnerships. Founder of the Senior Story " +
       "Project, which he ran for 6 years with a team of 125+ volunteers. " +
       "Leading TrustAudit's pilots with AP teams in pharma distribution, " +
       "manufacturing, and industrial procurement.",
