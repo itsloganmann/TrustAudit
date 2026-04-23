@@ -62,22 +62,21 @@ const COFOUNDERS = [
     slug: "arnav",
     name: "Arnav Bhardwaj",
     role: "Co-founder & CEO",
-    tagline: "UC Berkeley Haas · GTM Intern @ Carbyn AI",
+    tagline: "UC Berkeley Haas · Founder @ The Senior Story Project",
     location: "San Francisco Bay Area",
     initials: "AB",
     photo: "/team/arnav.jpg",
     photoFallback: "/team/arnav.svg",
     bio:
       "Runs strategy, GTM, and partnerships. Deep roots in the Indian " +
-      "enterprise and MSME ecosystem. GTM intern at Carbyn AI. Ran the " +
-      "Senior Story Project for 6 years, managing a team of 125+ " +
-      "volunteers. Leading TrustAudit's pilots with AP teams in pharma " +
-      "distribution, manufacturing, and industrial procurement.",
+      "enterprise and MSME ecosystem. Founder of the Senior Story " +
+      "Project, which he ran for 6 years with a team of 125+ volunteers. " +
+      "Leading TrustAudit's pilots with AP teams in pharma distribution, " +
+      "manufacturing, and industrial procurement.",
     credentials: [
       { icon: Briefcase, label: "Strategy & GTM · Partnerships" },
       { icon: GraduationCap, label: "UC Berkeley Haas School of Business" },
-      { icon: Rocket, label: "GTM Intern @ Carbyn AI" },
-      { icon: Users, label: "Senior Story Project · 125+ volunteers (6 yrs)" },
+      { icon: Users, label: "Founder @ The Senior Story Project" },
     ],
     links: [
       {
