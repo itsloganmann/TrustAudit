@@ -37,15 +37,15 @@ export const LEGAL = {
   companyName: envOr("VITE_LEGAL_COMPANY_NAME", "TrustAudit"),
   companyLegalName: envOr(
     "VITE_LEGAL_COMPANY_LEGAL_NAME",
-    "TrustAudit (registered entity name pending — see PRODUCTION_READINESS.md)"
+    "TrustAudit (registered entity name pending incorporation)"
   ),
   companyRegistration: envOr(
     "VITE_LEGAL_COMPANY_REGISTRATION",
-    "TODO_LEGAL: CIN / GSTIN / firm registration number"
+    "Entity registration pending (pre-incorporation pilot)"
   ),
   registeredAddress: envOr(
     "VITE_LEGAL_REGISTERED_ADDRESS",
-    "TODO_LEGAL: registered postal address in India"
+    "Registered address pending (pre-incorporation pilot)"
   ),
   jurisdictionCity: envOr("VITE_LEGAL_JURISDICTION_CITY", "Bengaluru"),
 
@@ -60,7 +60,7 @@ export const LEGAL = {
   // ---------------------------------------------------------------------
   grievanceOfficerName: envOr(
     "VITE_LEGAL_GRIEVANCE_OFFICER_NAME",
-    "TODO_LEGAL: Grievance Officer full name"
+    "Logan Mann (co-founder, acting Grievance Officer pending DPDP Rule 5(9) appointment)"
   ),
   grievanceOfficerEmail: envOr(
     "VITE_LEGAL_GRIEVANCE_OFFICER_EMAIL",
@@ -68,11 +68,11 @@ export const LEGAL = {
   ),
   grievanceOfficerPhone: envOr(
     "VITE_LEGAL_GRIEVANCE_OFFICER_PHONE",
-    "TODO_LEGAL: Indian phone number (+91 ...)"
+    "Reachable via grievance@trustaudit.in until a phone line is listed"
   ),
   grievanceOfficerAddress: envOr(
     "VITE_LEGAL_GRIEVANCE_OFFICER_ADDRESS",
-    "TODO_LEGAL: full postal address for service of grievance"
+    "Address pending registered-entity incorporation (contact via email for now)"
   ),
 
   // ---------------------------------------------------------------------

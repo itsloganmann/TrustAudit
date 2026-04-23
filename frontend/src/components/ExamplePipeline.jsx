@@ -738,6 +738,6 @@ const STEP_DESCRIPTIONS = [
   "A driver at the Rajesh Steel Works warehouse photographs the delivery challan and sends it via WhatsApp. The paper has oil stains and fold marks from being handled on the shop floor, exactly how real documents arrive.",
   "Vision AI scans the image and pulls the fields AP needs to decide: supplier identity, GSTIN, invoice details, amounts, and the date of acceptance that anchors the payment window.",
   "The raw OCR engine extracts text directly from the crumpled paper. Notice the errors: 'Ste3l' instead of 'Steel', '0RDER' instead of 'ORDER', zeros confused with the letter O. This is what typical OCR produces on damaged documents.",
-  "A predictive model cross-references extracted text against known patterns, supplier records, and GSTIN checksums to correct OCR errors. 15 corrections are applied automatically with 99.2% confidence.",
+  "A predictive model cross-references extracted text against known patterns, supplier records, and GSTIN checksums to correct OCR errors, applying per-field confidence scores. Illustrative example, not a live model metric.",
   "The cleaned record surfaces in TrustAudit with a clear decision: cleared to claim, disputed, or missing proof. The 45-day 43B(h) window is one tag among many, not the whole story.",
 ];

@@ -184,7 +184,7 @@ def test_webhook_health_endpoint(client):
 # ---------------------------------------------------------------------------
 # Step-1.5 immediate ack + outbound observability
 # ---------------------------------------------------------------------------
-def test_inbound_fires_immediate_ack_and_records_outbound_observability(client):
+def test_inbound_fires_immediate_ack_and_records_outbound_observability(client, monkeypatch):
     """Every accepted inbound must (a) push a user-visible ack to the sender
     BEFORE running the slow vision pipeline, and (b) record the outbound
     result to the observability ring buffer so a stale sidecar connection is
@@ -218,8 +218,15 @@ def test_inbound_fires_immediate_ack_and_records_outbound_observability(client):
 
     # The observability ring buffer should now contain TWO rows for this
     # webhook hit: the inbound record (sig=skipped) AND the ack record
-    # (ack_sent:ok=True).
-    debug = client.get("/api/debug/recent-inbounds?limit=10").json()
+    # (ack_sent:ok=True). The debug endpoint is admin-gated — we set the
+    # token directly rather than asserting on an unauth 401 because the
+    # test is about observability, not authn.
+    admin_token = "test-admin-token-debug-route-cb8b23"
+    monkeypatch.setenv("ADMIN_TOKEN", admin_token)
+    debug = client.get(
+        "/api/debug/recent-inbounds?limit=10",
+        headers={"X-Admin-Token": admin_token},
+    ).json()
     items = debug["items"]
     matched_inbound = [
         i for i in items

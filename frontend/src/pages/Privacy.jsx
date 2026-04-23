@@ -62,14 +62,19 @@ export default function Privacy() {
               <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
               <div className="text-[13px] leading-relaxed">
                 <p className="font-semibold text-amber-800 mb-1">
-                  This deployment is running with placeholder legal fields.
+                  TrustAudit is in a pre-incorporation pilot.
                 </p>
                 <p>
-                  Some identity, grievance, or jurisdiction values are still
-                  marked <code className="text-amber-800">TODO_LEGAL</code>.
-                  Set the matching <code className="text-amber-800">VITE_LEGAL_*</code>{" "}
-                  env vars in Render before onboarding real customers. See{" "}
-                  <code className="text-amber-800">PRODUCTION_READINESS.md</code>.
+                  Registration, grievance officer, and jurisdiction details
+                  will be updated once the legal entity is formed and DPDP
+                  Rule 5(9) appointments are finalised. Until then, reach
+                  the founders at{" "}
+                  <a
+                    href="mailto:privacy@trustaudit.in"
+                    className="underline text-amber-900"
+                  >
+                    privacy@trustaudit.in
+                  </a>.
                 </p>
               </div>
             </div>
