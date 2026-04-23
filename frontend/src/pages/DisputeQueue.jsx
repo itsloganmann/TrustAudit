@@ -72,34 +72,34 @@ export default function DisputeQueue() {
   const selected = filtered.find((d) => d.id === selectedId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans">
-      <Toaster position="top-right" theme="dark" />
+    <div className="min-h-screen bg-white text-zinc-700 font-sans">
+      <Toaster position="top-right" theme="light" />
 
-      <header className="border-b border-white/[0.06] bg-slate-950/60 backdrop-blur-xl sticky top-0 z-30">
+      <header className="border-b border-zinc-200 bg-white sticky top-0 z-30">
         <div className="max-w-[1600px] mx-auto px-6 h-14 flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-              <Flag size={13} className="text-rose-400" />
+            <div className="w-7 h-7 rounded-md bg-red-50 border border-red-200 flex items-center justify-center">
+              <Flag size={13} className="text-red-700" />
             </div>
-            <h1 className="text-[14px] text-white font-bold tracking-tight">
-              Dispute Queue
+            <h1 className="text-[14px] text-zinc-900 font-bold tracking-tight">
+              Dispute queue
             </h1>
           </div>
 
           <div className="flex items-center gap-1 glass rounded-lg p-0.5 ml-auto">
-            <Filter size={11} className="text-slate-600 ml-2" />
+            <Filter size={11} className="text-zinc-500 ml-2" />
             {FILTERS.map((f) => (
               <button
                 key={f.key}
                 onClick={() => setFilter(f.key)}
                 className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 ${
                   filter === f.key
-                    ? "bg-white/[0.08] text-white border border-white/[0.1]"
-                    : "text-slate-500 hover:text-slate-300 border border-transparent"
+                    ? "bg-zinc-100 text-zinc-900 border border-zinc-200"
+                    : "text-zinc-600 hover:text-zinc-900 border border-transparent"
                 }`}
               >
                 {f.label}
-                <span className="text-[9px] text-slate-600 tabular-nums">
+                <span className="text-[9px] text-zinc-500 tabular-nums">
                   {counts[f.key]}
                 </span>
               </button>
@@ -113,13 +113,13 @@ export default function DisputeQueue() {
         <div className="lg:col-span-2 glass rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/[0.06] text-[10px] text-slate-500 uppercase tracking-widest">
-                <th className="text-left px-4 py-2.5 font-semibold">Document</th>
+              <tr className="border-b border-zinc-200 text-[10px] text-zinc-500 uppercase tracking-widest">
+                <th className="text-left px-4 py-2.5 font-semibold">Invoice</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Reason</th>
-                <th className="text-left px-3 py-2.5 font-semibold">State</th>
+                <th className="text-left px-3 py-2.5 font-semibold">Decision</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Status</th>
                 <th className="text-right px-4 py-2.5 font-semibold">
-                  Created
+                  Raised
                 </th>
               </tr>
             </thead>
@@ -134,24 +134,24 @@ export default function DisputeQueue() {
                     exit={{ opacity: 0, x: 8 }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                     onClick={() => setSelectedId(d.id)}
-                    className={`row-transition border-b border-white/[0.04] cursor-pointer ${
-                      selectedId === d.id ? "bg-white/[0.04]" : ""
+                    className={`row-transition border-b border-zinc-100 cursor-pointer ${
+                      selectedId === d.id ? "bg-zinc-50" : ""
                     }`}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <FileText size={11} className="text-slate-600" />
+                        <FileText size={11} className="text-zinc-500" />
                         <div>
-                          <p className="text-[12px] text-white font-medium tracking-tight">
+                          <p className="text-[12px] text-zinc-900 font-medium tracking-tight">
                             {d.invoice_number || `#${d.invoice_id}`}
                           </p>
-                          <p className="text-[10px] text-slate-600 mt-0.5">
+                          <p className="text-[10px] text-zinc-500 mt-0.5">
                             {d.vendor_name || "—"}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-[11px] text-slate-300">
+                    <td className="px-3 py-3 text-[11px] text-zinc-700">
                       {d.reason || "—"}
                     </td>
                     <td className="px-3 py-3">
@@ -162,7 +162,7 @@ export default function DisputeQueue() {
                     <td className="px-3 py-3">
                       <DisputeBadge status={d.status} />
                     </td>
-                    <td className="px-4 py-3 text-right text-[10px] text-slate-600 font-mono">
+                    <td className="px-4 py-3 text-right text-[10px] text-zinc-500 font-mono">
                       {d.created_at
                         ? new Date(d.created_at).toLocaleDateString("en-IN")
                         : "—"}
@@ -174,7 +174,7 @@ export default function DisputeQueue() {
           </table>
 
           {!loading && filtered.length === 0 && (
-            <div className="px-4 py-16 text-center text-[12px] text-slate-600">
+            <div className="px-4 py-16 text-center text-[12px] text-zinc-500">
               No disputes match the current filter.
             </div>
           )}
@@ -191,8 +191,8 @@ export default function DisputeQueue() {
             />
           ) : (
             <div className="rounded-xl glass p-8 text-center">
-              <Flag size={18} className="mx-auto text-slate-700 mb-2" />
-              <p className="text-[11px] text-slate-600">
+              <Flag size={18} className="mx-auto text-zinc-400 mb-2" />
+              <p className="text-[11px] text-zinc-500">
                 Select a dispute to view details and resolve.
               </p>
             </div>

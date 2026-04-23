@@ -9,17 +9,17 @@ export default function DriverSignup() {
   return (
     <AuthShell
       role="driver"
-      eyebrow="Supplier signup"
-      title="Get paid faster. Stay compliant."
-      subtitle="Sign up in 30 seconds. Then send a challan photo on WhatsApp — that's it. Your enterprise sees it instantly."
+      eyebrow="Supplier driver signup"
+      title="Get your supplier paid faster."
+      subtitle="Sign up in 30 seconds. Send a challan photo on WhatsApp. The AP team sees the decision the same minute."
       footer={
         <div className="space-y-3">
           <RoleSwitcher currentRole="driver" mode="signup" />
-          <p className="text-center text-[12px] text-slate-500">
+          <p className="text-center text-[12px] text-zinc-600">
             Already registered?{" "}
             <Link
               to="/auth/driver/signin"
-              className="text-white font-medium hover:text-amber-300 transition-colors"
+              className="text-emerald-700 font-medium hover:text-emerald-800 transition-colors"
             >
               Sign in →
             </Link>
@@ -29,7 +29,7 @@ export default function DriverSignup() {
     >
       <ProviderButtons role="driver" onError={(e) => toast.error(e.message)} />
       <EmailPasswordForm role="driver" mode="signup" />
-      <p className="text-[10px] text-slate-600 text-center leading-relaxed">
+      <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
         By signing up you agree to receive WhatsApp messages from
         TrustAudit on the verified number.
       </p>

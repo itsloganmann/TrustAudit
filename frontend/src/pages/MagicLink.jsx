@@ -63,27 +63,27 @@ export default function MagicLink() {
           ? "Redirecting you to your dashboard now."
           : status === "error"
             ? "Magic links expire after 15 minutes for security. Request a new one."
-            : "Hold tight, this only takes a second."
+            : "Hold tight, this takes a second."
       }
     >
       <div className="flex items-center justify-center py-6">
         {status === "loading" && (
-          <Loader2 size={36} className="text-slate-400 animate-spin" />
+          <Loader2 size={36} className="text-zinc-500 animate-spin" />
         )}
         {status === "success" && (
-          <CheckCircle2 size={48} className="text-emerald-400" strokeWidth={1.5} />
+          <CheckCircle2 size={48} className="text-emerald-600" strokeWidth={1.5} />
         )}
         {status === "error" && (
-          <AlertCircle size={48} className="text-rose-400" strokeWidth={1.5} />
+          <AlertCircle size={48} className="text-red-600" strokeWidth={1.5} />
         )}
       </div>
 
       {status === "error" && (
         <>
-          <p className="text-[12px] text-rose-400 text-center">{error}</p>
+          <p className="text-[12px] text-red-700 text-center">{error}</p>
           <Link
             to="/auth/vendor/signin"
-            className="block h-11 rounded-xl bg-white text-slate-950 text-[13px] font-semibold flex items-center justify-center"
+            className="btn btn-primary btn-md w-full"
           >
             Request a new link
           </Link>

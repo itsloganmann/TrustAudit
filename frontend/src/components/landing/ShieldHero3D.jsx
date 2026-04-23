@@ -1,156 +1,133 @@
 import { motion } from "framer-motion";
 
 /**
- * AuroraHero — round 5 visual reset.
+ * Hero product illustration — restrained light-theme replacement for the
+ * previous 3D/SVG shield. A clean white card showing three sample invoice
+ * rows with status pills (clear / missing proof / disputed). No WebGL,
+ * no heavy motion, just a fade-in.
  *
- * The previous SVG was busy and emerald-themed; this version is a
- * single, calm composition: a giant typographic "43" surrounded by
- * a pulsing aurora ring, two slow-orbiting planet dots, and a few
- * grain-like floating particles. Pure SVG + framer-motion.
- *
- * Filename kept as ShieldHero3D so the lazy import in Landing.jsx
- * keeps resolving without churn.
+ * The component is kept as a default export so the lazy() import in
+ * Landing.jsx continues to resolve.
  */
+
+const ROWS = [
+  {
+    vendor: "Kiran Pharma Dist.",
+    amount: "₹4,50,000",
+    window: "3d",
+    statusLabel: "Clear to claim",
+    statusClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  {
+    vendor: "Shakti Industrial",
+    amount: "₹2,85,000",
+    window: "7d",
+    statusLabel: "Missing proof",
+    statusClass: "bg-amber-50 text-amber-700 border-amber-200",
+    dot: "bg-amber-500",
+  },
+  {
+    vendor: "Bharat Process Mfg.",
+    amount: "₹11,20,000",
+    window: "12d",
+    statusLabel: "Disputed",
+    statusClass: "bg-red-50 text-red-700 border-red-200",
+    dot: "bg-red-500",
+  },
+];
+
 export default function ShieldHero3D() {
   return (
-    <div className="relative w-full aspect-square max-w-[560px] mx-auto">
-      {/* Outer aurora glow */}
-      <motion.div
-        className="absolute inset-0 rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 50%, rgba(167,139,250,0.45) 0%, rgba(232,121,249,0.18) 40%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-        animate={{ scale: [1, 1.08, 1], opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Concentric rings */}
-      <motion.svg
-        viewBox="0 0 400 400"
-        className="absolute inset-0 w-full h-full"
-        aria-hidden
-      >
-        <defs>
-          <linearGradient id="ringGradA" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.8" />
-            <stop offset="50%" stopColor="#e879f9" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="ringGradB" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#e879f9" stopOpacity="0.0" />
-          </linearGradient>
-          <radialGradient id="centerHalo" cx="50%" cy="50%" r="60%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
-            <stop offset="55%" stopColor="rgba(167,139,250,0.18)" />
-            <stop offset="100%" stopColor="rgba(6,7,15,0)" />
-          </radialGradient>
-        </defs>
-
-        {/* Soft inner halo */}
-        <circle cx="200" cy="200" r="140" fill="url(#centerHalo)" />
-
-        {/* Ring 1 (outer dashed) */}
-        <motion.circle
-          cx="200"
-          cy="200"
-          r="190"
-          fill="none"
-          stroke="url(#ringGradA)"
-          strokeWidth="1"
-          strokeDasharray="2 10"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        />
-        {/* Ring 2 (mid solid faint) */}
-        <motion.circle
-          cx="200"
-          cy="200"
-          r="158"
-          fill="none"
-          stroke="rgba(232, 121, 249, 0.18)"
-          strokeWidth="0.6"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 90, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        />
-        {/* Ring 3 (inner dashed gold) */}
-        <motion.circle
-          cx="200"
-          cy="200"
-          r="128"
-          fill="none"
-          stroke="url(#ringGradB)"
-          strokeWidth="0.8"
-          strokeDasharray="1 6"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        />
-
-        {/* Orbiting planet dots */}
-        <motion.g
-          animate={{ rotate: 360 }}
-          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        >
-          <circle cx="200" cy="10" r="5" fill="#a78bfa" />
-          <circle cx="200" cy="10" r="11" fill="#a78bfa" opacity="0.25" />
-        </motion.g>
-        <motion.g
-          animate={{ rotate: -360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        >
-          <circle cx="200" cy="42" r="3.5" fill="#e879f9" />
-          <circle cx="200" cy="42" r="8" fill="#e879f9" opacity="0.25" />
-        </motion.g>
-        <motion.g
-          animate={{ rotate: 360 }}
-          transition={{ duration: 38, repeat: Infinity, ease: "linear" }}
-          style={{ transformOrigin: "200px 200px" }}
-        >
-          <circle cx="200" cy="72" r="2.5" fill="#fbbf24" />
-        </motion.g>
-      </motion.svg>
-
-      {/* Center display: typographic "43B(h)" mark */}
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.94 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="relative text-center">
-          <div
-            className="absolute inset-0 -m-10 rounded-full blur-3xl"
-            style={{ background: "rgba(167, 139, 250, 0.5)" }}
-          />
-          <p className="relative aurora-headline text-[120px] md:text-[160px] leading-none text-white">
-            43<span className="text-[#fbbf24]">B</span>
-            <span className="text-[#e879f9]">(h)</span>
-          </p>
-          <p className="relative mt-2 font-mono text-[10px] tracking-[0.4em] uppercase text-violet-300/80">
-            Compliance · Active
-          </p>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="relative w-full max-w-[520px] mx-auto"
+    >
+      <div className="relative rounded-2xl bg-white border border-zinc-200 shadow-sm overflow-hidden min-h-[480px] flex flex-col">
+        {/* Card header */}
+        <div className="px-5 py-4 border-b border-zinc-200 flex items-center justify-between">
+          <div>
+            <p className="text-[11px] text-zinc-500 uppercase tracking-widest font-semibold">
+              AP decision queue
+            </p>
+            <p className="mt-1 text-[14px] text-zinc-900 font-semibold tracking-tight">
+              Today's verdicts
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-1.5 px-2.5 h-6 rounded-md bg-emerald-50 border border-emerald-200 text-[11px] font-medium text-emerald-700">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            Live
+          </span>
         </div>
-      </motion.div>
 
-      {/* Bottom status pill */}
-      <motion.div
-        initial={{ y: 12, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-        className="absolute left-1/2 -bottom-1 -translate-x-1/2"
-      >
-        <span className="chip">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#34d399] pulse-dot" />
-          Section 43B(h) shield active
-        </span>
-      </motion.div>
-    </div>
+        {/* Column labels */}
+        <div className="px-5 pt-4 pb-2 grid grid-cols-12 gap-3 text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
+          <div className="col-span-6">Vendor</div>
+          <div className="col-span-3 text-right">Amount</div>
+          <div className="col-span-3 text-right">Window</div>
+        </div>
+
+        {/* Rows */}
+        <div className="px-5 pb-4 space-y-2">
+          {ROWS.map((row, i) => (
+            <motion.div
+              key={row.vendor}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.35,
+                delay: 0.1 + i * 0.08,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="group rounded-lg border border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50 transition-colors px-3.5 py-3"
+            >
+              <div className="grid grid-cols-12 gap-3 items-center">
+                <div className="col-span-6 flex items-center gap-2.5 min-w-0">
+                  <span
+                    className={`w-1.5 h-8 rounded-full shrink-0 ${row.dot}`}
+                    aria-hidden
+                  />
+                  <span className="text-[13px] text-zinc-900 font-medium tracking-tight truncate">
+                    {row.vendor}
+                  </span>
+                </div>
+                <div className="col-span-3 text-right">
+                  <span className="text-[13px] text-zinc-900 font-semibold tabular-nums tracking-tight">
+                    {row.amount}
+                  </span>
+                </div>
+                <div className="col-span-3 text-right">
+                  <span className="text-[12px] text-zinc-600 font-mono tabular-nums">
+                    {row.window}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-2 flex items-center justify-between">
+                <span
+                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[11px] font-medium ${row.statusClass}`}
+                >
+                  {row.statusLabel}
+                </span>
+                <span className="text-[11px] text-zinc-500 tabular-nums">
+                  Invoice #{1024 + i}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Footer strip */}
+        <div className="mt-auto px-5 py-3 border-t border-zinc-200 bg-zinc-50 flex items-center justify-between">
+          <span className="text-[11px] text-zinc-600">
+            3 verdicts in the last hour
+          </span>
+          <span className="text-[11px] text-emerald-700 font-medium">
+            97.4% match rate
+          </span>
+        </div>
+      </div>
+    </motion.div>
   );
 }

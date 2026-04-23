@@ -41,11 +41,12 @@ export default function TiltCard({
 
   // Hooks below MUST be called unconditionally (rules-of-hooks). The
   // glare gradient transform is computed regardless of whether glare is
-  // enabled — its result is just unused in the no-glare case.
+  // enabled — its result is just unused in the no-glare case. On light
+  // theme we keep the glare barely visible so cards stay flat.
   const glareBg = useTransform(
     [glareX, glareY],
     ([gx, gy]) =>
-      `radial-gradient(360px circle at ${gx} ${gy}, rgba(255,255,255,0.18), transparent 55%)`,
+      `radial-gradient(360px circle at ${gx} ${gy}, rgba(16,185,129,0.05), transparent 55%)`,
   );
 
   if (reduceMotion) {

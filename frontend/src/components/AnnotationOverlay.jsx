@@ -12,15 +12,12 @@ const CARD_SHELL = {
   position: "relative",
   borderRadius: "14px",
   padding: "1px",
-  background:
-    "linear-gradient(135deg, rgba(16,185,129,0.45) 0%, rgba(59,130,246,0.25) 40%, rgba(236,72,153,0.35) 100%)",
-  backgroundSize: "200% 200%",
-  animation: "annotationShimmer 6s ease-in-out infinite",
+  background: "#e4e4e7",
 };
 
 const CARD_INNER = {
   borderRadius: "13px",
-  background: "rgba(10, 15, 26, 0.92)",
+  background: "#ffffff",
   overflow: "hidden",
 };
 
@@ -70,17 +67,16 @@ export default function AnnotationOverlay({ invoiceId }) {
 
   return (
     <>
-      <style>{shimmerKeyframes}</style>
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
-            <ScanSearch size={12} className="text-slate-400" />
+          <div className="w-6 h-6 rounded-md bg-zinc-50 border border-zinc-200 flex items-center justify-center">
+            <ScanSearch size={12} className="text-zinc-500" />
           </div>
-          <p className="text-[12px] text-white font-semibold tracking-tight">
+          <p className="text-[12px] text-zinc-900 font-semibold tracking-tight">
             Vision Annotation Preview
           </p>
           {data?.boxes?.length ? (
-            <span className="ml-auto text-[9px] font-mono uppercase tracking-widest text-emerald-400/80">
+            <span className="ml-auto text-[9px] font-mono uppercase tracking-widest text-emerald-700">
               {data.boxes.length} regions detected
             </span>
           ) : null}
@@ -147,7 +143,7 @@ function AnnotatedFigure({ data, hoveredIdx, onHover }) {
         }}
       >
         {boxList.map((box, idx) => {
-          const color = box.color || "#10b981";
+          const color = box.color || "#059669";
           const x = box.x ?? 0;
           const y = box.y ?? 0;
           const w = box.w ?? 0;
@@ -163,7 +159,7 @@ function AnnotatedFigure({ data, hoveredIdx, onHover }) {
             <g key={`${box.field_name}-${idx}`}>
               <motion.rect
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 0.9, scale: 1 }}
+                animate={{ opacity: 0.85, scale: 1 }}
                 transition={{
                   delay: idx * 0.08,
                   duration: 0.45,
@@ -180,10 +176,10 @@ function AnnotatedFigure({ data, hoveredIdx, onHover }) {
                 width={w}
                 height={h}
                 fill={color}
-                fillOpacity={0.5}
+                fillOpacity={0.2}
                 stroke={color}
-                strokeOpacity={0.5}
-                strokeWidth={isHover ? 6 : 3}
+                strokeOpacity={0.9}
+                strokeWidth={isHover ? 5 : 3}
                 rx={8}
                 ry={8}
                 onMouseEnter={() => onHover(idx)}
@@ -197,8 +193,8 @@ function AnnotatedFigure({ data, hoveredIdx, onHover }) {
                 y={labelY}
                 fontSize={22}
                 fontWeight={700}
-                fill="#ffffff"
-                stroke={color}
+                fill="#09090b"
+                stroke="#ffffff"
                 strokeWidth={0.8}
                 paintOrder="stroke"
                 style={{
@@ -231,27 +227,23 @@ function AnnotatedFigure({ data, hoveredIdx, onHover }) {
             }}
           >
             <div
-              className="rounded-lg px-3 py-2 border border-white/[0.08] shadow-2xl"
-              style={{
-                background: "rgba(10, 15, 26, 0.92)",
-                backdropFilter: "blur(8px)",
-              }}
+              className="rounded-lg px-3 py-2 border border-zinc-200 bg-white shadow-sm"
             >
               <div className="flex items-center gap-2">
                 <span
                   className="inline-block w-2 h-2 rounded-full"
-                  style={{ background: hoveredBox.color || "#10b981" }}
+                  style={{ background: hoveredBox.color || "#059669" }}
                 />
-                <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">
+                <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
                   {hoveredBox.field_name}
                 </span>
-                <span className="ml-auto text-[10px] font-mono text-emerald-400">
+                <span className="ml-auto text-[10px] font-mono text-emerald-700">
                   {Math.round((hoveredBox.confidence ?? 0) * 100)}%
                 </span>
               </div>
-              <p className="text-[12px] text-white font-medium mt-1 break-words">
+              <p className="text-[12px] text-zinc-900 font-medium mt-1 break-words">
                 {hoveredBox.missing ? (
-                  <span className="text-rose-400">— missing —</span>
+                  <span className="text-red-700">— missing —</span>
                 ) : (
                   hoveredBox.value || "(empty)"
                 )}
@@ -270,15 +262,12 @@ function SkeletonTile() {
       style={{
         width: "100%",
         aspectRatio: "2 / 3",
-        background:
-          "linear-gradient(100deg, rgba(255,255,255,0.02) 30%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 70%)",
-        backgroundSize: "200% 100%",
-        animation: "annotationShimmer 1.8s linear infinite",
+        background: "#fafafa",
       }}
       className="flex flex-col items-center justify-center gap-2"
     >
-      <div className="w-8 h-8 rounded-full border-2 border-emerald-500/30 border-t-emerald-400 animate-spin" />
-      <p className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">
+      <div className="w-8 h-8 rounded-full border-2 border-zinc-200 border-t-emerald-600 animate-spin" />
+      <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">
         Rendering annotation…
       </p>
     </div>
@@ -291,23 +280,15 @@ function EmptyTile({ label, detail }) {
       style={{
         width: "100%",
         aspectRatio: "2 / 3",
-        background: "rgba(10, 15, 26, 0.4)",
+        background: "#fafafa",
       }}
       className="flex flex-col items-center justify-center gap-2 text-center px-4"
     >
-      <ImageOff size={24} className="text-slate-600" />
-      <p className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold">
+      <ImageOff size={24} className="text-zinc-400" />
+      <p className="text-[11px] uppercase tracking-widest text-zinc-500 font-semibold">
         {label}
       </p>
-      {detail && <p className="text-[10px] text-slate-600">{detail}</p>}
+      {detail && <p className="text-[10px] text-zinc-400">{detail}</p>}
     </div>
   );
 }
-
-const shimmerKeyframes = `
-@keyframes annotationShimmer {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-`;

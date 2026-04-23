@@ -9,10 +9,10 @@ import {
 } from "lucide-react";
 
 const TYPE_CONFIG = {
-  success: { color: "#10b981", Icon: CheckCircle2, tag: "OK" },
-  info:    { color: "#3b82f6", Icon: ArrowRight,    tag: "IN" },
-  warning: { color: "#f59e0b", Icon: AlertTriangle, tag: "WN" },
-  error:   { color: "#f43f5e", Icon: XCircle,       tag: "ER" },
+  success: { color: "#059669", Icon: CheckCircle2, tag: "OK" },
+  info:    { color: "#1d4ed8", Icon: ArrowRight,    tag: "IN" },
+  warning: { color: "#b45309", Icon: AlertTriangle, tag: "WN" },
+  error:   { color: "#b91c1c", Icon: XCircle,       tag: "ER" },
 };
 
 function timeAgo(ts) {
@@ -39,20 +39,20 @@ export default function ActivityTicker({ activity }) {
   return (
     <div className="glass rounded-xl overflow-hidden h-full flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className="w-2 h-2 rounded-full bg-emerald-400" />
-            <div className="absolute inset-0 w-2 h-2 rounded-full bg-emerald-400 animate-ping opacity-40" />
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <div className="absolute inset-0 w-2 h-2 rounded-full bg-emerald-500 animate-ping opacity-40" />
           </div>
-          <span className="text-[12px] text-white font-semibold tracking-tight">
-            Transaction Stream
+          <span className="text-[12px] text-zinc-900 font-semibold tracking-tight">
+            Decision activity
           </span>
-          <span className="text-[9px] text-emerald-400 font-semibold uppercase tracking-widest bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+          <span className="text-[9px] text-emerald-700 font-semibold uppercase tracking-widest bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
             Live
           </span>
         </div>
-        <span className="text-[9px] text-slate-600 font-mono tabular-nums">
+        <span className="text-[9px] text-zinc-500 font-mono tabular-nums">
           {activity.length} events
         </span>
       </div>
@@ -81,13 +81,13 @@ export default function ActivityTicker({ activity }) {
                         }
                   }
                   layout
-                  className="flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-white/[0.03] transition-colors group will-change-transform"
+                  className="flex items-start gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-50 transition-colors group will-change-transform"
                 >
                   {/* Icon */}
                   <div
                     className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5"
                     style={{
-                      background: `${cfg.color}10`,
+                      background: `${cfg.color}14`,
                     }}
                   >
                     <Icon size={10} style={{ color: cfg.color }} />
@@ -95,7 +95,7 @@ export default function ActivityTicker({ activity }) {
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-slate-400 leading-relaxed truncate group-hover:text-slate-300 transition-colors">
+                    <p className="text-[11px] text-zinc-700 leading-relaxed truncate group-hover:text-zinc-900 transition-colors">
                       {item.message}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -105,7 +105,7 @@ export default function ActivityTicker({ activity }) {
                       >
                         {cfg.tag}
                       </span>
-                      <span className="text-[9px] text-slate-700 font-mono">
+                      <span className="text-[9px] text-zinc-500 font-mono">
                         {timeAgo(item.timestamp)}
                       </span>
                     </div>
@@ -113,7 +113,7 @@ export default function ActivityTicker({ activity }) {
 
                   {/* Pulse for errors */}
                   {item.type === "error" && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 pulse-dot mt-2 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot mt-2 shrink-0" />
                   )}
                 </motion.div>
               );
@@ -122,8 +122,8 @@ export default function ActivityTicker({ activity }) {
 
           {displayItems.length === 0 && (
             <div className="text-center py-10">
-              <Radio size={16} className="text-slate-700 mx-auto mb-2" />
-              <p className="text-[11px] text-slate-600">Waiting for events...</p>
+              <Radio size={16} className="text-zinc-400 mx-auto mb-2" />
+              <p className="text-[11px] text-zinc-500">Waiting for the next invoice decision…</p>
             </div>
           )}
         </div>

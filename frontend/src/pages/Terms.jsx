@@ -24,18 +24,18 @@ import LEGAL, { hasUnresolvedLegalFields } from "../config/legal.js";
 export default function Terms() {
   const unresolved = hasUnresolvedLegalFields();
   return (
-    <div className="min-h-screen bg-[#06070f] text-violet-100/70 font-sans antialiased">
-      <header className="sticky top-0 z-50 border-b border-violet-500/10 bg-[#06070f]/80 backdrop-blur-2xl">
-        <div className="max-w-4xl mx-auto px-8 h-20 flex items-center justify-between">
+    <div className="min-h-screen bg-white text-zinc-700 font-sans antialiased">
+      <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white/90 backdrop-blur">
+        <div className="max-w-4xl mx-auto px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-gradient-to-br from-violet-400 via-fuchsia-400 to-amber-300 flex items-center justify-center">
-              <Shield size={18} className="text-[#06070f]" strokeWidth={2.5} />
+            <div className="w-9 h-9 rounded-md bg-zinc-900 flex items-center justify-center">
+              <Shield size={16} className="text-white" strokeWidth={2.5} />
             </div>
             <div className="flex flex-col">
-              <span className="aurora-headline text-[22px] text-white leading-none">
+              <span className="text-zinc-900 font-semibold text-[17px] tracking-tight leading-none">
                 {LEGAL.companyName}
               </span>
-              <span className="font-mono text-[9px] text-violet-300/70 tracking-[0.3em] uppercase mt-0.5">
+              <span className="text-[10px] text-zinc-500 tracking-wide mt-0.5">
                 Terms of Service
               </span>
             </div>
@@ -51,29 +51,29 @@ export default function Terms() {
       </header>
 
       <main className="max-w-3xl mx-auto px-8 py-16">
-        <article className="prose-dark space-y-6">
+        <article className="space-y-6">
           <div>
-            <h1 className="text-[40px] font-bold text-white tracking-tight leading-tight mb-2">
+            <h1 className="text-[40px] font-bold text-zinc-900 tracking-tight leading-tight mb-2">
               Terms of Service
             </h1>
-            <p className="text-[13px] text-violet-300/60">
+            <p className="text-[13px] text-zinc-500">
               Last updated: {LEGAL.termsLastUpdated}
             </p>
           </div>
 
           {unresolved && (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 my-4 text-amber-100">
-              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-300" />
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 my-4 text-amber-800">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-700" />
               <div className="text-[13px] leading-relaxed">
-                <p className="font-semibold text-amber-200 mb-1">
+                <p className="font-semibold text-amber-800 mb-1">
                   This deployment is running with placeholder legal fields.
                 </p>
                 <p>
                   Some identity or jurisdiction values are still marked{" "}
-                  <code className="text-amber-200">TODO_LEGAL</code>. Set the
-                  matching <code className="text-amber-200">VITE_LEGAL_*</code>{" "}
+                  <code className="text-amber-800">TODO_LEGAL</code>. Set the
+                  matching <code className="text-amber-800">VITE_LEGAL_*</code>{" "}
                   env vars in Render before accepting paid customers. See{" "}
-                  <code className="text-amber-200">PRODUCTION_READINESS.md</code>.
+                  <code className="text-amber-800">PRODUCTION_READINESS.md</code>.
                 </p>
               </div>
             </div>
@@ -99,14 +99,16 @@ export default function Terms() {
 
           <Section title="2. What the Service does">
             <p>
-              {LEGAL.companyName} is a compliance dashboard for Indian
-              small and medium businesses that tracks the 45-day payment
-              deadline under Section 43B(h) of the Income Tax Act, 1961.
-              We ingest photos of paper delivery challans and supplier
-              invoices that you or your team send us on WhatsApp, read
-              the structured fields using a third-party vision model
-              (Google Gemini), and present them on your dashboard with a
-              running deadline timer.
+              {LEGAL.companyName} is a decision dashboard for AP teams at
+              Indian enterprises. We ingest delivery and acceptance proof
+              (WhatsApp messages, photos, PDFs, signed PODs, stamped GRNs)
+              that you or your team forward to us, read the structured
+              fields using a third-party vision model (Google Gemini),
+              match them to the supplier invoice or shipment line, and
+              return a verdict (clear to claim, disputed, or missing proof)
+              on your dashboard. Tracking the 45-day payment window under
+              Section 43B(h) of the Income Tax Act, 1961 is one named use
+              case of this decision layer.
             </p>
             <p>
               <strong>We are not a chartered accountant, tax advisor, or
@@ -238,7 +240,7 @@ export default function Terms() {
           </Section>
 
           <Section title="9. Warranty disclaimer">
-            <p className="uppercase tracking-wide text-[13px] text-violet-100/60">
+            <p className="uppercase tracking-wide text-[13px] text-zinc-500">
               The Service is provided "as is" and "as available" without
               warranties of any kind, whether express, implied,
               statutory, or otherwise. To the maximum extent permitted
@@ -298,7 +300,7 @@ export default function Terms() {
               may close your account via the dashboard or by emailing{" "}
               <a
                 href={`mailto:${LEGAL.supportEmail}`}
-                className="text-violet-300 hover:text-white"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 {LEGAL.supportEmail}
               </a>
@@ -338,7 +340,7 @@ export default function Terms() {
               first contact us at{" "}
               <a
                 href={`mailto:${LEGAL.supportEmail}`}
-                className="text-violet-300 hover:text-white"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 {LEGAL.supportEmail}
               </a>{" "}
@@ -348,7 +350,7 @@ export default function Terms() {
               Officer at{" "}
               <a
                 href={`mailto:${LEGAL.grievanceOfficerEmail}`}
-                className="text-violet-300 hover:text-white"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 {LEGAL.grievanceOfficerEmail}
               </a>{" "}
@@ -365,7 +367,7 @@ export default function Terms() {
               Email:{" "}
               <a
                 href={`mailto:${LEGAL.supportEmail}`}
-                className="text-violet-300 hover:text-white"
+                className="text-emerald-700 hover:text-emerald-800"
               >
                 {LEGAL.supportEmail}
               </a>
@@ -374,11 +376,11 @@ export default function Terms() {
         </article>
       </main>
 
-      <footer className="border-t border-violet-500/10 mt-20 py-8">
-        <div className="max-w-4xl mx-auto px-8 text-center text-[12px] text-violet-300/50">
+      <footer className="border-t border-zinc-200 mt-20 py-8">
+        <div className="max-w-4xl mx-auto px-8 text-center text-[12px] text-zinc-500">
           <p>
             &copy; {new Date().getFullYear()} {LEGAL.companyName} ·{" "}
-            <Link to="/privacy" className="hover:text-white">
+            <Link to="/privacy" className="hover:text-zinc-900">
               Privacy Policy
             </Link>
           </p>
@@ -391,10 +393,10 @@ export default function Terms() {
 function Section({ title, children }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-[22px] font-semibold text-white tracking-tight mt-8">
+      <h2 className="text-[22px] font-semibold text-zinc-900 tracking-tight mt-8">
         {title}
       </h2>
-      <div className="text-[15px] leading-relaxed text-violet-100/75 space-y-3">
+      <div className="text-[15px] leading-relaxed text-zinc-700 space-y-3">
         {children}
       </div>
     </section>

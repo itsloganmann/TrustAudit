@@ -19,15 +19,15 @@ export default function RoleSwitcher({ currentRole, mode }) {
   return (
     <Link
       to={`/auth/${otherRole}/${mode}`}
-      className="group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl glass glass-hover transition-all"
+      className="group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-white border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 transition-all"
     >
-      <span className="text-[12px] text-slate-400 group-hover:text-slate-200 transition-colors">
+      <span className="text-[12px] text-zinc-600 group-hover:text-zinc-900 transition-colors">
         Wrong sign-in page?{" "}
-        <span className="text-white font-medium">{otherCopy}</span>
+        <span className="text-zinc-900 font-medium">{otherCopy}</span>
       </span>
       <ArrowRight
         size={13}
-        className="text-slate-500 group-hover:text-white transition-colors shrink-0"
+        className="text-zinc-400 group-hover:text-zinc-900 transition-colors shrink-0"
       />
     </Link>
   );

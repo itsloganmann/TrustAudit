@@ -33,16 +33,16 @@ export default function FacebookButton({ role, onError }) {
           : "Facebook sign-in is coming soon. Use Google or email for now."
       }
       aria-label={`Continue with Facebook as ${role}`}
-      className={`w-full h-11 rounded-xl glass flex items-center justify-center gap-2.5 text-[13px] font-medium transition-all ${
+      className={`w-full h-11 rounded-xl border flex items-center justify-center gap-2.5 text-[13px] font-medium transition-all ${
         enabled
-          ? "text-white glass-hover"
-          : "text-slate-500 cursor-not-allowed opacity-60"
+          ? "text-zinc-900 bg-white border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300"
+          : "text-zinc-500 bg-white border-zinc-200 cursor-not-allowed opacity-60"
       }`}
     >
       <Facebook size={15} />
       Continue with Facebook
       {!enabled && (
-        <span className="text-[10px] text-slate-600">(coming soon)</span>
+        <span className="text-[10px] text-zinc-500">(coming soon)</span>
       )}
     </button>
   );

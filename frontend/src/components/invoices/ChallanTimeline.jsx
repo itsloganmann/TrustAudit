@@ -33,47 +33,41 @@ const EVENT_ICONS = {
 };
 
 const EVENT_TONE = {
-  RECEIVED: "slate",
-  WHATSAPP_RECEIVED: "blue",
-  PHOTO_UPLOADED: "blue",
+  RECEIVED: "neutral",
+  WHATSAPP_RECEIVED: "info",
+  PHOTO_UPLOADED: "info",
   EXTRACTING: "amber",
   EXTRACTED: "amber",
   VERIFIED: "emerald",
   NEEDS_INFO: "amber",
-  SUBMITTED_TO_GOV: "amber-gold",
+  SUBMITTED_TO_GOV: "amber",
   ACK_FROM_GOV: "emerald",
 };
 
 const TONE_CLASSES = {
-  slate: {
-    bg: "bg-slate-500/10",
-    border: "border-slate-500/20",
-    text: "text-slate-400",
-    line: "bg-white/[0.06]",
+  neutral: {
+    bg: "bg-zinc-50",
+    border: "border-zinc-200",
+    text: "text-zinc-600",
+    line: "bg-zinc-200",
   },
-  blue: {
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/25",
-    text: "text-blue-300",
-    line: "bg-blue-500/15",
+  info: {
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    text: "text-blue-700",
+    line: "bg-blue-200",
   },
   amber: {
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/25",
-    text: "text-amber-300",
-    line: "bg-amber-500/15",
-  },
-  "amber-gold": {
-    bg: "bg-[rgba(251,191,36,0.10)]",
-    border: "border-amber-300/30",
-    text: "text-amber-200",
-    line: "bg-amber-400/20",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    text: "text-amber-700",
+    line: "bg-amber-200",
   },
   emerald: {
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/25",
-    text: "text-emerald-300",
-    line: "bg-emerald-500/20",
+    bg: "bg-emerald-50",
+    border: "border-emerald-200",
+    text: "text-emerald-700",
+    line: "bg-emerald-200",
   },
 };
 
@@ -108,19 +102,15 @@ const itemVariants = {
 
 /**
  * Vertical timeline of challan events.
- *
- * @param {object} props
- * @param {ChallanEvent[]} [props.events]
- * @param {string} [props.className]
  */
 export default function ChallanTimeline({ events = [], className = "" }) {
   if (!events || events.length === 0) {
     return (
       <div
-        className={`rounded-xl bg-white/[0.02] border border-white/[0.06] p-6 text-center ${className}`}
+        className={`rounded-xl bg-white border border-zinc-200 p-6 text-center ${className}`}
       >
-        <Clock size={16} className="mx-auto text-slate-700 mb-2" />
-        <p className="text-[11px] text-slate-600">
+        <Clock size={16} className="mx-auto text-zinc-400 mb-2" />
+        <p className="text-[11px] text-zinc-500">
           No challan events recorded yet.
         </p>
       </div>
@@ -135,7 +125,7 @@ export default function ChallanTimeline({ events = [], className = "" }) {
       transition={{ staggerChildren: 0.07 }}
     >
       {events.map((ev, idx) => {
-        const tone = TONE_CLASSES[EVENT_TONE[ev.event_type] || "slate"];
+        const tone = TONE_CLASSES[EVENT_TONE[ev.event_type] || "neutral"];
         const Icon = EVENT_ICONS[ev.event_type] || Clock;
         const isLast = idx === events.length - 1;
 
@@ -164,17 +154,17 @@ export default function ChallanTimeline({ events = [], className = "" }) {
                 >
                   {humanize(ev.event_type)}
                 </p>
-                <time className="text-[9px] text-slate-600 font-mono shrink-0 tabular-nums">
+                <time className="text-[9px] text-zinc-500 font-mono shrink-0 tabular-nums">
                   {formatDateTime(ev.occurred_at)}
                 </time>
               </div>
               {ev.description && (
-                <p className="mt-0.5 text-[10px] text-slate-500 leading-snug">
+                <p className="mt-0.5 text-[10px] text-zinc-600 leading-snug">
                   {ev.description}
                 </p>
               )}
               {ev.actor && (
-                <p className="mt-0.5 text-[9px] text-slate-700 font-mono">
+                <p className="mt-0.5 text-[9px] text-zinc-500 font-mono">
                   by {ev.actor}
                 </p>
               )}

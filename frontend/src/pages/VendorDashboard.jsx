@@ -63,31 +63,31 @@ export default function VendorDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans">
+    <div className="min-h-screen bg-white text-zinc-700 font-sans">
       <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: "#0f172a",
-            border: "1px solid rgba(16, 185, 129, 0.2)",
-            color: "#f8fafc",
+            background: "#ffffff",
+            border: "1px solid #e4e4e7",
+            color: "#09090b",
             fontSize: "13px",
             fontWeight: 500,
           },
           className: "font-sans",
         }}
-        theme="dark"
+        theme="light"
       />
 
       <main className="max-w-[1600px] mx-auto px-6 py-5 space-y-4">
         {/* Provider health pinned at top */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
-            <h1 className="text-[18px] font-bold text-white tracking-tight">
-              Vendor Dashboard
+            <h1 className="text-[18px] font-bold text-zinc-900 tracking-tight">
+              AP decision dashboard
             </h1>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              All your 43B(h) compliance documents in one place.
+            <p className="text-[11px] text-zinc-500 mt-0.5">
+              Which supplier invoices are safe to pay, which are disputed, and which still need proof.
             </p>
           </div>
           <ProviderHealthPanel />

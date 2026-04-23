@@ -52,7 +52,7 @@ function App() {
         a.forEach((inv) => {
           if (prevMap[inv.id] === "PENDING" && inv.status === "VERIFIED") {
             toast.success(
-              `Tax Shield Secured: INR ${inv.invoice_amount.toLocaleString("en-IN")} deduction protected.`,
+              `Invoice cleared to claim: INR ${inv.invoice_amount.toLocaleString("en-IN")}.`,
               {
                 description: `${inv.vendor_name} -- ${inv.invoice_number}`,
                 duration: 6000,
@@ -110,8 +110,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#06070f] text-violet-100/70 font-sans">
-      {/* Ambient background — mounts once, behind everything */}
+    <div className="min-h-screen bg-white text-zinc-700 font-sans">
+      {/* Ambient background — mounts once, behind everything (no-op on light theme) */}
       <AmbientBackground />
 
       {/* All interactive content sits above the ambient canvas */}
@@ -121,29 +121,29 @@ function App() {
         position="top-right"
         toastOptions={{
           style: {
-            background: "#0f172a",
-            border: "1px solid rgba(16, 185, 129, 0.2)",
-            color: "#f8fafc",
+            background: "#ffffff",
+            border: "1px solid #e4e4e7",
+            color: "#09090b",
             fontSize: "13px",
             fontWeight: 500,
           },
           className: "font-sans",
         }}
-        theme="dark"
+        theme="light"
       />
 
       {/* Live Ticker Strip */}
-      <div className="h-9 bg-[#06070f]/85 border-b border-violet-500/10 overflow-hidden flex items-center backdrop-blur-md">
+      <div className="h-9 bg-zinc-50 border-b border-zinc-200 overflow-hidden flex items-center">
         <div className="ticker-scroll flex items-center gap-10 whitespace-nowrap px-6">
           {invoices
             .filter((i) => i.status === "PENDING" && i.days_remaining <= 3)
             .map((inv, i) => (
               <span key={`t1-${i}`} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185] pulse-dot" />
-                <span className="text-[#fb7185] font-semibold">{inv.vendor_name}</span>
-                <span className="text-violet-300/40">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
-                <span className="text-violet-300/30">·</span>
-                <span className="text-[#fb7185]">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot" />
+                <span className="text-red-700 font-semibold">{inv.vendor_name}</span>
+                <span className="text-zinc-500">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
+                <span className="text-zinc-400">·</span>
+                <span className="text-red-700">
                   {inv.days_remaining <= 0 ? "OVERDUE" : `${inv.days_remaining}d left`}
                 </span>
               </span>
@@ -153,11 +153,11 @@ function App() {
             .slice(0, 5)
             .map((inv, i) => (
               <span key={`t2-${i}`} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#34d399]" />
-                <span className="text-[#34d399] font-semibold">{inv.vendor_name}</span>
-                <span className="text-violet-300/40">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
-                <span className="text-violet-300/30">·</span>
-                <span className="text-[#34d399]">Secured</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-emerald-700 font-semibold">{inv.vendor_name}</span>
+                <span className="text-zinc-500">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
+                <span className="text-zinc-400">·</span>
+                <span className="text-emerald-700">Cleared</span>
               </span>
             ))}
           {/* Duplicate for seamless scroll */}
@@ -165,11 +165,11 @@ function App() {
             .filter((i) => i.status === "PENDING" && i.days_remaining <= 3)
             .map((inv, i) => (
               <span key={`t3-${i}`} className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185] pulse-dot" />
-                <span className="text-[#fb7185] font-semibold">{inv.vendor_name}</span>
-                <span className="text-violet-300/40">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
-                <span className="text-violet-300/30">·</span>
-                <span className="text-[#fb7185]">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot" />
+                <span className="text-red-700 font-semibold">{inv.vendor_name}</span>
+                <span className="text-zinc-500">₹{inv.invoice_amount.toLocaleString("en-IN")}</span>
+                <span className="text-zinc-400">·</span>
+                <span className="text-red-700">
                   {inv.days_remaining <= 0 ? "OVERDUE" : `${inv.days_remaining}d left`}
                 </span>
               </span>
@@ -177,53 +177,53 @@ function App() {
         </div>
       </div>
 
-      {/* Header — round 5 Aurora */}
-      <header className="border-b border-violet-500/10 bg-[#06070f]/80 backdrop-blur-2xl sticky top-0 z-40">
+      {/* Header */}
+      <header className="border-b border-zinc-200 bg-white sticky top-0 z-40">
         <div className="max-w-[1600px] mx-auto px-8 h-20 flex items-center justify-between">
           {/* Left: Brand */}
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-md bg-gradient-to-br from-violet-400 via-fuchsia-400 to-amber-300 flex items-center justify-center shadow-[0_0_30px_-4px_rgba(167,139,250,0.6)]">
-              <span className="aurora-headline text-[20px] text-[#06070f] leading-none">A</span>
+            <div className="relative w-10 h-10 rounded-md bg-zinc-900 flex items-center justify-center">
+              <span className="aurora-headline text-[20px] text-white leading-none">A</span>
             </div>
             <div className="flex flex-col">
-              <span className="aurora-headline text-[22px] text-white leading-none">
+              <span className="aurora-headline text-[22px] text-zinc-900 leading-none">
                 TrustAudit
               </span>
-              <span className="font-mono text-[9px] text-violet-300/70 tracking-[0.3em] uppercase mt-0.5">
-                Dashboard · CFO
+              <span className="font-mono text-[9px] text-zinc-500 tracking-[0.3em] uppercase mt-0.5">
+                AP Decision Dashboard
               </span>
             </div>
           </div>
 
           {/* Center: Key metrics */}
           <div className="flex items-stretch gap-6">
-            <MetricBlock label="Portfolio" value={stats.total_value || 0} prefix="INR " />
-            <div className="w-px bg-violet-500/15" />
-            <MetricBlock label="Saved" value={stats.liability_saved || 0} prefix="INR " accent="#34d399" />
-            <div className="w-px bg-violet-500/15" />
-            <MetricBlock label="At Risk" value={stats.total_at_risk || 0} prefix="INR " accent="#fb7185" />
-            <div className="w-px bg-violet-500/15" />
+            <MetricBlock label="Payables" value={stats.total_value || 0} prefix="INR " />
+            <div className="w-px bg-zinc-200" />
+            <MetricBlock label="Cleared" value={stats.liability_saved || 0} prefix="INR " accent="#047857" />
+            <div className="w-px bg-zinc-200" />
+            <MetricBlock label="At Risk" value={stats.total_at_risk || 0} prefix="INR " accent="#dc2626" />
+            <div className="w-px bg-zinc-200" />
             <div className="flex flex-col justify-center">
-              <p className="font-mono text-[9px] text-violet-300/60 uppercase tracking-[0.25em]">
-                Compliance
+              <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-[0.25em]">
+                Cleared rate
               </p>
-              <p className="aurora-headline text-[28px] text-[#fbbf24] tabular-nums leading-none mt-1">
+              <p className="aurora-headline text-[28px] text-emerald-700 tabular-nums leading-none mt-1">
                 {stats.compliance_rate || 0}
-                <span className="text-[16px] text-violet-300/60">%</span>
+                <span className="text-[16px] text-zinc-500">%</span>
               </p>
             </div>
           </div>
 
           {/* Right: Live indicator */}
           <div className="flex items-center gap-3">
-            <span className="chip !bg-[#34d399]/8 !border-[#34d399]/30 !text-[#34d399]">
+            <span className="chip chip-active">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#34d399] opacity-40" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#34d399]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
               </span>
               Live
             </span>
-            <span className="font-mono text-[10px] text-violet-300/60 tabular-nums tracking-wider">
+            <span className="font-mono text-[10px] text-zinc-500 tabular-nums tracking-wider">
               {stats.total_invoices || 0} invoices
             </span>
           </div>
@@ -238,10 +238,10 @@ function App() {
             <div className="flex items-center gap-2">
               {[
                 { key: "all", label: "All" },
-                { key: "critical", label: "Critical", color: "#fb7185" },
-                { key: "warning", label: "Warning", color: "#fbbf24" },
-                { key: "pending", label: "Safe", color: "#a78bfa" },
-                { key: "verified", label: "Verified", color: "#34d399" },
+                { key: "critical", label: "Window closing", color: "#dc2626" },
+                { key: "warning", label: "Watch", color: "#d97706" },
+                { key: "pending", label: "Safe", color: "#059669" },
+                { key: "verified", label: "Cleared", color: "#059669" },
               ].map((t) => {
                 const isActive = tab === t.key;
                 return (
@@ -271,14 +271,14 @@ function App() {
             <div className="relative">
               <Search
                 size={14}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-violet-300/40"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
               />
               <input
                 type="text"
                 placeholder="Search vendor, GSTIN, invoice…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-80 h-10 pl-10 pr-4 font-mono text-[11px] uppercase tracking-wider bg-violet-500/4 border border-violet-500/15 rounded-md text-white placeholder:text-violet-300/30 placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-violet-400/50 focus:bg-violet-500/8 transition-all backdrop-blur-md"
+                className="w-80 h-10 pl-10 pr-4 font-mono text-[11px] uppercase tracking-wider bg-white border border-zinc-200 rounded-md text-zinc-900 placeholder:text-zinc-400 placeholder:normal-case placeholder:tracking-normal focus:outline-none focus:border-zinc-300 focus:bg-zinc-50 transition-all"
               />
             </div>
           </div>
@@ -310,15 +310,15 @@ function App() {
 function MetricBlock({ label, value, prefix = "", accent }) {
   return (
     <div className="flex flex-col justify-center">
-      <p className="font-mono text-[9px] text-violet-300/60 uppercase tracking-[0.25em]">
+      <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-[0.25em]">
         {label}
       </p>
-      <div className="aurora-headline text-[28px] tabular-nums leading-none mt-1" style={{ color: accent || "#fafafa" }}>
+      <div className="aurora-headline text-[28px] tabular-nums leading-none mt-1" style={{ color: accent || "#09090b" }}>
         <AnimatedCounter
           value={value}
           prefix={prefix}
           className="aurora-headline tabular-nums"
-          style={{ color: accent || "#fafafa" }}
+          style={{ color: accent || "#09090b" }}
         />
       </div>
     </div>

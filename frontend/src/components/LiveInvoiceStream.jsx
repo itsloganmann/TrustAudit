@@ -38,7 +38,7 @@ export default function LiveInvoiceStream({ onStatus } = {}) {
       "invoice.ingested": (payload) => {
         const vendor =
           payload?.vendor_display_name || payload?.vendor_name || "supplier";
-        toast("Challan received — verifying…", {
+        toast("Acceptance proof received, verifying…", {
           description: `From ${vendor}`,
           duration: 5000,
         });
@@ -53,15 +53,15 @@ export default function LiveInvoiceStream({ onStatus } = {}) {
           Number.isFinite(amountRaw) && amountRaw > 0
             ? `INR ${amountRaw.toLocaleString("en-IN")}`
             : "INR —";
-        toast.success(`Verified: ${amountLabel} from ${vendor}`, {
+        toast.success(`Clear to claim: ${amountLabel} from ${vendor}`, {
           description: payload?.invoice_number
             ? `Invoice ${payload.invoice_number}`
-            : "43B(h) shield extended",
+            : "Acceptance proof matched",
           duration: 6000,
           style: {
-            background: "#0f172a",
-            border: "1px solid rgba(16, 185, 129, 0.35)",
-            color: "#f8fafc",
+            background: "#ffffff",
+            border: "1px solid #a7f3d0",
+            color: "#047857",
           },
         });
       },

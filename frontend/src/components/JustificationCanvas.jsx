@@ -3,21 +3,17 @@ import { Sparkles, AlertTriangle, CheckCircle2, ArrowRight } from "lucide-react"
 import { cn } from "../lib/cn";
 
 /* ─────────────────────────────────────────────
-   JustificationCanvas — round 5 visual reset.
+   JustificationCanvas — light theme.
 
-   The previous version was a heavy three.js scene (orbits, sphere,
-   bars, OrbitControls). It looked busy and lagged on weaker GPUs.
-
-   This rewrite is pure 2D: an SVG radial confidence gauge, animated
-   field bars, and a recommendation rail. Same prop contract so the
-   InvoiceDetailSheet keeps working without churn.
+   Pure 2D: an SVG radial confidence gauge, animated field bars, and a
+   recommendation rail. Same prop contract as before.
    ───────────────────────────────────────────── */
 
-const VIOLET = "#a78bfa";
-const FUCHSIA = "#e879f9";
-const GOLD = "#fbbf24";
-const MINT = "#34d399";
-const CORAL = "#fb7185";
+const EMERALD = "#059669";
+const EMERALD_DEEP = "#047857";
+const AMBER = "#d97706";
+const MINT = "#10b981";
+const CORAL = "#dc2626";
 
 function formatInr(value) {
   const n = Number(value);
@@ -26,15 +22,15 @@ function formatInr(value) {
 }
 
 function confidenceColor(c) {
-  if (c >= 0.85) return MINT;
-  if (c >= 0.55) return GOLD;
+  if (c >= 0.85) return EMERALD;
+  if (c >= 0.55) return AMBER;
   return CORAL;
 }
 
 function severityChip(severity) {
-  if (severity === "critical") return "border-[#fb7185]/40 text-[#fb7185] bg-[#fb7185]/8";
-  if (severity === "warning") return "border-[#fbbf24]/40 text-[#fbbf24] bg-[#fbbf24]/8";
-  return "border-[#34d399]/40 text-[#34d399] bg-[#34d399]/8";
+  if (severity === "critical") return "border-red-200 text-red-700 bg-red-50";
+  if (severity === "warning") return "border-amber-200 text-amber-700 bg-amber-50";
+  return "border-emerald-200 text-emerald-700 bg-emerald-50";
 }
 
 /* ── Radial confidence gauge ── */
@@ -52,15 +48,8 @@ function ConfidenceGauge({ confidence }) {
         <defs>
           <linearGradient id="gauge-fill" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={color} />
-            <stop offset="100%" stopColor={FUCHSIA} />
+            <stop offset="100%" stopColor={EMERALD_DEEP} />
           </linearGradient>
-          <filter id="gauge-glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
         {/* Track */}
         <circle
@@ -68,7 +57,7 @@ function ConfidenceGauge({ confidence }) {
           cy="100"
           r={radius}
           fill="none"
-          stroke="rgba(167,139,250,0.12)"
+          stroke="#e4e4e7"
           strokeWidth="6"
         />
         {/* Fill */}
@@ -84,16 +73,15 @@ function ConfidenceGauge({ confidence }) {
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
-          filter="url(#gauge-glow)"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <p className="text-[9px] uppercase tracking-[0.3em] text-violet-300/70 font-semibold">
+        <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-500 font-semibold">
           Confidence
         </p>
-        <p className="aurora-headline text-[64px] leading-none text-white tabular-nums">
+        <p className="aurora-headline text-[64px] leading-none text-zinc-900 tabular-nums">
           {pct}
-          <span className="text-[28px] text-violet-300/60">%</span>
+          <span className="text-[28px] text-zinc-500">%</span>
         </p>
       </div>
     </div>
@@ -113,28 +101,27 @@ function FieldBar({ field, missing }) {
       className="space-y-1.5"
     >
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-medium text-violet-200/80 tracking-wide uppercase">
+        <span className="text-[10px] font-medium text-zinc-700 tracking-wide uppercase">
           {field?.label || field?.field_name || "field"}
         </span>
         {missing ? (
-          <span className="text-[10px] font-mono text-[#fb7185] tabular-nums">
+          <span className="text-[10px] font-mono text-red-700 tabular-nums">
             {formatInr(field?.impact_inr)}
           </span>
         ) : (
-          <span className="text-[10px] font-mono text-violet-300/60 tabular-nums">
+          <span className="text-[10px] font-mono text-zinc-500 tabular-nums">
             {Math.round(conf * 100)}%
           </span>
         )}
       </div>
-      <div className="h-1 rounded-full bg-violet-500/8 overflow-hidden">
+      <div className="h-1 rounded-full bg-zinc-100 overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
           className="h-full rounded-full"
           style={{
-            background: `linear-gradient(90deg, ${color}, ${FUCHSIA})`,
-            boxShadow: `0 0 12px ${color}66`,
+            background: color,
           }}
         />
       </div>
@@ -145,23 +132,23 @@ function FieldBar({ field, missing }) {
 /* ── Fallback for unsupported environments ── */
 function Fallback({ confidence, deductionInr, totalRecoverableInr, missingFields }) {
   return (
-    <div className="w-full rounded-2xl border border-violet-500/15 bg-violet-500/4 p-6 text-center">
-      <p className="text-[9px] uppercase tracking-[0.3em] text-violet-300/70 font-semibold">
-        Justification snapshot
+    <div className="w-full rounded-2xl border border-zinc-200 bg-white p-6 text-center">
+      <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-500 font-semibold">
+        Decision snapshot
       </p>
-      <p className="aurora-headline text-[48px] text-white tabular-nums leading-none mt-2">
+      <p className="aurora-headline text-[48px] text-zinc-900 tabular-nums leading-none mt-2">
         {Math.round((Number(confidence) || 0) * 100)}%
       </p>
-      <p className="mt-1 text-[11px] text-violet-200/70">
+      <p className="mt-1 text-[11px] text-zinc-600">
         confidence · {formatInr(deductionInr)} deductible
       </p>
       {Number(totalRecoverableInr) > 0 && (
-        <p className="text-[10px] text-[#fbbf24] mt-1 font-mono">
+        <p className="text-[10px] text-amber-700 mt-1 font-mono">
           {formatInr(totalRecoverableInr)} recoverable
         </p>
       )}
       {Array.isArray(missingFields) && missingFields.length > 0 && (
-        <p className="text-[10px] text-[#fb7185] mt-2">
+        <p className="text-[10px] text-red-700 mt-2">
           {missingFields.length} missing field{missingFields.length === 1 ? "" : "s"}
         </p>
       )}
@@ -179,7 +166,6 @@ export default function JustificationCanvas({
   recommendations = [],
   className,
 }) {
-  // No more WebGL — every environment can render this 2D version.
   const safeAvailable = Array.isArray(availableFields) ? availableFields : [];
   const safeMissing = Array.isArray(missingFields) ? missingFields : [];
   const safeRecs = Array.isArray(recommendations) ? recommendations : [];
@@ -200,34 +186,24 @@ export default function JustificationCanvas({
   return (
     <div
       className={cn(
-        "w-full rounded-2xl border border-violet-500/15 bg-gradient-to-br from-violet-500/[0.04] via-fuchsia-500/[0.02] to-amber-500/[0.04] p-6 relative overflow-hidden",
+        "w-full rounded-2xl border border-zinc-200 bg-white p-6 relative overflow-hidden",
         className
       )}
       data-invoice-id={invoiceId}
     >
-      {/* Background glow */}
-      <div
-        aria-hidden
-        className="absolute -top-20 -right-20 w-64 h-64 rounded-full pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(232,121,249,0.18), transparent 60%)",
-          filter: "blur(40px)",
-        }}
-      />
-
       <div className="relative grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 items-start">
         {/* Left: gauge + headline numbers */}
         <div className="space-y-4">
           <ConfidenceGauge confidence={confidence} />
           <div className="text-center space-y-1">
-            <p className="text-[9px] uppercase tracking-[0.3em] text-violet-300/70 font-semibold">
-              Deductible under 43B(h)
+            <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-500 font-semibold">
+              43B(h) deduction estimate
             </p>
-            <p className="aurora-headline text-[28px] text-[#fbbf24] tabular-nums leading-none">
+            <p className="aurora-headline text-[28px] text-emerald-700 tabular-nums leading-none">
               {formatInr(deductionInr)}
             </p>
             {Number(totalRecoverableInr) > 0 && (
-              <p className="text-[10px] text-violet-300/60 font-mono">
+              <p className="text-[10px] text-zinc-500 font-mono">
                 +{formatInr(totalRecoverableInr)} recoverable
               </p>
             )}
@@ -239,8 +215,8 @@ export default function JustificationCanvas({
           {safeAvailable.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 size={11} className="text-[#34d399]" />
-                <p className="text-[9px] uppercase tracking-[0.3em] text-violet-300/70 font-semibold">
+                <CheckCircle2 size={11} className="text-emerald-700" />
+                <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-500 font-semibold">
                   Extracted ({safeAvailable.length})
                 </p>
               </div>
@@ -255,8 +231,8 @@ export default function JustificationCanvas({
           {safeMissing.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle size={11} className="text-[#fb7185]" />
-                <p className="text-[9px] uppercase tracking-[0.3em] text-[#fb7185]/80 font-semibold">
+                <AlertTriangle size={11} className="text-red-700" />
+                <p className="text-[9px] uppercase tracking-[0.3em] text-red-700 font-semibold">
                   Missing ({safeMissing.length})
                 </p>
               </div>
@@ -269,10 +245,10 @@ export default function JustificationCanvas({
           )}
 
           {safeRecs.length > 0 && (
-            <div className="pt-2 border-t border-violet-500/10">
+            <div className="pt-2 border-t border-zinc-200">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles size={11} className="text-[#a78bfa]" />
-                <p className="text-[9px] uppercase tracking-[0.3em] text-violet-300/70 font-semibold">
+                <Sparkles size={11} className="text-emerald-700" />
+                <p className="text-[9px] uppercase tracking-[0.3em] text-zinc-500 font-semibold">
                   Recommendations
                 </p>
               </div>

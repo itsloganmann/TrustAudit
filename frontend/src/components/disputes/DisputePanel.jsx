@@ -50,14 +50,6 @@ function formatDate(iso) {
 
 /**
  * Create + resolve UI for a single invoice's disputes.
- *
- * @param {object} props
- * @param {string|number} props.invoiceId
- * @param {Dispute[]} [props.disputes]
- * @param {(updated:Dispute[])=>void} [props.onChange]
- * @param {boolean} [props.canCreate=true]
- * @param {boolean} [props.canResolve=false]
- * @param {string} [props.className]
  */
 export default function DisputePanel({
   invoiceId,
@@ -137,19 +129,19 @@ export default function DisputePanel({
 
   return (
     <div
-      className={`rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden ${className}`}
+      className={`rounded-xl bg-white border border-zinc-200 overflow-hidden ${className}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.02]">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-200 bg-zinc-50">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-            <Flag size={11} className="text-rose-400" />
+          <div className="w-6 h-6 rounded-md bg-red-50 border border-red-200 flex items-center justify-center">
+            <Flag size={11} className="text-red-700" />
           </div>
-          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">
+          <p className="text-[10px] text-zinc-700 uppercase tracking-widest font-semibold">
             Disputes
           </p>
           {activeCount > 0 && (
-            <span className="text-[9px] text-rose-300 font-mono tabular-nums">
+            <span className="text-[9px] text-red-700 font-mono tabular-nums">
               {activeCount} active
             </span>
           )}
@@ -158,7 +150,7 @@ export default function DisputePanel({
           <button
             type="button"
             onClick={() => setComposerOpen(true)}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold text-zinc-700 hover:text-zinc-900 bg-white hover:bg-zinc-50 border border-zinc-200 transition-colors"
           >
             <Plus size={10} strokeWidth={2.5} />
             New
@@ -173,31 +165,27 @@ export default function DisputePanel({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-b border-white/[0.06]"
+            className="overflow-hidden border-b border-zinc-200"
           >
             <div className="p-4 space-y-3">
               <div>
-                <label className="block text-[9px] text-slate-500 uppercase tracking-widest mb-1.5">
+                <label className="block text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">
                   Reason
                 </label>
                 <select
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-[11px] text-white focus:outline-none focus:border-white/[0.18]"
+                  className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-[11px] text-zinc-900 focus:outline-none focus:border-zinc-300"
                 >
                   {REASON_OPTIONS.map((o) => (
-                    <option
-                      key={o.value}
-                      value={o.value}
-                      className="bg-slate-900"
-                    >
+                    <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-[9px] text-slate-500 uppercase tracking-widest mb-1.5">
+                <label className="block text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5">
                   Details
                 </label>
                 <textarea
@@ -205,14 +193,14 @@ export default function DisputePanel({
                   onChange={(e) => setDetails(e.target.value)}
                   rows={3}
                   placeholder="Describe the discrepancy with as much detail as possible..."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-[11px] text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] resize-none"
+                  className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-[11px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 resize-none"
                 />
               </div>
               <div className="flex items-center gap-2 justify-end">
                 <button
                   type="button"
                   onClick={() => setComposerOpen(false)}
-                  className="px-3 py-1.5 rounded-lg text-[10px] font-semibold text-slate-400 hover:text-white border border-white/[0.08] hover:bg-white/[0.05] transition-colors"
+                  className="px-3 py-1.5 rounded-lg text-[10px] font-semibold text-zinc-600 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -220,7 +208,7 @@ export default function DisputePanel({
                   type="button"
                   disabled={submitting || !details.trim()}
                   onClick={handleCreate}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold text-white bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold text-white bg-red-600 hover:bg-red-700 border border-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send size={10} strokeWidth={2.5} />
                   File Dispute
@@ -232,14 +220,14 @@ export default function DisputePanel({
       </AnimatePresence>
 
       {/* List */}
-      <div className="divide-y divide-white/[0.04]">
+      <div className="divide-y divide-zinc-100">
         {disputes.length === 0 && !composerOpen && (
           <div className="px-4 py-8 text-center">
             <CheckCircle2
               size={16}
-              className="mx-auto text-emerald-500/40 mb-2"
+              className="mx-auto text-emerald-500 mb-2"
             />
-            <p className="text-[11px] text-slate-600">
+            <p className="text-[11px] text-zinc-500">
               No disputes filed for this document.
             </p>
           </div>
@@ -251,7 +239,7 @@ export default function DisputePanel({
                 <DisputeBadge status={d.status} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-white font-semibold tracking-tight">
+                <p className="text-[11px] text-zinc-900 font-semibold tracking-tight">
                   {(
                     REASON_OPTIONS.find((o) => o.value === d.reason)?.label ||
                     d.reason ||
@@ -259,11 +247,11 @@ export default function DisputePanel({
                   )}
                 </p>
                 {d.details && (
-                  <p className="mt-1 text-[10px] text-slate-400 leading-snug">
+                  <p className="mt-1 text-[10px] text-zinc-600 leading-snug">
                     {d.details}
                   </p>
                 )}
-                <div className="mt-1.5 flex items-center gap-3 text-[9px] text-slate-600 font-mono">
+                <div className="mt-1.5 flex items-center gap-3 text-[9px] text-zinc-500 font-mono">
                   <span className="inline-flex items-center gap-1">
                     <Clock size={8} />
                     {formatDate(d.created_at)}
@@ -271,8 +259,8 @@ export default function DisputePanel({
                   {d.created_by && <span>by {d.created_by}</span>}
                 </div>
                 {d.resolution_note && (
-                  <div className="mt-2 rounded-md bg-emerald-500/5 border border-emerald-500/15 px-2.5 py-1.5">
-                    <p className="text-[10px] text-emerald-300 leading-snug">
+                  <div className="mt-2 rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1.5">
+                    <p className="text-[10px] text-emerald-700 leading-snug">
                       {d.resolution_note}
                     </p>
                   </div>
@@ -289,7 +277,7 @@ export default function DisputePanel({
                             onChange={(e) => setResolutionNote(e.target.value)}
                             rows={2}
                             placeholder="Resolution note..."
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-md px-2 py-1.5 text-[10px] text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] resize-none"
+                            className="w-full bg-white border border-zinc-200 rounded-md px-2 py-1.5 text-[10px] text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 resize-none"
                           />
                           <div className="flex items-center gap-1.5 justify-end">
                             <button
@@ -298,7 +286,7 @@ export default function DisputePanel({
                                 setResolvingId(null);
                                 setResolutionNote("");
                               }}
-                              className="p-1 rounded-md text-slate-500 hover:text-white border border-white/[0.08] hover:bg-white/[0.05]"
+                              className="p-1 rounded-md text-zinc-500 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-50"
                             >
                               <X size={10} />
                             </button>
@@ -307,14 +295,14 @@ export default function DisputePanel({
                               onClick={() =>
                                 handleResolve(d.id, "DISMISSED")
                               }
-                              className="px-2 py-1 rounded-md text-[9px] font-semibold text-slate-400 hover:text-white border border-white/[0.08] hover:bg-white/[0.05]"
+                              className="px-2 py-1 rounded-md text-[9px] font-semibold text-zinc-600 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-50"
                             >
                               Dismiss
                             </button>
                             <button
                               type="button"
                               onClick={() => handleResolve(d.id, "RESOLVED")}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-semibold text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/25"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
                             >
                               <CheckCircle2 size={9} />
                               Resolve
@@ -325,7 +313,7 @@ export default function DisputePanel({
                         <button
                           type="button"
                           onClick={() => setResolvingId(d.id)}
-                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-semibold text-slate-300 hover:text-white border border-white/[0.08] hover:bg-white/[0.05] transition-colors"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-semibold text-zinc-700 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-50 transition-colors"
                         >
                           <AlertCircle size={9} />
                           Resolve

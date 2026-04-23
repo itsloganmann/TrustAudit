@@ -112,50 +112,50 @@ function phoneToSessionId(rawPhone) {
 const STATE_CONFIG = {
   PENDING: {
     label: "Pending",
-    bg: "bg-rose-500/8",
-    text: "text-rose-400",
-    dot: "bg-rose-500",
-    border: "border-rose-500/15",
+    bg: "bg-red-50",
+    text: "text-red-700",
+    dot: "bg-red-500",
+    border: "border-red-200",
     pulse: true,
   },
   VERIFYING: {
     label: "Verifying",
-    bg: "bg-amber-500/8",
-    text: "text-amber-400",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
     dot: "bg-amber-500",
-    border: "border-amber-500/15",
+    border: "border-amber-200",
     pulse: true,
   },
   VERIFIED: {
     label: "Verified",
-    bg: "bg-emerald-500/8",
-    text: "text-emerald-400",
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
     dot: "bg-emerald-500",
-    border: "border-emerald-500/15",
+    border: "border-emerald-200",
     pulse: false,
   },
   NEEDS_INFO: {
     label: "Needs Info",
-    bg: "bg-amber-500/8",
-    text: "text-amber-400",
+    bg: "bg-amber-50",
+    text: "text-amber-700",
     dot: "bg-amber-500",
-    border: "border-amber-500/15",
+    border: "border-amber-200",
     pulse: true,
   },
   SUBMITTED_TO_GOV: {
     label: "Submitted",
-    bg: "bg-blue-500/8",
-    text: "text-blue-400",
+    bg: "bg-blue-50",
+    text: "text-blue-700",
     dot: "bg-blue-500",
-    border: "border-blue-500/15",
+    border: "border-blue-200",
     pulse: false,
   },
   DISPUTED: {
     label: "Disputed",
-    bg: "bg-violet-500/8",
-    text: "text-violet-400",
-    dot: "bg-violet-500",
-    border: "border-violet-500/15",
+    bg: "bg-red-50",
+    text: "text-red-700",
+    dot: "bg-red-500",
+    border: "border-red-200",
     pulse: false,
   },
 };
@@ -175,10 +175,10 @@ function StateBadge({ state }) {
 function ConfidenceBar({ value }) {
   const pct = Math.round((Number(value) || 0) * 100);
   const color =
-    pct >= 90 ? "#10b981" : pct >= 80 ? "#3b82f6" : pct >= 70 ? "#f59e0b" : "#f43f5e";
+    pct >= 90 ? "#059669" : pct >= 80 ? "#2563eb" : pct >= 70 ? "#d97706" : "#dc2626";
   return (
     <div className="flex items-center gap-2 justify-end">
-      <div className="w-16 h-[3px] rounded-full bg-white/[0.05] overflow-hidden">
+      <div className="w-16 h-[3px] rounded-full bg-zinc-200 overflow-hidden">
         <motion.div
           className="h-full rounded-full"
           initial={{ width: 0 }}
@@ -208,7 +208,7 @@ function RelativeTime({ timestamp }) {
   else label = `${Math.floor(ageSec / 3600)}h ago`;
   return (
     <span
-      className="text-[11px] text-slate-600 tabular-nums"
+      className="text-[11px] text-zinc-500 tabular-nums"
       title={new Date((timestamp || 0) * 1000).toISOString()}
     >
       {label}
@@ -401,35 +401,35 @@ export default function LiveDemo() {
   }, [invoices]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-400 font-sans antialiased">
+    <div className="min-h-screen bg-white text-zinc-700 font-sans antialiased">
       {/* Header */}
-      <header className="border-b border-white/[0.06] bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40">
+      <header className="border-b border-zinc-200 bg-white/90 backdrop-blur sticky top-0 z-40">
         <div className="max-w-[1500px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <a
               href="/"
-              className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-[12px] font-medium"
+              className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 transition-colors text-[12px] font-medium"
             >
               <ArrowLeft size={13} />
               Back
             </a>
-            <div className="w-px h-6 bg-white/[0.06]" />
+            <div className="w-px h-6 bg-zinc-200" />
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
-                <Shield size={15} className="text-slate-950" strokeWidth={2.5} />
+              <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center flex-shrink-0">
+                <Shield size={15} className="text-white" strokeWidth={2.5} />
               </div>
               <div className="min-w-0">
-                <p className="text-white font-semibold text-[14px] tracking-tight leading-tight truncate">
-                  TrustAudit Live Demo
+                <p className="text-zinc-900 font-semibold text-[14px] tracking-tight leading-tight truncate">
+                  TrustAudit AP decision dashboard
                 </p>
-                <p className="text-[10px] text-slate-500 leading-tight">
+                <p className="text-[10px] text-zinc-500 leading-tight">
                   Public, read-only, anonymized
                 </p>
               </div>
             </div>
-            <span className="hidden md:inline-flex ml-3 px-2 py-1 rounded-md bg-white/[0.04] border border-white/[0.08] text-[10px] text-slate-400 font-mono tracking-wide">
+            <span className="hidden md:inline-flex ml-3 px-2 py-1 rounded-md bg-zinc-50 border border-zinc-200 text-[10px] text-zinc-600 font-mono tracking-wide">
               session:{" "}
-              <span className="text-emerald-400 ml-1 font-semibold tabular-nums">
+              <span className="text-emerald-700 ml-1 font-semibold tabular-nums">
                 {sessionId === "*"
                   ? "ALL SUBMISSIONS"
                   : sessionId?.startsWith("live-phone-")
@@ -440,7 +440,7 @@ export default function LiveDemo() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-500">
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-zinc-600">
               <span className="relative flex h-2 w-2">
                 {connected ? (
                   <>
@@ -448,13 +448,13 @@ export default function LiveDemo() {
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                   </>
                 ) : (
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                 )}
               </span>
               {connected ? (
                 <>
                   Live
-                  <span className="text-slate-700 ml-1 uppercase tracking-wide text-[9px] font-semibold">
+                  <span className="text-zinc-400 ml-1 uppercase tracking-wide text-[9px] font-semibold">
                     {transport === "sse" ? "SSE" : transport === "poll" ? "POLL" : ""}
                   </span>
                 </>
@@ -467,7 +467,7 @@ export default function LiveDemo() {
               type="button"
               onClick={handleNewSession}
               disabled={creating}
-              className="inline-flex items-center gap-1.5 px-3 h-9 rounded-lg glass glass-hover text-white text-[12px] font-semibold transition-all disabled:opacity-50"
+              className="btn btn-md btn-ghost disabled:opacity-50"
             >
               {creating ? <RefreshCcw size={13} className="animate-spin" /> : <Plus size={13} />}
               New session
@@ -482,28 +482,28 @@ export default function LiveDemo() {
         <section className="lg:col-span-9 space-y-4">
           {/* Stat strip */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <StatCard label="Total" value={stats.total} color="#f8fafc" icon={Radio} />
-            <StatCard label="Verifying" value={stats.verifying} color="#f59e0b" icon={RefreshCcw} />
-            <StatCard label="Verified" value={stats.verified} color="#10b981" icon={ShieldCheck} />
-            <StatCard label="Needs info" value={stats.needsInfo} color="#f43f5e" icon={Clock} />
+            <StatCard label="Total" value={stats.total} color="#09090b" icon={Radio} />
+            <StatCard label="Verifying" value={stats.verifying} color="#d97706" icon={RefreshCcw} />
+            <StatCard label="Verified" value={stats.verified} color="#059669" icon={ShieldCheck} />
+            <StatCard label="Needs info" value={stats.needsInfo} color="#dc2626" icon={Clock} />
           </div>
 
           {/* Live table */}
           <div className="glass rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
               <div>
-                <p className="text-[13px] text-white font-semibold tracking-tight">Live submissions</p>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[13px] text-zinc-900 font-semibold tracking-tight">Live proof submissions</p>
+                <p className="text-[11px] text-zinc-500">
                   Rows auto-expire after {MAX_AGE_SECONDS / 60} minutes.
                 </p>
               </div>
-              <span className="text-[11px] text-slate-600 tabular-nums">
+              <span className="text-[11px] text-zinc-500 tabular-nums">
                 {invoices.length} row{invoices.length === 1 ? "" : "s"}
               </span>
             </div>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/[0.06] text-[10px] text-slate-500 uppercase tracking-widest">
+                <tr className="border-b border-zinc-200 text-[10px] text-zinc-500 uppercase tracking-widest">
                   <th className="text-left px-4 py-2.5 font-semibold">Vendor</th>
                   <th className="text-left px-3 py-2.5 font-semibold">Invoice</th>
                   <th className="text-right px-3 py-2.5 font-semibold">Amount</th>
@@ -534,8 +534,8 @@ export default function LiveDemo() {
                           exit={{ opacity: 0, x: 10 }}
                           transition={{ type: "spring", stiffness: 400, damping: 30 }}
                           onClick={() => setExpandedKey(isExpanded ? null : key)}
-                          className={`row-transition border-b border-white/[0.04] cursor-pointer ${
-                            isExpanded ? "bg-white/[0.03]" : ""
+                          className={`row-transition border-b border-zinc-200 cursor-pointer ${
+                            isExpanded ? "bg-zinc-50" : ""
                           }`}
                         >
                           <td className="px-4 py-3">
@@ -545,35 +545,35 @@ export default function LiveDemo() {
                                 style={{
                                   background:
                                     inv.state === "VERIFIED"
-                                      ? "#34d399"
+                                      ? "#059669"
                                       : inv.state === "NEEDS_INFO" || inv.state === "VERIFYING"
-                                      ? "#fbbf24"
-                                      : "#fb7185",
+                                      ? "#d97706"
+                                      : "#dc2626",
                                 }}
                               />
                               <div>
-                                <p className="text-[13px] text-white font-medium tracking-tight leading-tight flex items-center gap-1.5">
+                                <p className="text-[13px] text-zinc-900 font-medium tracking-tight leading-tight flex items-center gap-1.5">
                                   {inv.vendor_display_name || "Vendor ?"}
                                   <ChevronRight
                                     size={11}
-                                    className={`text-slate-600 transition-transform ${
+                                    className={`text-zinc-400 transition-transform ${
                                       isExpanded ? "rotate-90" : ""
                                     }`}
                                   />
                                 </p>
-                                <p className="text-[10px] text-slate-600 font-mono mt-0.5">
+                                <p className="text-[10px] text-zinc-500 font-mono mt-0.5">
                                   {inv.gstin || "GSTIN hidden"}
                                 </p>
                               </div>
                             </div>
                           </td>
                           <td className="px-3 py-3">
-                            <span className="text-[12px] text-slate-400 font-mono">
+                            <span className="text-[12px] text-zinc-600 font-mono">
                               {inv.invoice_number || "—"}
                             </span>
                           </td>
                           <td className="px-3 py-3 text-right">
-                            <span className="text-[13px] text-white font-semibold tabular-nums tracking-tight">
+                            <span className="text-[13px] text-zinc-900 font-semibold tabular-nums tracking-tight">
                               {inv.amount
                                 ? `INR ${Number(inv.amount).toLocaleString("en-IN")}`
                                 : "—"}
@@ -596,12 +596,12 @@ export default function LiveDemo() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.18 }}
-                            className="border-b border-white/[0.04] bg-white/[0.015]"
+                            className="border-b border-zinc-200 bg-zinc-50"
                           >
                             <td colSpan={6} className="px-4 py-5">
                               <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-5">
                                 {/* Thumbnail */}
-                                <div className="rounded-lg overflow-hidden border border-white/[0.06] bg-slate-900/40 aspect-[3/4]">
+                                <div className="rounded-lg overflow-hidden border border-zinc-200 bg-white aspect-[3/4]">
                                   {inv.image_url ? (
                                     <img
                                       src={inv.image_url}
@@ -609,7 +609,7 @@ export default function LiveDemo() {
                                       className="w-full h-full object-cover"
                                     />
                                   ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-600 uppercase tracking-wider">
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500 uppercase tracking-wider">
                                       No image
                                     </div>
                                   )}
@@ -618,14 +618,14 @@ export default function LiveDemo() {
                                 <div className="space-y-4">
                                   {missingFields.length > 0 && (
                                     <div>
-                                      <p className="text-[10px] text-rose-400/90 font-mono uppercase tracking-[0.18em] mb-2">
+                                      <p className="text-[10px] text-red-700 font-mono uppercase tracking-[0.18em] mb-2">
                                         Missing ({missingFields.length})
                                       </p>
                                       <div className="flex flex-wrap gap-1.5">
                                         {missingFields.map((label) => (
                                           <span
                                             key={`m-${label}`}
-                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-rose-500/8 border border-rose-500/30 text-[11px] text-rose-300 font-medium"
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-50 border border-red-200 text-[11px] text-red-700 font-medium"
                                           >
                                             <AlertTriangle size={10} />
                                             {label}
@@ -636,14 +636,14 @@ export default function LiveDemo() {
                                   )}
                                   {extractedFields.length > 0 && (
                                     <div>
-                                      <p className="text-[10px] text-emerald-400/90 font-mono uppercase tracking-[0.18em] mb-2">
+                                      <p className="text-[10px] text-emerald-700 font-mono uppercase tracking-[0.18em] mb-2">
                                         Extracted ({extractedFields.length})
                                       </p>
                                       <div className="flex flex-wrap gap-1.5">
                                         {extractedFields.map((label) => (
                                           <span
                                             key={`e-${label}`}
-                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-500/8 border border-emerald-500/30 text-[11px] text-emerald-300 font-medium"
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-700 font-medium"
                                           >
                                             <CheckCircle2 size={10} />
                                             {label}
@@ -654,18 +654,19 @@ export default function LiveDemo() {
                                   )}
                                   {missingFields.length === 0 &&
                                     extractedFields.length === 0 && (
-                                      <p className="text-[12px] text-slate-500">
+                                      <p className="text-[12px] text-zinc-500">
                                         No field detail available for this row.
                                       </p>
                                     )}
                                   {missingFields.length > 0 && (
-                                    <div className="pt-2 border-t border-white/[0.06]">
-                                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                                    <div className="pt-2 border-t border-zinc-200">
+                                      <p className="text-[11px] text-zinc-600 leading-relaxed">
                                         Send a follow-up message to the
-                                        WhatsApp bot with the missing
-                                        information (e.g. "GSTIN
-                                        29ABCDE1234F1Z5") and the row will
-                                        re-process automatically.
+                                        WhatsApp bot with the missing proof
+                                        (for example, GSTIN
+                                        29ABCDE1234F1Z5 or a re-stamped
+                                        POD) and the row will re-match
+                                        automatically.
                                       </p>
                                     </div>
                                   )}
@@ -683,20 +684,20 @@ export default function LiveDemo() {
 
             {invoices.length === 0 && (
               <div className="px-4 py-20 text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
-                  <MessageCircle size={20} className="text-emerald-400" />
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 mb-4">
+                  <MessageCircle size={20} className="text-emerald-700" />
                 </div>
-                <p className="text-[14px] text-white font-semibold mb-1">
+                <p className="text-[14px] text-zinc-900 font-semibold mb-1">
                   No submissions yet
                 </p>
-                <p className="text-[12px] text-slate-500 max-w-sm mx-auto">
-                  Send a challan photo to the TrustAudit WhatsApp bot and it
-                  will land here in real time.
+                <p className="text-[12px] text-zinc-500 max-w-sm mx-auto">
+                  Send a POD, GRN, or delivery photo to the TrustAudit
+                  WhatsApp bot and it will land here in real time.
                 </p>
               </div>
             )}
 
-            <div className="px-4 py-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-slate-600">
+            <div className="px-4 py-2 border-t border-zinc-200 flex items-center justify-between text-[10px] text-zinc-500 bg-zinc-50">
               <span>
                 Anonymized public feed · {transport === "sse" ? "SSE" : transport === "poll" ? "2s poll" : "idle"}
               </span>
@@ -716,21 +717,21 @@ export default function LiveDemo() {
           {/* Phone-link card — re-keys the session to a private feed */}
           <div className="glass rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[13px] font-semibold text-white tracking-tight">
+              <p className="text-[13px] font-semibold text-zinc-900 tracking-tight">
                 Link your phone
               </p>
               {sessionId?.startsWith("live-phone-") && (
                 <button
                   type="button"
                   onClick={unlinkPhone}
-                  className="text-[10px] text-slate-500 hover:text-rose-400 uppercase tracking-wider font-semibold"
+                  className="text-[10px] text-zinc-500 hover:text-red-700 uppercase tracking-wider font-semibold"
                 >
                   Unlink
                 </button>
               )}
             </div>
-            <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
-              Paste the WhatsApp number you'll send challans from. This page
+            <p className="text-[11px] text-zinc-600 leading-relaxed mb-3">
+              Paste the WhatsApp number you'll send proof from. This page
               will then show only your submissions in real time.
             </p>
             <div className="flex items-center gap-2">
@@ -742,21 +743,21 @@ export default function LiveDemo() {
                   if (e.key === "Enter") linkPhone();
                 }}
                 placeholder="+1 415 555 1234"
-                className="flex-1 h-9 px-3 text-[12px] bg-white/[0.03] border border-white/[0.06] rounded-lg text-white placeholder-slate-600 focus:outline-none focus:border-emerald-400/50 transition-colors font-mono"
+                className="flex-1 h-9 px-3 text-[12px] bg-white border border-zinc-200 rounded-lg text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 transition-colors font-mono"
               />
               <button
                 type="button"
                 onClick={linkPhone}
-                className="px-3 h-9 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[11px] font-semibold tracking-wide uppercase transition-all"
+                className="px-3 h-9 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold tracking-wide uppercase transition-all"
               >
                 Link
               </button>
             </div>
             {linkError && (
-              <p className="mt-2 text-[10px] text-rose-400">{linkError}</p>
+              <p className="mt-2 text-[10px] text-red-700">{linkError}</p>
             )}
             {sessionId === "*" && (
-              <p className="mt-3 text-[10px] text-slate-600 leading-relaxed">
+              <p className="mt-3 text-[10px] text-zinc-500 leading-relaxed">
                 Currently watching the public firehose — every recent
                 submission across every linked phone.
               </p>
@@ -765,14 +766,14 @@ export default function LiveDemo() {
 
           <div className="glass rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/12 border border-emerald-500/25 flex items-center justify-center">
-                <MessageCircle size={15} className="text-emerald-400" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                <MessageCircle size={15} className="text-emerald-700" />
               </div>
-              <p className="text-[13px] font-semibold text-white tracking-tight">
-                Send a challan
+              <p className="text-[13px] font-semibold text-zinc-900 tracking-tight">
+                Send delivery proof
               </p>
             </div>
-            <p className="text-[12px] text-slate-400 leading-relaxed mb-4">
+            <p className="text-[12px] text-zinc-600 leading-relaxed mb-4">
               Tap the button below from your phone. Pre-fills the TrustAudit
               WhatsApp bot with the join code.
             </p>
@@ -780,63 +781,63 @@ export default function LiveDemo() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 px-4 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-[13px] tracking-tight transition-all"
+              className="w-full btn btn-md btn-primary"
             >
               <MessageCircle size={14} strokeWidth={2.4} />
               Open WhatsApp
             </a>
-            <p className="mt-3 text-[10px] text-slate-600 text-center font-mono">
+            <p className="mt-3 text-[10px] text-zinc-500 text-center font-mono">
               {WHATSAPP_NUMBER_DISPLAY}
             </p>
           </div>
 
           <div className="glass rounded-2xl p-5">
-            <p className="text-[13px] font-semibold text-white tracking-tight mb-2">
+            <p className="text-[13px] font-semibold text-zinc-900 tracking-tight mb-2">
               What happens next
             </p>
-            <ul className="space-y-2 text-[12px] text-slate-400 leading-relaxed">
+            <ul className="space-y-2 text-[12px] text-zinc-600 leading-relaxed">
               <li className="flex gap-2">
-                <span className="text-emerald-400 font-bold">1.</span>
-                You send a challan photo.
+                <span className="text-emerald-700 font-bold">1.</span>
+                You send a POD, GRN, or delivery photo.
               </li>
               <li className="flex gap-2">
-                <span className="text-emerald-400 font-bold">2.</span>
-                A row flashes amber (VERIFYING).
+                <span className="text-emerald-700 font-bold">2.</span>
+                The row enters verifying while we match it to an invoice.
               </li>
               <li className="flex gap-2">
-                <span className="text-emerald-400 font-bold">3.</span>
-                It turns green (VERIFIED) in ~15s.
+                <span className="text-emerald-700 font-bold">3.</span>
+                A verdict lands: clear, disputed, or missing proof.
               </li>
               <li className="flex gap-2">
-                <span className="text-emerald-400 font-bold">4.</span>
-                A 43B(h) PDF is ready to open.
+                <span className="text-emerald-700 font-bold">4.</span>
+                An audit-ready proof bundle is ready to open.
               </li>
             </ul>
           </div>
 
           <a
             href="/about"
-            className="block glass glass-hover rounded-2xl p-4 text-[12px] text-slate-300 hover:text-white transition-all"
+            className="block glass glass-hover rounded-2xl p-4 text-[12px] text-zinc-700 hover:text-zinc-900 transition-all"
           >
             <div className="flex items-center justify-between">
               <span className="font-semibold">About the founders</span>
               <ExternalLink size={12} />
             </div>
-            <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-              Meet the team shipping TrustAudit.
+            <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+              Meet the team building TrustAudit.
             </p>
           </a>
         </aside>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/[0.06] bg-slate-950/60 backdrop-blur-xl mt-8">
-        <div className="max-w-[1500px] mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] text-slate-600">
+      <footer className="border-t border-zinc-200 bg-white mt-8">
+        <div className="max-w-[1500px] mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-[11px] text-zinc-500">
           <span>
             You are viewing the TrustAudit public demo. Data is anonymized and
             auto-expires in {MAX_AGE_SECONDS / 60} minutes.
           </span>
-          <a href="/" className="hover:text-white transition-colors">
+          <a href="/" className="hover:text-zinc-900 transition-colors">
             trustaudit.onrender.com
           </a>
         </div>
@@ -853,13 +854,13 @@ function StatCard({ label, value, color, icon: Icon }) {
   return (
     <div className="glass glass-hover rounded-xl px-4 py-3 group transition-all">
       <div className="flex items-center justify-between mb-1">
-        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-medium">
+        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-medium">
           {label}
         </p>
         {Icon && (
           <Icon
             size={13}
-            className="opacity-30 group-hover:opacity-60 transition-opacity"
+            className="opacity-50 group-hover:opacity-80 transition-opacity"
             style={{ color }}
           />
         )}

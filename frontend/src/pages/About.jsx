@@ -31,15 +31,13 @@ const COFOUNDERS = [
     tagline: "LLM Researcher @ PocketFM",
     location: "San Jose, California",
     initials: "LM",
-    gradientFrom: "#10b981",
-    gradientVia: "#06b6d4",
-    gradientTo: "#3b82f6",
     photo: "/team/logan.jpg",
     photoFallback: "/team/logan.svg",
     bio:
       "Ships end-to-end AI agents for a living. Leads the TrustAudit " +
-      "vision pipeline, the 43B(h) state machine, and the autonomous " +
-      "test harness that has to stay green before every demo.",
+      "proof-ingestion pipeline, the invoice-to-evidence matching engine, " +
+      "and the autonomous test harness that has to stay green before " +
+      "every demo.",
     credentials: [
       { icon: Briefcase, label: "LLM Researcher @ PocketFM" },
       { icon: GraduationCap, label: "CE @ UC Santa Barbara" },
@@ -67,15 +65,13 @@ const COFOUNDERS = [
     tagline: "UC Berkeley Haas · Carbyn AI",
     location: "San Francisco Bay Area",
     initials: "AB",
-    gradientFrom: "#f59e0b",
-    gradientVia: "#f43f5e",
-    gradientTo: "#8b5cf6",
     photo: "/team/arnav.jpg",
     photoFallback: "/team/arnav.svg",
     bio:
       "Runs strategy, GTM, and partnerships. Deep roots in the Indian " +
-      "MSME ecosystem and the founder Arnav behind Carbyn AI. Leading " +
-      "TrustAudit's pilots with Indian enterprise CFO teams.",
+      "enterprise and MSME ecosystem, and the founder behind Carbyn AI. " +
+      "Leading TrustAudit's pilots with AP teams in pharma distribution, " +
+      "manufacturing, and industrial procurement.",
     credentials: [
       { icon: Briefcase, label: "Strategy & GTM · Partnerships" },
       { icon: GraduationCap, label: "UC Berkeley Haas School of Business" },
@@ -102,31 +98,25 @@ const COFOUNDERS = [
 // why TrustAudit has to exist *now*.
 const WHY_STATS = [
   {
-    icon: Users,
-    value: "63 million",
-    label: "Indian MSMEs",
+    icon: TrendingDown,
+    value: "$90B",
+    label: "stuck in offline workflows",
     detail:
-      "Every one of them carries payment risk for the corporates they supply.",
-    accentFrom: "#10b981",
-    accentTo: "#06b6d4",
+      "Enterprise-to-MSME payments in India move through WhatsApp photos, paper PODs, and stapled GRNs. AP teams can't tell which invoices are actually safe to pay.",
+  },
+  {
+    icon: Users,
+    value: "3 sectors",
+    label: "pharma, manufacturing, industrial",
+    detail:
+      "Where the proof-matching problem is sharpest. Every pharma distributor, process manufacturer, and industrial procurement team runs this workflow by hand today.",
   },
   {
     icon: CalendarClock,
-    value: "45 days",
-    label: "43B(h) cliff",
+    value: "₹8 trillion",
+    label: "annual flow we sit under",
     detail:
-      "After acceptance, the buyer's tax deduction vanishes if the invoice goes unpaid.",
-    accentFrom: "#06b6d4",
-    accentTo: "#3b82f6",
-  },
-  {
-    icon: TrendingDown,
-    value: "₹2 trillion",
-    label: "annual MSME receivables exposure",
-    detail:
-      "The total amount of working capital trapped behind 43B(h) every year.",
-    accentFrom: "#8b5cf6",
-    accentTo: "#f43f5e",
+      "The acceptance decision for every one of these invoices eventually gates a payment. Own the decision layer, earn the right to expand into settlement and financing.",
   },
 ];
 
@@ -135,35 +125,31 @@ const WHY_STATS = [
 const TIMELINE = [
   {
     when: "2024",
-    title: "The idea",
+    title: "Saw the problem",
     Icon: Lightbulb,
     body:
-      "Logan and Arnav meet around a 43B(h) tax post that nobody at the table can fully explain. They go look — and find a ₹12,000 crore problem hiding in plain sight.",
-    accent: "#10b981",
+      "Working with Indian AP teams, we kept watching the same scene: a ledger open on one screen, a WhatsApp feed of delivery photos on another, and a clerk matching them by hand. ₹8 trillion a year moves through workflows that look like this. One named version of the blast radius: Section 43B(h), where a missed acceptance date erases a buyer's tax deduction.",
   },
   {
     when: "2025",
-    title: "First pilot",
+    title: "First MVP",
     Icon: Handshake,
     body:
-      "TrustAudit ships a WhatsApp-first verification flow with one Indian enterprise. Within two weeks, the CFO can see their entire MSME exposure on a single screen.",
-    accent: "#06b6d4",
+      "Shipped the first end-to-end ingestion loop: WhatsApp and PDF proof in, vision-extracted fields matched to an invoice, a clear-to-claim or missing-proof verdict out. Ran it against real AP workflows, not demo data.",
   },
   {
     when: "2025 · Q4",
-    title: "YC application",
+    title: "YC Summer 2026 application",
     Icon: FileCheck,
     body:
-      "We submit to Y Combinator with the full vision pipeline, the autonomous test harness, and the real Indian customer asking us to scale.",
-    accent: "#8b5cf6",
+      "Submitted to Y Combinator with the decision layer framing: enterprise buyer pays, supplier uses it free, expansion into settlement and financing earns out from owning the acceptance call.",
   },
   {
-    when: "2026 · Q1",
-    title: "Customer demos",
+    when: "2026",
+    title: "Pilots",
     Icon: PlayCircle,
     body:
-      "Live demos with Indian CFO teams. Every demo ends the same way: 'How fast can we get this onto our supplier base?'",
-    accent: "#f43f5e",
+      "Rolling out pilots with AP teams in pharma distribution, manufacturing, and industrial procurement. Every demo ends the same way: 'How fast can we get this onto our supplier base?'",
   },
 ];
 
@@ -199,12 +185,12 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.15 },
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
   },
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 32 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
@@ -212,7 +198,7 @@ const cardVariants = {
   },
 };
 
-function AvatarBubble({ founder, hovered }) {
+function AvatarBubble({ founder }) {
   // Fallback chain: jpg -> svg -> initials. We use a stage counter so React
   // owns the swap instead of mutating the DOM via the onError handler.
   // 0 = primary jpg, 1 = stylized svg, 2 = inline initials.
@@ -223,31 +209,9 @@ function AvatarBubble({ founder, hovered }) {
 
   return (
     <div className="relative shrink-0">
-      {/* Outer glow ring — accelerates on hover (4.5s vs 14s) and lifts +6px */}
-      <motion.div
-        aria-hidden
-        className="absolute -inset-1 rounded-full opacity-70 blur-xl"
-        style={{
-          background: `conic-gradient(from 180deg at 50% 50%, ${founder.gradientFrom}, ${founder.gradientVia}, ${founder.gradientTo}, ${founder.gradientFrom})`,
-        }}
-        animate={{ rotate: 360 }}
-        transition={{
-          duration: hovered ? 4.5 : 14,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      />
-      {/* Photo or initials circle */}
-      <div
-        className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-white/20 bg-slate-900 flex items-center justify-center"
-        style={{
-          backgroundImage: `linear-gradient(135deg, ${founder.gradientFrom}, ${founder.gradientVia}, ${founder.gradientTo})`,
-        }}
-      >
+      <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border border-zinc-200 ring-2 ring-emerald-500/20 bg-zinc-50 flex items-center justify-center">
         {showImage ? (
           <img
-            // key forces the <img> to remount when the source changes so
-            // failed loads can re-trigger onError on the new src.
             key={currentSrc}
             src={currentSrc}
             alt={`${founder.name} headshot`}
@@ -256,7 +220,7 @@ function AvatarBubble({ founder, hovered }) {
           />
         ) : (
           <div
-            className="absolute inset-0 flex items-center justify-center text-white font-black tracking-tight"
+            className="absolute inset-0 flex items-center justify-center text-emerald-700 font-bold tracking-tight bg-emerald-50"
             style={{ fontSize: "2.2rem" }}
           >
             {founder.initials}
@@ -269,40 +233,24 @@ function AvatarBubble({ founder, hovered }) {
 
 function WhyStatCard({ stat }) {
   const Icon = stat.icon;
-  // We use .glass as the base (frost-card from W7 hasn't merged yet) plus
-  // a per-card gradient halo so the three cards still feel distinct.
   return (
     <motion.div
       variants={cardVariants}
-      whileHover={{ y: -4, transition: { type: "spring", stiffness: 300 } }}
-      className="glass relative overflow-hidden rounded-2xl p-5 md:p-6"
+      whileHover={{ y: -2, transition: { type: "spring", stiffness: 300 } }}
+      className="relative rounded-2xl p-5 md:p-6 bg-white border border-zinc-200 shadow-sm hover:border-zinc-300 transition-colors"
     >
-      {/* Per-card halo */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-[1px] rounded-2xl opacity-40"
-        style={{
-          background: `radial-gradient(380px circle at 50% -20%, ${stat.accentFrom}22, transparent 50%), radial-gradient(380px circle at 100% 120%, ${stat.accentTo}22, transparent 50%)`,
-        }}
-      />
-
       <div className="relative">
-        <div
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg"
-          style={{
-            background: `linear-gradient(135deg, ${stat.accentFrom}, ${stat.accentTo})`,
-          }}
-        >
-          <Icon size={16} className="text-white" strokeWidth={2.4} />
+        <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200">
+          <Icon size={16} className="text-emerald-700" strokeWidth={2.4} />
         </div>
 
-        <p className="mt-4 text-[28px] md:text-[32px] font-black text-white tracking-tight leading-none">
+        <p className="mt-4 text-[28px] md:text-[32px] font-bold text-zinc-900 tracking-tight leading-none">
           {stat.value}
         </p>
-        <p className="mt-1 text-[12px] uppercase tracking-[0.18em] font-semibold text-slate-400">
+        <p className="mt-1 text-[11px] uppercase tracking-[0.18em] font-semibold text-zinc-500">
           {stat.label}
         </p>
-        <p className="mt-3 text-[13px] text-slate-300 leading-relaxed">
+        <p className="mt-3 text-[13px] text-zinc-600 leading-relaxed">
           {stat.detail}
         </p>
       </div>
@@ -316,11 +264,7 @@ function Timeline({ items }) {
       {/* Vertical spine */}
       <div
         aria-hidden
-        className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px md:-translate-x-px"
-        style={{
-          background:
-            "linear-gradient(180deg, transparent, rgba(255,255,255,0.18) 12%, rgba(255,255,255,0.18) 88%, transparent)",
-        }}
+        className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px md:-translate-x-px bg-zinc-200"
       />
 
       <ol className="space-y-8 md:space-y-10">
@@ -347,11 +291,7 @@ function TimelineNode({ node, index }) {
       {/* Spine dot */}
       <div
         aria-hidden
-        className="absolute left-4 md:left-1/2 top-2 w-3 h-3 -translate-x-[5px] md:-translate-x-1/2 rounded-full ring-4 ring-slate-950"
-        style={{
-          background: node.accent,
-          boxShadow: `0 0 0 1px ${node.accent}66, 0 0 18px ${node.accent}66`,
-        }}
+        className="absolute left-4 md:left-1/2 top-2 w-3 h-3 -translate-x-[5px] md:-translate-x-1/2 rounded-full ring-4 ring-white bg-emerald-500"
       />
 
       {/* Card column. On md+ we alternate left/right; on mobile everything stacks right of the spine. */}
@@ -362,7 +302,7 @@ function TimelineNode({ node, index }) {
             : "pl-12 md:pl-10 md:col-start-2"
         }
       >
-        <div className="glass inline-block max-w-md text-left rounded-2xl p-5">
+        <div className="inline-block max-w-md text-left rounded-2xl p-5 bg-white border border-zinc-200 shadow-sm">
           <div
             className={
               isLeft
@@ -370,25 +310,17 @@ function TimelineNode({ node, index }) {
                 : "flex items-center gap-2"
             }
           >
-            <div
-              className="inline-flex items-center justify-center w-8 h-8 rounded-lg"
-              style={{
-                background: `linear-gradient(135deg, ${node.accent}cc, ${node.accent}66)`,
-              }}
-            >
-              <Icon size={14} className="text-white" strokeWidth={2.4} />
+            <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200">
+              <Icon size={14} className="text-emerald-700" strokeWidth={2.4} />
             </div>
-            <p
-              className="text-[11px] uppercase tracking-[0.3em] font-semibold"
-              style={{ color: node.accent }}
-            >
+            <p className="text-[11px] uppercase tracking-[0.3em] font-semibold text-emerald-700">
               {node.when}
             </p>
           </div>
-          <h3 className="mt-2 text-[18px] md:text-[20px] font-black text-white tracking-tight">
+          <h3 className="mt-2 text-[18px] md:text-[20px] font-bold text-zinc-900 tracking-tight">
             {node.title}
           </h3>
-          <p className="mt-2 text-[13px] text-slate-300 leading-relaxed">
+          <p className="mt-2 text-[13px] text-zinc-600 leading-relaxed">
             {node.body}
           </p>
         </div>
@@ -398,48 +330,29 @@ function TimelineNode({ node, index }) {
 }
 
 function FounderCard({ founder }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <motion.article
       variants={cardVariants}
-      whileHover={{ y: -6, transition: { type: "spring", stiffness: 300 } }}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-      className="relative overflow-hidden rounded-3xl p-6 md:p-8 group"
-      style={{
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
-        backdropFilter: "blur(18px) saturate(140%)",
-        WebkitBackdropFilter: "blur(18px) saturate(140%)",
-        border: "1px solid rgba(255,255,255,0.08)",
-      }}
+      whileHover={{ y: -2, transition: { type: "spring", stiffness: 300 } }}
+      className="relative overflow-hidden rounded-2xl p-6 md:p-8 bg-white border border-zinc-200 shadow-sm hover:border-zinc-300 transition-colors"
     >
-      {/* Animated caustic light sheen */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-[2px] rounded-3xl opacity-40 group-hover:opacity-80 transition-opacity"
-        style={{
-          background: `radial-gradient(600px circle at 20% -10%, ${founder.gradientFrom}22, transparent 40%), radial-gradient(600px circle at 100% 100%, ${founder.gradientTo}22, transparent 40%)`,
-        }}
-      />
-
       <div className="relative flex flex-col md:flex-row gap-6 md:gap-8">
-        <AvatarBubble founder={founder} hovered={hovered} />
+        <AvatarBubble founder={founder} />
 
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[10px] uppercase tracking-[0.3em] font-semibold text-[#a78bfa]">
+          <p className="text-[10px] uppercase tracking-[0.3em] font-semibold text-emerald-700">
             {founder.role}
           </p>
-          <h2 className="mt-2 aurora-headline text-[36px] md:text-[44px] text-white leading-[0.95]">
+          <h2 className="mt-2 aurora-headline text-[32px] md:text-[40px] text-zinc-900 leading-[0.95]">
             {founder.name}
           </h2>
-          <p className="mt-1 text-[14px] text-slate-300">{founder.tagline}</p>
-          <div className="mt-1 flex items-center gap-1 text-[12px] text-slate-500">
+          <p className="mt-1 text-[14px] text-zinc-600">{founder.tagline}</p>
+          <div className="mt-1 flex items-center gap-1 text-[12px] text-zinc-500">
             <MapPin size={11} />
             <span>{founder.location}</span>
           </div>
 
-          <p className="mt-4 text-[14px] leading-relaxed text-slate-300">
+          <p className="mt-4 text-[14px] leading-relaxed text-zinc-700">
             {founder.bio}
           </p>
 
@@ -448,9 +361,9 @@ function FounderCard({ founder }) {
             {founder.credentials.map(({ icon: Icon, label }) => (
               <li
                 key={label}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] text-slate-300"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-700"
               >
-                <Icon size={11} className="text-violet-300" />
+                <Icon size={11} className="text-emerald-700" />
                 <span>{label}</span>
               </li>
             ))}
@@ -461,12 +374,12 @@ function FounderCard({ founder }) {
             {founder.links.map(({ kind, label, href, Icon }) => (
               <motion.a
                 key={kind}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
                 href={href}
                 target={kind === "email" ? undefined : "_blank"}
                 rel={kind === "email" ? undefined : "noopener noreferrer"}
-                className="inline-flex items-center gap-2 px-4 h-10 rounded-xl border border-white/10 bg-white/[0.03] text-[13px] font-semibold text-white hover:bg-white/[0.06] transition-colors"
+                className="inline-flex items-center gap-2 px-4 h-10 rounded-lg border border-zinc-200 bg-white text-[13px] font-semibold text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
               >
                 <Icon size={14} />
                 <span>{label}</span>
@@ -481,29 +394,19 @@ function FounderCard({ founder }) {
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-[#06070f] text-white relative overflow-hidden">
-      {/* Ambient gradient orbs — pure CSS, GPU-cheap */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(900px circle at 10% 0%, rgba(16,185,129,0.12), transparent 40%), radial-gradient(900px circle at 100% 100%, rgba(139,92,246,0.12), transparent 40%)",
-        }}
-      />
-
+    <div className="min-h-screen bg-white text-zinc-900 relative overflow-hidden">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#06070f]/70 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/90 backdrop-blur">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-2">
-            <ArrowLeft size={16} className="text-slate-400" />
-            <span className="text-[13px] text-slate-300">Back to home</span>
+            <ArrowLeft size={16} className="text-zinc-500" />
+            <span className="text-[13px] text-zinc-700">Back to home</span>
           </a>
           <a href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-              <Shield size={15} className="text-slate-950" strokeWidth={2.5} />
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center">
+              <Shield size={15} className="text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-white font-semibold text-[15px] tracking-tight">
+            <span className="text-zinc-900 font-semibold text-[15px] tracking-tight">
               TrustAudit
             </span>
           </a>
@@ -513,30 +416,27 @@ export default function About() {
       <main className="relative max-w-5xl mx-auto px-6 pt-14 pb-24">
         {/* Hero */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
+          <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-700">
             The team behind TrustAudit
           </p>
-          <h1 className="mt-3 text-[40px] md:text-[52px] font-black text-white tracking-tight leading-[1.05]">
+          <h1 className="mt-3 text-[40px] md:text-[52px] font-bold text-zinc-900 tracking-tight leading-[1.05]">
             Two founders, one mission:
-            <span
-              className="block bg-clip-text text-transparent"
-              style={{
-                backgroundImage:
-                  "linear-gradient(120deg, #10b981 0%, #06b6d4 35%, #3b82f6 70%, #8b5cf6 100%)",
-              }}
-            >
-              save Indian MSMEs from the 43B(h) cliff.
+            <span className="block text-emerald-700">
+              unblock supplier payments in India.
             </span>
           </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-[14px] md:text-[15px] text-slate-400 leading-relaxed">
-            Indian MSMEs lose <span className="text-white font-semibold">₹12,000 crore</span> per year to Section 43B(h) cliff
-            enforcement. We built TrustAudit because the two of us were in the
-            rooms where this happened and nobody was solving it.
+          <p className="mt-4 max-w-2xl mx-auto text-[14px] md:text-[15px] text-zinc-600 leading-relaxed">
+            <span className="text-zinc-900 font-semibold">$90B a year</span> of
+            enterprise-to-MSME payments in India sit behind WhatsApp photos,
+            paper PODs, and stapled GRNs that nobody has matched to the
+            invoice yet. We built TrustAudit so AP teams can finally tell the
+            difference between a bill that is clear to claim and one that is
+            still missing proof.
           </p>
         </motion.div>
 
@@ -549,11 +449,11 @@ export default function About() {
           aria-label="Why TrustAudit"
         >
           <div className="text-center mb-8">
-            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
+            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-700">
               Why TrustAudit
             </p>
-            <h2 className="mt-2 text-[24px] md:text-[28px] font-black text-white tracking-tight">
-              The market that nobody else is staring at.
+            <h2 className="mt-2 text-[24px] md:text-[28px] font-bold text-zinc-900 tracking-tight">
+              The flow that nobody else is staring at.
             </h2>
           </div>
 
@@ -587,11 +487,11 @@ export default function About() {
           aria-label="How we got here"
         >
           <div className="text-center mb-10">
-            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
+            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-700">
               How we got here
             </p>
-            <h2 className="mt-2 text-[24px] md:text-[28px] font-black text-white tracking-tight">
-              From late-night idea to live customer demos.
+            <h2 className="mt-2 text-[24px] md:text-[28px] font-bold text-zinc-900 tracking-tight">
+              From a problem we kept watching to live pilots.
             </h2>
           </div>
 
@@ -608,13 +508,13 @@ export default function About() {
           aria-label="Press and contact"
         >
           <div className="text-center mb-6">
-            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-violet-300">
+            <p className="text-[11px] uppercase tracking-[0.4em] font-semibold text-emerald-700">
               Press + talk to us
             </p>
-            <h2 className="mt-2 text-[24px] md:text-[28px] font-black text-white tracking-tight">
+            <h2 className="mt-2 text-[24px] md:text-[28px] font-bold text-zinc-900 tracking-tight">
               Reporters, operators, and investors — we read everything.
             </h2>
-            <p className="mt-3 max-w-xl mx-auto text-[13px] text-slate-400">
+            <p className="mt-3 max-w-xl mx-auto text-[13px] text-zinc-600">
               The fastest way to reach the founders is the channel they live
               in. We answer everything within 24 hours.
             </p>
@@ -626,16 +526,16 @@ export default function About() {
               return (
                 <motion.a
                   key={link.kind}
-                  whileHover={{ scale: 1.04, y: -2 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.03, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
                   href={link.href}
                   target={link.kind === "email" ? undefined : "_blank"}
                   rel={
                     link.kind === "email" ? undefined : "noopener noreferrer"
                   }
-                  className="inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-[13px] font-semibold text-white transition-colors"
+                  className="inline-flex items-center gap-2 px-4 h-11 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-[13px] font-semibold text-zinc-900 transition-colors"
                 >
-                  <LinkIcon size={14} className="text-violet-300" />
+                  <LinkIcon size={14} className="text-emerald-700" />
                   <span>{link.label}</span>
                 </motion.a>
               );
@@ -647,25 +547,19 @@ export default function About() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          className="mt-16 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 md:p-8 text-center"
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="mt-16 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 md:p-8 text-center"
         >
-          <p className="text-[13px] text-slate-300">
-            Want to talk shop with the founders? Ping us on LinkedIn or the
-            WhatsApp number on the live demo page.
+          <p className="text-[13px] text-zinc-700">
+            Want to talk shop with the founders? Ping us on LinkedIn or see
+            the live proof-ingestion flow on the demo page.
           </p>
           <div className="mt-4 flex flex-wrap gap-3 justify-center">
-            <a
-              href="/live"
-              className="inline-flex items-center gap-2 px-5 h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-[13px] transition-colors"
-            >
-              Try the live demo
+            <a href="/live" className="btn btn-md btn-primary">
+              See the live demo
             </a>
-            <a
-              href="/auth/vendor/signup"
-              className="inline-flex items-center gap-2 px-5 h-11 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] text-white font-semibold text-[13px] transition-colors"
-            >
-              Sign up as a vendor
+            <a href="/auth/vendor/signup" className="btn btn-md btn-ghost">
+              Sign up as a buyer
             </a>
           </div>
         </motion.div>

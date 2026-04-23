@@ -13,19 +13,19 @@ export default function VendorSignin() {
   return (
     <AuthShell
       role="vendor"
-      eyebrow="Enterprise sign-in"
-      title="Welcome back, CFO."
-      subtitle="Sign in to see your real-time 43B(h) compliance shield, dispute queue, and supplier network."
+      eyebrow="AP team sign-in"
+      title="Welcome back."
+      subtitle="Sign in to see which supplier invoices are cleared to claim, disputed, or still missing proof."
       footer={
         <div className="space-y-3">
           <RoleSwitcher currentRole="vendor" mode="signin" />
-          <p className="text-center text-[12px] text-slate-500">
+          <p className="text-center text-[12px] text-zinc-600">
             New to TrustAudit?{" "}
             <Link
               to="/auth/vendor/signup"
-              className="text-white font-medium hover:text-emerald-300 transition-colors"
+              className="text-emerald-700 font-medium hover:text-emerald-800 transition-colors"
             >
-              Create an enterprise account →
+              Create an AP team account →
             </Link>
           </p>
         </div>

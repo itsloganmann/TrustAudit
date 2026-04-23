@@ -59,7 +59,7 @@ export default function ProviderButtons({ role, onError }) {
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="glass rounded-xl p-4 mt-1">
+            <div className="rounded-xl p-4 mt-1 bg-zinc-50 border border-zinc-200">
               {open === "whatsapp" && <WhatsAppOtpForm role={role} />}
               {open === "phone" && <PhoneOtpForm role={role} />}
               {open === "magic" && <EmailMagicForm role={role} />}
@@ -70,11 +70,11 @@ export default function ProviderButtons({ role, onError }) {
 
       {/* Divider */}
       <div className="flex items-center gap-3 py-1">
-        <div className="flex-1 h-px bg-white/[0.06]" />
-        <span className="text-[10px] text-slate-600 uppercase tracking-widest font-semibold">
+        <div className="flex-1 h-px bg-zinc-200" />
+        <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
           or with email
         </span>
-        <div className="flex-1 h-px bg-white/[0.06]" />
+        <div className="flex-1 h-px bg-zinc-200" />
       </div>
     </div>
   );
@@ -87,8 +87,8 @@ function ProviderPill({ label, icon, active, onClick }) {
       onClick={onClick}
       className={`h-11 rounded-xl flex items-center justify-center gap-1.5 text-[12px] font-medium transition-all border ${
         active
-          ? "bg-white/[0.08] border-white/[0.18] text-white"
-          : "glass glass-hover text-slate-300 border-transparent"
+          ? "bg-zinc-100 border-zinc-300 text-zinc-900"
+          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300"
       }`}
     >
       {icon}

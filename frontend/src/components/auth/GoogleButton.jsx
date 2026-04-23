@@ -62,7 +62,7 @@ export default function GoogleButton({ role, onError }) {
           },
         });
         google.accounts.id.renderButton(buttonRef.current, {
-          theme: "filled_black",
+          theme: "outline",
           size: "large",
           width: 320,
           shape: "pill",
@@ -101,11 +101,11 @@ export default function GoogleButton({ role, onError }) {
         type="button"
         disabled
         title="Google sign-in not configured (set VITE_GOOGLE_OAUTH_CLIENT_ID)"
-        className="w-full h-11 rounded-xl glass flex items-center justify-center gap-2.5 text-[13px] font-medium text-slate-500 cursor-not-allowed opacity-60"
+        className="w-full h-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center gap-2.5 text-[13px] font-medium text-zinc-500 cursor-not-allowed opacity-60"
       >
         <Globe size={15} />
         Continue with Google
-        <span className="text-[10px] text-slate-600">(coming soon)</span>
+        <span className="text-[10px] text-zinc-500">(coming soon)</span>
       </button>
     );
   }
@@ -118,13 +118,13 @@ export default function GoogleButton({ role, onError }) {
         className={`flex justify-center min-h-[44px] ${ready ? "" : "opacity-0"}`}
       />
       {!ready && (
-        <div className="absolute inset-0 h-11 rounded-xl glass flex items-center justify-center gap-2.5 text-[13px] font-medium text-slate-400 pointer-events-none">
+        <div className="absolute inset-0 h-11 rounded-xl bg-white border border-zinc-200 flex items-center justify-center gap-2.5 text-[13px] font-medium text-zinc-600 pointer-events-none">
           <Globe size={15} />
           Loading Google sign-in...
         </div>
       )}
       {busy && (
-        <div className="absolute inset-0 h-11 rounded-xl bg-slate-950/70 flex items-center justify-center text-[12px] text-slate-300">
+        <div className="absolute inset-0 h-11 rounded-xl bg-white/70 flex items-center justify-center text-[12px] text-zinc-700">
           Signing in...
         </div>
       )}

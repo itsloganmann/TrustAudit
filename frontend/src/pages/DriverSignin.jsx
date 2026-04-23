@@ -13,19 +13,19 @@ export default function DriverSignin() {
   return (
     <AuthShell
       role="driver"
-      eyebrow="Supplier sign-in"
+      eyebrow="Supplier driver sign-in"
       title="Namaste! Welcome back."
-      subtitle="Sign in to see your past challan submissions and the verification status from each enterprise you supply."
+      subtitle="Sign in to see past submissions and the decision on each one from the AP teams you deliver to."
       footer={
         <div className="space-y-3">
           <RoleSwitcher currentRole="driver" mode="signin" />
-          <p className="text-center text-[12px] text-slate-500">
+          <p className="text-center text-[12px] text-zinc-600">
             First time here?{" "}
             <Link
               to="/auth/driver/signup"
-              className="text-white font-medium hover:text-amber-300 transition-colors"
+              className="text-emerald-700 font-medium hover:text-emerald-800 transition-colors"
             >
-              Create a supplier account →
+              Create a supplier driver account →
             </Link>
           </p>
         </div>

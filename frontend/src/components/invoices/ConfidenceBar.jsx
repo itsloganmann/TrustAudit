@@ -1,14 +1,7 @@
 import { motion } from "framer-motion";
 
 /**
- * Horizontal confidence bar with red→amber→green gradient.
- *
- * @param {object} props
- * @param {number|null|undefined} props.confidence - 0..1
- * @param {number} [props.width=100]
- * @param {number} [props.threshold=0.85]
- * @param {boolean} [props.showLabel=true]
- * @param {string} [props.className]
+ * Horizontal confidence bar with red→amber→emerald gradient.
  */
 export default function ConfidenceBar({
   confidence,
@@ -25,12 +18,12 @@ export default function ConfidenceBar({
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         <div
-          className="h-[6px] rounded-full border border-dashed border-white/[0.10]"
+          className="h-[6px] rounded-full border border-dashed border-zinc-200"
           style={{ width }}
           aria-label="No confidence score yet"
         />
         {showLabel && (
-          <span className="text-[10px] text-slate-600 tabular-nums font-mono">
+          <span className="text-[10px] text-zinc-400 tabular-nums font-mono">
             --%
           </span>
         )}
@@ -41,15 +34,15 @@ export default function ConfidenceBar({
   // Color the percentage label by tier
   const labelColor =
     pct >= threshold
-      ? "text-emerald-400"
+      ? "text-emerald-700"
       : pct >= 0.6
-      ? "text-amber-400"
-      : "text-rose-400";
+      ? "text-amber-700"
+      : "text-red-700";
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div
-        className="relative h-[6px] rounded-full bg-white/[0.05] overflow-hidden ring-1 ring-inset ring-white/[0.04]"
+        className="relative h-[6px] rounded-full bg-zinc-100 overflow-hidden ring-1 ring-inset ring-zinc-200"
         style={{ width }}
         role="progressbar"
         aria-valuenow={Math.round(pct * 100)}
@@ -63,19 +56,13 @@ export default function ConfidenceBar({
           transition={{ type: "spring", stiffness: 140, damping: 22 }}
           style={{
             background:
-              "linear-gradient(90deg, #f43f5e 0%, #f59e0b 50%, #10b981 100%)",
+              "linear-gradient(90deg, #dc2626 0%, #d97706 50%, #059669 100%)",
             backgroundSize: `${100 / Math.max(pct, 0.01)}% 100%`,
-            boxShadow:
-              pct >= threshold
-                ? "0 0 8px rgba(16,185,129,0.45)"
-                : pct >= 0.6
-                ? "0 0 6px rgba(245,158,11,0.35)"
-                : "0 0 6px rgba(244,63,94,0.35)",
           }}
         />
         {/* Threshold marker */}
         <div
-          className="absolute inset-y-0 w-px bg-white/[0.18]"
+          className="absolute inset-y-0 w-px bg-zinc-400"
           style={{ left: `${threshold * 100}%` }}
           aria-hidden
         />

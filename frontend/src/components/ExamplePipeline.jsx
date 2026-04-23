@@ -9,7 +9,6 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertTriangle,
-  MessageCircle,
   ArrowRight,
   Eye,
 } from "lucide-react";
@@ -77,13 +76,13 @@ const TYPO_FIXES = [
 
 /* Key fields to extract (for green highlighting) */
 const KEY_FIELDS = [
-  { label: "Vendor", value: "Rajesh Steel Works", color: "#10b981" },
-  { label: "GSTIN", value: "27AADCR4328K1ZG", color: "#10b981" },
-  { label: "Invoice No", value: "INV-2024-0847", color: "#3b82f6" },
-  { label: "Date", value: "14-Jan-2025", color: "#3b82f6" },
-  { label: "Total Amount", value: "₹4,50,000", color: "#10b981" },
-  { label: "Date of Acceptance", value: "14-Jan-2025", color: "#f59e0b" },
-  { label: "MSME Reg", value: "UDYAM-MH-26-0012345", color: "#8b5cf6" },
+  { label: "Vendor", value: "Rajesh Steel Works", color: "#059669" },
+  { label: "GSTIN", value: "27AADCR4328K1ZG", color: "#059669" },
+  { label: "Invoice No", value: "INV-2024-0847", color: "#1d4ed8" },
+  { label: "Date", value: "14-Jan-2025", color: "#1d4ed8" },
+  { label: "Total Amount", value: "₹4,50,000", color: "#059669" },
+  { label: "Date of Acceptance", value: "14-Jan-2025", color: "#b45309" },
+  { label: "MSME Reg", value: "UDYAM-MH-26-0012345", color: "#059669" },
 ];
 
 /* ─────────────────── STEPS CONFIG ─────────────────── */
@@ -92,37 +91,37 @@ const STEPS = [
   {
     id: 0,
     icon: Camera,
-    title: "WhatsApp Photo Received",
-    subtitle: "Driver uploads challan photo from warehouse",
-    color: "#10b981",
+    title: "WhatsApp photo received",
+    subtitle: "Supplier driver sends a challan photo from the warehouse",
+    color: "#059669",
   },
   {
     id: 1,
     icon: ScanSearch,
-    title: "Key Areas Detected",
-    subtitle: "Vision AI identifies critical data fields",
-    color: "#3b82f6",
+    title: "Key fields detected",
+    subtitle: "Vision AI identifies the load-bearing data",
+    color: "#1d4ed8",
   },
   {
     id: 2,
     icon: FileText,
-    title: "Raw OCR Transcription",
-    subtitle: "Direct text extraction — typos and all",
-    color: "#f59e0b",
+    title: "Raw OCR transcription",
+    subtitle: "Direct text extraction, typos and all",
+    color: "#b45309",
   },
   {
     id: 3,
     icon: Sparkles,
-    title: "AI-Corrected Output",
+    title: "Corrected output",
     subtitle: "Predictive model fixes OCR errors",
-    color: "#8b5cf6",
+    color: "#059669",
   },
   {
     id: 4,
     icon: DatabaseZap,
-    title: "Added to Dashboard",
-    subtitle: "Data flows into compliance engine",
-    color: "#10b981",
+    title: "Decision surfaced",
+    subtitle: "Invoice marked clear to claim, disputed, or missing proof",
+    color: "#059669",
   },
 ];
 
@@ -133,31 +132,31 @@ function WhatsAppView() {
   return (
     <div className="flex flex-col h-full">
       {/* WhatsApp header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 bg-[#1f2c34] border-b border-white/[0.06] rounded-t-xl">
-        <div className="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center text-[11px] font-bold text-white">RS</div>
+      <div className="flex items-center gap-3 px-4 py-2.5 bg-zinc-50 border-b border-zinc-200 rounded-t-xl">
+        <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-[11px] font-bold text-zinc-700">RS</div>
         <div>
-          <p className="text-[13px] text-white font-medium">Ramesh (Driver)</p>
-          <p className="text-[10px] text-slate-400">online</p>
+          <p className="text-[13px] text-zinc-900 font-medium">Ramesh (supplier driver)</p>
+          <p className="text-[10px] text-emerald-700">online</p>
         </div>
       </div>
       {/* Chat area */}
-      <div className="flex-1 p-4 space-y-3 bg-[#0b141a] overflow-auto">
+      <div className="flex-1 p-4 space-y-3 bg-zinc-50 overflow-auto">
         {/* Incoming message */}
         <div className="max-w-[85%]">
-          <div className="bg-[#1f2c34] rounded-xl rounded-tl-sm p-2 shadow-lg">
+          <div className="bg-white border border-zinc-200 rounded-xl rounded-tl-sm p-2 shadow-sm">
             {/* Purchase order preview */}
             <div className="relative rounded-lg overflow-hidden bg-[#f5f0e8] p-0">
               <PurchaseOrderImage />
             </div>
-            <p className="text-[12px] text-slate-300 mt-2 px-1">Sir challan photo 👆 from Rajesh Steel warehouse</p>
-            <p className="text-[9px] text-slate-500 text-right mt-1">8:47 AM</p>
+            <p className="text-[12px] text-zinc-700 mt-2 px-1">Sir, challan photo from Rajesh Steel warehouse</p>
+            <p className="text-[9px] text-zinc-500 text-right mt-1">8:47 AM</p>
           </div>
         </div>
         {/* Outgoing auto-reply */}
         <div className="max-w-[85%] ml-auto">
-          <div className="bg-[#005c4b] rounded-xl rounded-tr-sm p-2.5">
-            <p className="text-[12px] text-slate-200">✅ Received. Processing challan for INV-2024-0847.</p>
-            <p className="text-[9px] text-slate-400 text-right mt-1">8:47 AM ✓✓</p>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl rounded-tr-sm p-2.5">
+            <p className="text-[12px] text-emerald-700">Received. Processing acceptance proof for INV-2024-0847.</p>
+            <p className="text-[9px] text-emerald-700 text-right mt-1">8:47 AM ✓✓</p>
           </div>
         </div>
       </div>
@@ -174,7 +173,6 @@ function HLSpan({ children, color }) {
         background: `${color}25`,
         border: `1.5px solid ${color}90`,
         borderRadius: "3px",
-        boxShadow: `0 0 6px ${color}20`,
       }}
     >
       {children}
@@ -185,10 +183,10 @@ function HLSpan({ children, color }) {
 /* CSS-rendered crumpled purchase order — accepts `highlights` prop for key field highlighting */
 function PurchaseOrderImage({ highlights = false }) {
   const HL = highlights ? HLSpan : ({ children }) => <>{children}</>;
-  const green = "#10b981";
-  const blue = "#3b82f6";
-  const amber = "#f59e0b";
-  const violet = "#8b5cf6";
+  const green = "#059669";
+  const blue = "#1d4ed8";
+  const amber = "#b45309";
+  const violet = "#059669";
 
   return (
     <div className="relative" style={{ fontFamily: "'Courier New', monospace" }}>
@@ -202,7 +200,6 @@ function PurchaseOrderImage({ highlights = false }) {
             radial-gradient(ellipse at 85% 80%, rgba(100,80,50,0.15) 0%, transparent 35%),
             linear-gradient(135deg, #f5f0e8 0%, #ede5d5 30%, #f0e8d8 60%, #e8dfc8 100%)
           `,
-          boxShadow: "inset 0 0 60px rgba(0,0,0,0.08)",
         }}
       >
         {/* Oil stain overlays */}
@@ -299,9 +296,9 @@ function PurchaseOrderImage({ highlights = false }) {
 function HighlightedView() {
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
-        <Eye size={14} className="text-blue-400" />
-        <span className="text-[12px] text-white font-medium">Vision AI — Key Field Detection</span>
+      <div className="px-4 py-3 border-b border-zinc-200 flex items-center gap-2">
+        <Eye size={14} className="text-emerald-700" />
+        <span className="text-[12px] text-zinc-900 font-medium">Vision AI, key field detection</span>
       </div>
       <div className="flex-1 p-4 overflow-auto">
         <div className="relative rounded-lg overflow-hidden">
@@ -310,12 +307,12 @@ function HighlightedView() {
         {/* Legend */}
         <div className="mt-3 flex flex-wrap gap-2">
           {[
-            { label: "Identity", color: "#10b981" },
-            { label: "Invoice Data", color: "#3b82f6" },
-            { label: "Compliance Critical", color: "#f59e0b" },
-            { label: "Registration", color: "#8b5cf6" },
+            { label: "Identity", color: "#059669" },
+            { label: "Invoice data", color: "#1d4ed8" },
+            { label: "Window critical", color: "#b45309" },
+            { label: "Registration", color: "#059669" },
           ].map((l) => (
-            <span key={l.label} className="flex items-center gap-1.5 text-[10px] text-slate-400">
+            <span key={l.label} className="flex items-center gap-1.5 text-[10px] text-zinc-600">
               <span className="w-2 h-2 rounded-sm" style={{ background: l.color, opacity: 0.7 }} />
               {l.label}
             </span>
@@ -331,21 +328,21 @@ function RawOCRView() {
   const lines = RAW_OCR.split("\n");
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText size={14} className="text-amber-400" />
-          <span className="text-[12px] text-white font-medium">Raw OCR Output</span>
+          <FileText size={14} className="text-amber-700" />
+          <span className="text-[12px] text-zinc-900 font-medium">Raw OCR output</span>
         </div>
-        <span className="text-[10px] text-amber-400/70 flex items-center gap-1">
+        <span className="text-[10px] text-amber-700 flex items-center gap-1">
           <AlertTriangle size={10} />
           {TYPO_FIXES.length} errors detected
         </span>
       </div>
-      <div className="flex-1 p-4 overflow-auto">
+      <div className="flex-1 p-4 overflow-auto bg-white">
         <pre className="text-[11px] leading-[1.7] font-mono whitespace-pre-wrap">
           {lines.map((line, i) => (
             <span key={i}>
-              <span className="text-slate-600 select-none mr-3 text-[9px]">{String(i + 1).padStart(2, "0")}</span>
+              <span className="text-zinc-400 select-none mr-3 text-[9px]">{String(i + 1).padStart(2, "0")}</span>
               <HighlightTypos text={line} />
               {"\n"}
             </span>
@@ -376,16 +373,16 @@ function HighlightTypos({ text }) {
 
     if (matchedFix) {
       if (earliestIdx > 0) {
-        result.push(<span key={keyIdx++} className="text-slate-400">{remaining.slice(0, earliestIdx)}</span>);
+        result.push(<span key={keyIdx++} className="text-zinc-600">{remaining.slice(0, earliestIdx)}</span>);
       }
       result.push(
-        <span key={keyIdx++} className="text-rose-400 bg-rose-400/10 px-0.5 rounded" title={`Should be: ${matchedFix.right}`}>
+        <span key={keyIdx++} className="text-red-700 bg-red-50 border border-red-200 px-0.5 rounded" title={`Should be: ${matchedFix.right}`}>
           {matchedFix.wrong}
         </span>
       );
       remaining = remaining.slice(earliestIdx + matchedFix.wrong.length);
     } else {
-      result.push(<span key={keyIdx++} className="text-slate-400">{remaining}</span>);
+      result.push(<span key={keyIdx++} className="text-zinc-600">{remaining}</span>);
       remaining = "";
     }
   }
@@ -398,35 +395,35 @@ function CorrectedView() {
   const lines = CORRECTED.split("\n");
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-zinc-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles size={14} className="text-violet-400" />
-          <span className="text-[12px] text-white font-medium">AI-Corrected Output</span>
+          <Sparkles size={14} className="text-emerald-700" />
+          <span className="text-[12px] text-zinc-900 font-medium">Corrected output</span>
         </div>
-        <span className="text-[10px] text-emerald-400/70 flex items-center gap-1">
+        <span className="text-[10px] text-emerald-700 flex items-center gap-1">
           <CheckCircle2 size={10} />
           {TYPO_FIXES.length} corrections applied
         </span>
       </div>
-      <div className="flex-1 p-4 overflow-auto">
+      <div className="flex-1 p-4 overflow-auto bg-white">
         <pre className="text-[11px] leading-[1.7] font-mono whitespace-pre-wrap">
           {lines.map((line, i) => (
             <span key={i}>
-              <span className="text-slate-600 select-none mr-3 text-[9px]">{String(i + 1).padStart(2, "0")}</span>
+              <span className="text-zinc-400 select-none mr-3 text-[9px]">{String(i + 1).padStart(2, "0")}</span>
               <HighlightCorrections text={line} />
               {"\n"}
             </span>
           ))}
         </pre>
         {/* Diff summary */}
-        <div className="mt-4 pt-3 border-t border-white/[0.06]">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Corrections Applied</p>
+        <div className="mt-4 pt-3 border-t border-zinc-200">
+          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2">Corrections applied</p>
           <div className="grid grid-cols-2 gap-1.5">
             {TYPO_FIXES.slice(0, 8).map((fix, i) => (
               <div key={i} className="flex items-center gap-1.5 text-[10px]">
-                <span className="text-rose-400 line-through opacity-60">{fix.wrong}</span>
-                <ArrowRight size={8} className="text-slate-600" />
-                <span className="text-emerald-400">{fix.right}</span>
+                <span className="text-red-700 line-through opacity-60">{fix.wrong}</span>
+                <ArrowRight size={8} className="text-zinc-400" />
+                <span className="text-emerald-700">{fix.right}</span>
               </div>
             ))}
           </div>
@@ -456,16 +453,16 @@ function HighlightCorrections({ text }) {
 
     if (matchedFix) {
       if (earliestIdx > 0) {
-        result.push(<span key={keyIdx++} className="text-slate-400">{remaining.slice(0, earliestIdx)}</span>);
+        result.push(<span key={keyIdx++} className="text-zinc-600">{remaining.slice(0, earliestIdx)}</span>);
       }
       result.push(
-        <span key={keyIdx++} className="text-emerald-400 bg-emerald-400/10 px-0.5 rounded">
+        <span key={keyIdx++} className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-0.5 rounded">
           {matchedFix.right}
         </span>
       );
       remaining = remaining.slice(earliestIdx + matchedFix.right.length);
     } else {
-      result.push(<span key={keyIdx++} className="text-slate-400">{remaining}</span>);
+      result.push(<span key={keyIdx++} className="text-zinc-600">{remaining}</span>);
       remaining = "";
     }
   }
@@ -486,23 +483,23 @@ function DashboardView() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-white/[0.06] flex items-center gap-2">
-        <DatabaseZap size={14} className="text-emerald-400" />
-        <span className="text-[12px] text-white font-medium">Dashboard Integration</span>
+      <div className="px-4 py-3 border-b border-zinc-200 flex items-center gap-2">
+        <DatabaseZap size={14} className="text-emerald-700" />
+        <span className="text-[12px] text-zinc-900 font-medium">Decision surfaced</span>
       </div>
-      <div className="flex-1 p-4 space-y-3 overflow-auto">
+      <div className="flex-1 p-4 space-y-3 overflow-auto bg-white">
         {/* Extracted fields */}
         <div className="space-y-1.5">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Extracted Data</p>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-wider mb-2">Extracted data</p>
           {KEY_FIELDS.map((field, i) => (
             <motion.div
               key={field.label}
               initial={{ opacity: 0, x: -10 }}
               animate={animPhase >= 1 ? { opacity: 1, x: 0 } : {}}
               transition={{ delay: i * 0.08, duration: 0.3 }}
-              className="flex items-center justify-between py-1 px-2 rounded-md bg-white/[0.02]"
+              className="flex items-center justify-between py-1 px-2 rounded-md bg-zinc-50 border border-zinc-200"
             >
-              <span className="text-[10px] text-slate-500">{field.label}</span>
+              <span className="text-[10px] text-zinc-500">{field.label}</span>
               <span className="text-[11px] font-medium" style={{ color: field.color }}>{field.value}</span>
             </motion.div>
           ))}
@@ -513,28 +510,28 @@ function DashboardView() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={animPhase >= 2 ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.4 }}
-          className="rounded-lg p-3 border border-emerald-500/20 bg-emerald-500/[0.05]"
+          className="rounded-lg p-3 border border-emerald-200 bg-emerald-50"
         >
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 size={14} className="text-emerald-400" />
-            <span className="text-[12px] text-emerald-400 font-medium">43B(h) Compliance Check</span>
+            <CheckCircle2 size={14} className="text-emerald-700" />
+            <span className="text-[12px] text-emerald-700 font-medium">Invoice cleared to claim</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-[10px]">
             <div>
-              <span className="text-slate-500">Acceptance Date</span>
-              <p className="text-white font-medium">14-Jan-2025</p>
+              <span className="text-zinc-500">Acceptance date</span>
+              <p className="text-zinc-900 font-medium">14-Jan-2025</p>
             </div>
             <div>
-              <span className="text-slate-500">Payment Deadline</span>
-              <p className="text-amber-400 font-medium">28-Feb-2025 (45 days)</p>
+              <span className="text-zinc-500">Payment window ends</span>
+              <p className="text-amber-700 font-medium">28-Feb-2025 (45 days)</p>
             </div>
             <div>
-              <span className="text-slate-500">Amount Protected</span>
-              <p className="text-emerald-400 font-medium glow-emerald">₹4,50,000</p>
+              <span className="text-zinc-500">Amount</span>
+              <p className="text-emerald-700 font-medium">₹4,50,000</p>
             </div>
             <div>
-              <span className="text-slate-500">Tax Shield</span>
-              <p className="text-emerald-400 font-medium glow-emerald">₹1,35,000</p>
+              <span className="text-zinc-500">43B(h) deduction estimate</span>
+              <p className="text-emerald-700 font-medium">₹1,35,000</p>
             </div>
           </div>
         </motion.div>
@@ -544,14 +541,14 @@ function DashboardView() {
           initial={{ opacity: 0, y: 10 }}
           animate={animPhase >= 3 ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.3 }}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-zinc-200"
         >
-          <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <CheckCircle2 size={12} className="text-emerald-400" />
+          <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
+            <CheckCircle2 size={12} className="text-emerald-700" />
           </div>
           <div>
-            <p className="text-[11px] text-white font-medium">Added to Dashboard</p>
-            <p className="text-[9px] text-slate-500">Invoice INV-2024-0847 is now being tracked</p>
+            <p className="text-[11px] text-zinc-900 font-medium">Decision surfaced</p>
+            <p className="text-[9px] text-zinc-500">Invoice INV-2024-0847 marked clear to claim</p>
           </div>
         </motion.div>
       </div>
@@ -589,17 +586,17 @@ export default function ExamplePipeline() {
       {/* Section header */}
       <div className="flex items-center gap-3 mb-5">
         <div className="flex items-center gap-2">
-          <div className="w-1 h-5 rounded-full bg-gradient-to-b from-blue-500 to-emerald-500" />
-          <h2 className="text-white font-semibold text-[15px] tracking-tight">How It Works</h2>
+          <div className="w-1 h-5 rounded-full bg-emerald-600" />
+          <h2 className="text-zinc-900 font-semibold text-[15px] tracking-tight">How it works</h2>
         </div>
-        <span className="text-[10px] text-slate-600 font-medium px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/[0.06]">
-          Live Example
+        <span className="text-[10px] text-zinc-500 font-medium px-2 py-0.5 rounded-md bg-zinc-50 border border-zinc-200">
+          Live example
         </span>
       </div>
 
       <div className="glass rounded-2xl overflow-hidden">
         {/* Step tabs */}
-        <div className="flex items-center border-b border-white/[0.06] overflow-x-auto">
+        <div className="flex items-center border-b border-zinc-200 overflow-x-auto bg-white">
           {STEPS.map((step, i) => {
             const Icon = step.icon;
             const isActive = i === activeStep;
@@ -609,37 +606,36 @@ export default function ExamplePipeline() {
                 key={step.id}
                 onClick={() => handleStepClick(i)}
                 className={`group relative flex items-center gap-2 px-4 py-3 text-[11px] font-medium transition-all whitespace-nowrap ${isActive
-                    ? "text-white bg-white/[0.04]"
+                    ? "text-zinc-900 bg-zinc-50"
                     : isPast
-                      ? "text-slate-400"
-                      : "text-slate-600 hover:text-slate-400"
+                      ? "text-zinc-600"
+                      : "text-zinc-500 hover:text-zinc-700"
                   }`}
               >
                 <div
                   className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${isActive
-                      ? "bg-white/10"
+                      ? "bg-white border border-zinc-200"
                       : isPast
-                        ? "bg-white/[0.04]"
-                        : "bg-white/[0.02]"
+                        ? "bg-emerald-50 border border-emerald-200"
+                        : "bg-zinc-50 border border-zinc-200"
                     }`}
-                  style={isActive ? { boxShadow: `0 0 12px ${step.color}30` } : {}}
                 >
                   {isPast ? (
-                    <CheckCircle2 size={11} className="text-emerald-400" />
+                    <CheckCircle2 size={11} className="text-emerald-700" />
                   ) : (
-                    <Icon size={11} style={isActive ? { color: step.color } : {}} />
+                    <Icon size={11} style={isActive ? { color: step.color } : { color: "#71717a" }} />
                   )}
                 </div>
                 <span className="hidden sm:inline">{step.title}</span>
                 {i < STEPS.length - 1 && (
-                  <ChevronRight size={10} className="text-slate-700 ml-1" />
+                  <ChevronRight size={10} className="text-zinc-300 ml-1" />
                 )}
                 {/* Active indicator bar */}
                 {isActive && (
                   <motion.div
                     layoutId="activeStepBar"
                     className="absolute bottom-0 left-0 right-0 h-[2px]"
-                    style={{ background: `linear-gradient(90deg, ${step.color}, transparent)` }}
+                    style={{ background: step.color }}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -651,8 +647,8 @@ export default function ExamplePipeline() {
             <button
               onClick={() => setAutoPlay(!autoPlay)}
               className={`text-[9px] px-2 py-1 rounded-md border transition-all ${autoPlay
-                  ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/[0.05]"
-                  : "text-slate-600 border-white/[0.06] hover:text-slate-400"
+                  ? "text-emerald-700 border-emerald-200 bg-emerald-50"
+                  : "text-zinc-500 border-zinc-200 hover:text-zinc-700 bg-white"
                 }`}
             >
               {autoPlay ? "● Auto" : "○ Paused"}
@@ -663,7 +659,7 @@ export default function ExamplePipeline() {
         {/* Content area */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,1fr] min-h-[420px]">
           {/* Left: Visual */}
-          <div className="border-r border-white/[0.06]">
+          <div className="border-r border-zinc-200">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeStep}
@@ -679,7 +675,7 @@ export default function ExamplePipeline() {
           </div>
 
           {/* Right: Description */}
-          <div className="p-5 flex flex-col justify-center">
+          <div className="p-5 flex flex-col justify-center bg-white">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeStep}
@@ -690,18 +686,18 @@ export default function ExamplePipeline() {
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ background: `${STEPS[activeStep].color}15`, boxShadow: `0 0 20px ${STEPS[activeStep].color}10` }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center border border-zinc-200"
+                    style={{ background: `${STEPS[activeStep].color}15` }}
                   >
                     {(() => { const Icon = STEPS[activeStep].icon; return <Icon size={18} style={{ color: STEPS[activeStep].color }} />; })()}
                   </div>
                   <div>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">Step {activeStep + 1} of {STEPS.length}</p>
-                    <h3 className="text-white font-semibold text-[15px] tracking-tight">{STEPS[activeStep].title}</h3>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Step {activeStep + 1} of {STEPS.length}</p>
+                    <h3 className="text-zinc-900 font-semibold text-[15px] tracking-tight">{STEPS[activeStep].title}</h3>
                   </div>
                 </div>
 
-                <p className="text-[13px] text-slate-400 leading-relaxed mb-5">
+                <p className="text-[13px] text-zinc-600 leading-relaxed mb-5">
                   {STEP_DESCRIPTIONS[activeStep]}
                 </p>
 
@@ -710,9 +706,9 @@ export default function ExamplePipeline() {
                   {activeStep < STEPS.length - 1 && (
                     <button
                       onClick={() => handleStepClick(activeStep + 1)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-white bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] transition-all"
+                      className="btn btn-ghost btn-xs"
                     >
-                      Next Step <ChevronRight size={12} />
+                      Next step <ChevronRight size={12} />
                     </button>
                   )}
                   {/* Progress dots */}
@@ -722,8 +718,7 @@ export default function ExamplePipeline() {
                         key={i}
                         className="w-1.5 h-1.5 rounded-full transition-all cursor-pointer"
                         style={{
-                          background: i === activeStep ? STEPS[activeStep].color : i < activeStep ? "#10b981" : "rgba(255,255,255,0.1)",
-                          boxShadow: i === activeStep ? `0 0 6px ${STEPS[activeStep].color}60` : "none",
+                          background: i === activeStep ? STEPS[activeStep].color : i < activeStep ? "#10b981" : "#e4e4e7",
                         }}
                         onClick={() => handleStepClick(i)}
                       />
@@ -740,9 +735,9 @@ export default function ExamplePipeline() {
 }
 
 const STEP_DESCRIPTIONS = [
-  "A driver at the Rajesh Steel Works warehouse photographs the purchase order challan and sends it via WhatsApp. The paper has oil stains and fold marks from being handled on the shop floor — exactly how real documents arrive.",
-  "Our Vision AI scans the image and identifies critical data fields: vendor identity, GSTIN, invoice details, amounts, and most importantly — the Date of Acceptance that determines the 43B(h) compliance deadline.",
+  "A driver at the Rajesh Steel Works warehouse photographs the delivery challan and sends it via WhatsApp. The paper has oil stains and fold marks from being handled on the shop floor, exactly how real documents arrive.",
+  "Vision AI scans the image and pulls the fields AP needs to decide: supplier identity, GSTIN, invoice details, amounts, and the date of acceptance that anchors the payment window.",
   "The raw OCR engine extracts text directly from the crumpled paper. Notice the errors: 'Ste3l' instead of 'Steel', '0RDER' instead of 'ORDER', zeros confused with the letter O. This is what typical OCR produces on damaged documents.",
-  "Our predictive model cross-references extracted text against known patterns, vendor databases, and GSTIN checksums to correct every OCR error. 15 corrections are applied automatically with 99.2% confidence.",
-  "The verified data flows directly into the TrustAudit compliance engine. The system calculates the 45-day payment deadline, tracks the ₹4,50,000 deduction at risk, and begins the countdown timer.",
+  "A predictive model cross-references extracted text against known patterns, supplier records, and GSTIN checksums to correct OCR errors. 15 corrections are applied automatically with 99.2% confidence.",
+  "The cleaned record surfaces in TrustAudit with a clear decision: cleared to claim, disputed, or missing proof. The 45-day 43B(h) window is one tag among many, not the whole story.",
 ];

@@ -5,6 +5,8 @@ sqlalchemy>=2.0.25
 psycopg[binary]>=3.2
 alembic>=1.13
 pydantic>=2.5.3
+# EmailStr validator for the pilot intake form (POST /api/pilot/applications)
+email-validator>=2.2.0
 python-multipart>=0.0.18
 Pillow>=10.2.0
 httpx>=0.26.0

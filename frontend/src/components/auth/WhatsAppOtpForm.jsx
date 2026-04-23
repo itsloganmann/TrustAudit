@@ -75,13 +75,13 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
             className="space-y-3"
           >
             <label className="block">
-              <span className="text-[11px] text-slate-500 uppercase tracking-widest font-semibold">
+              <span className="text-[11px] text-zinc-500 uppercase tracking-widest font-semibold">
                 Phone number
               </span>
               <div className="mt-1.5 relative">
                 <MessageCircle
                   size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
                 />
                 <input
                   type="tel"
@@ -90,7 +90,7 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98765 43210"
-                  className="w-full h-11 pl-9 pr-3 text-[13px] bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] transition-colors"
+                  className="w-full h-11 pl-9 pr-3 text-[13px] bg-white border border-zinc-200 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
             </label>
@@ -98,7 +98,7 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
             <button
               type="submit"
               disabled={busy}
-              className="w-full h-11 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-[13px] font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className="btn btn-primary btn-md w-full"
             >
               {busy ? "Sending..." : `Send ${channelLabel} code`}
             </button>
@@ -113,19 +113,19 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
             onSubmit={handleVerify}
             className="space-y-3"
           >
-            <div className="text-[12px] text-slate-500 leading-relaxed">
+            <div className="text-[12px] text-zinc-600 leading-relaxed">
               We sent a {channelLabel} code to{" "}
-              <span className="text-white font-medium tabular-nums">{phone}</span>.
+              <span className="text-zinc-900 font-medium tabular-nums">{phone}</span>.
               Enter it below.
             </div>
             <label className="block">
-              <span className="text-[11px] text-slate-500 uppercase tracking-widest font-semibold">
+              <span className="text-[11px] text-zinc-500 uppercase tracking-widest font-semibold">
                 Verification code
               </span>
               <div className="mt-1.5 relative">
                 <ShieldCheck
                   size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
                 />
                 <input
                   type="text"
@@ -135,7 +135,7 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
                   placeholder="123456"
-                  className="w-full h-11 pl-9 pr-3 text-[15px] tabular-nums tracking-[0.2em] bg-white/[0.03] border border-white/[0.08] rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-white/[0.18] transition-colors"
+                  className="w-full h-11 pl-9 pr-3 text-[15px] tabular-nums tracking-[0.2em] bg-white border border-zinc-200 rounded-xl text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
             </label>
@@ -148,7 +148,7 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
                   setError("");
                   setCode("");
                 }}
-                className="h-11 px-4 rounded-xl glass glass-hover text-[12px] text-slate-300 flex items-center gap-1.5"
+                className="btn btn-ghost btn-md"
               >
                 <ArrowLeft size={12} />
                 Back
@@ -156,7 +156,7 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
               <button
                 type="submit"
                 disabled={busy}
-                className="flex-1 h-11 rounded-xl bg-white hover:bg-slate-100 text-slate-950 text-[13px] font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                className="btn btn-primary btn-md flex-1"
               >
                 {busy ? "Verifying..." : "Verify and continue"}
               </button>
@@ -170,8 +170,8 @@ export default function WhatsAppOtpForm({ role, channel = "whatsapp" }) {
 
 function FieldError({ children }) {
   return (
-    <p className="text-[11px] text-rose-400 flex items-center gap-1.5">
-      <span className="w-1 h-1 rounded-full bg-rose-500 pulse-dot" />
+    <p className="text-[11px] text-red-700 flex items-center gap-1.5">
+      <span className="w-1 h-1 rounded-full bg-red-500 pulse-dot" />
       {children}
     </p>
   );

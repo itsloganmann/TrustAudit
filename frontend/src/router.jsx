@@ -17,6 +17,7 @@ const LiveDemo = lazy(() => import("./pages/LiveDemo.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const Privacy = lazy(() => import("./pages/Privacy.jsx"));
 const Terms = lazy(() => import("./pages/Terms.jsx"));
+const Apply = lazy(() => import("./pages/Apply.jsx"));
 
 // ── Auth pages ──────────────────────────────────────────────────────────────
 import VendorSignup from "./pages/VendorSignup.jsx";
@@ -40,8 +41,8 @@ import App from "./App.jsx";
 
 function FullPageSpinner() {
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="w-5 h-5 rounded-full border-2 border-white/[0.08] border-t-white animate-spin" />
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="w-5 h-5 rounded-full border-2 border-zinc-200 border-t-zinc-900 animate-spin" />
     </div>
   );
 }
@@ -95,15 +96,15 @@ function VendorHomePlaceholder() {
   return (
     <div className="space-y-4">
       <div className="glass rounded-2xl p-6">
-        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-          Vendor dashboard
+        <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
+          AP decision dashboard
         </p>
-        <h1 className="mt-1 text-[24px] text-white font-bold tracking-tight">
-          Welcome, {user?.full_name || "CFO"}.
+        <h1 className="mt-1 text-[24px] text-zinc-900 font-bold tracking-tight">
+          Welcome, {user?.full_name || "AP lead"}.
         </h1>
-        <p className="mt-2 text-[13px] text-slate-400">
-          Your real-time 43B(h) compliance shield is live. The full dashboard
-          (W8) renders here.
+        <p className="mt-2 text-[13px] text-zinc-600">
+          Live decisions on which supplier invoices are cleared to claim,
+          disputed, or still missing proof. Full dashboard renders here.
         </p>
       </div>
     </div>
@@ -113,13 +114,13 @@ function VendorHomePlaceholder() {
 function VendorPlaceholder({ title, copy }) {
   return (
     <div className="glass rounded-2xl p-6">
-      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
         Coming soon
       </p>
-      <h1 className="mt-1 text-[20px] text-white font-bold tracking-tight">
+      <h1 className="mt-1 text-[20px] text-zinc-900 font-bold tracking-tight">
         {title}
       </h1>
-      <p className="mt-2 text-[13px] text-slate-400">{copy}</p>
+      <p className="mt-2 text-[13px] text-zinc-600">{copy}</p>
     </div>
   );
 }
@@ -128,15 +129,15 @@ function DriverHomePlaceholder() {
   const { user } = useAuth();
   return (
     <div className="glass rounded-2xl p-6">
-      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+      <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">
         My submissions
       </p>
-      <h1 className="mt-1 text-[22px] text-white font-bold tracking-tight">
+      <h1 className="mt-1 text-[22px] text-zinc-900 font-bold tracking-tight">
         Welcome, {user?.full_name || "driver"}.
       </h1>
-      <p className="mt-2 text-[13px] text-slate-400">
-        Send your first challan via WhatsApp using the green button above.
-        Your submissions will appear here in real time.
+      <p className="mt-2 text-[13px] text-zinc-600">
+        Send your first acceptance proof via WhatsApp using the green button
+        above. Your submissions appear here in real time.
       </p>
     </div>
   );
@@ -194,6 +195,14 @@ export const router = createBrowserRouter([
       </Suspense>
     ),
   },
+  {
+    path: "/apply",
+    element: (
+      <Suspense fallback={<FullPageSpinner />}>
+        <Apply />
+      </Suspense>
+    ),
+  },
 
   // Auth
   { path: "/auth/vendor/signup", element: <VendorSignup /> },
@@ -222,7 +231,7 @@ export const router = createBrowserRouter([
         element: (
           <VendorPlaceholder
             title="Invoice detail"
-            copy="The invoice detail drawer (W8) renders here as a real route."
+            copy="Per-invoice decision view and proof trail render here."
           />
         ),
       },
@@ -231,7 +240,7 @@ export const router = createBrowserRouter([
         element: (
           <VendorPlaceholder
             title="Dispute queue"
-            copy="W8 will mount the dispute resolution chat thread for each invoice here."
+            copy="Invoices flagged disputed land here with the supplier chat thread attached."
           />
         ),
       },
@@ -239,8 +248,8 @@ export const router = createBrowserRouter([
         path: "analytics",
         element: (
           <VendorPlaceholder
-            title="Loss analytics"
-            copy="W8 ships the loss-by-supplier heatmap and aging buckets here."
+            title="AP analytics"
+            copy="Aging buckets, supplier-level dispute rates, and payment window breakdowns."
           />
         ),
       },
@@ -249,7 +258,7 @@ export const router = createBrowserRouter([
         element: (
           <VendorPlaceholder
             title="Account settings"
-            copy="Manage your enterprise team, linked identities (Google, WhatsApp, magic link) and notification preferences."
+            copy="Manage your AP team, linked identities (Google, WhatsApp, magic link) and notification preferences."
           />
         ),
       },

@@ -15,27 +15,36 @@ import { ArrowRight, Clock, TrendingDown, ShieldCheck } from "lucide-react";
 const BEATS = [
   {
     icon: Clock,
-    accent: "#f43f5e",
-    eyebrow: "The cliff",
-    title: "45 days. Then the deduction is gone.",
+    accent: "#dc2626",
+    accentBg: "bg-red-50",
+    accentBorder: "border-red-200",
+    accentText: "text-red-700",
+    eyebrow: "The question AP can't answer",
+    title: "Is this invoice actually safe to pay?",
     body:
-      "Section 43B(h) disallows any MSME payment that misses the statutory window. It's a binary loss — one day late and the entire expense becomes non-deductible. For an enterprise with 1,000 monthly suppliers, a single missed deadline can erase ₹5-15 lakh in tax shield per month.",
+      "An Indian AP clerk opens a bill, then opens WhatsApp, then opens a folder of scanned PODs. Somewhere in that stack is the proof the goods landed, in the right quantity, on the right date. If it's there and matches, the invoice is clear. If it doesn't match, finance needs to pause. Today that judgment call happens in someone's head, over email, with no trail.",
   },
   {
     icon: TrendingDown,
-    accent: "#f59e0b",
-    eyebrow: "The broken workflow",
-    title: "Paper challans. WhatsApp photos. Spreadsheets.",
+    accent: "#d97706",
+    accentBg: "bg-amber-50",
+    accentBorder: "border-amber-200",
+    accentText: "text-amber-700",
+    eyebrow: "The workflow that got us here",
+    title: "Proof lives in WhatsApp, PDFs, and stamped paperwork.",
     body:
-      "Today the driver hands over a printed challan. Someone in finance gets a WhatsApp screenshot. They retype it into Tally three days later. The critical 'Date of Acceptance' field — the one 43B(h) actually keys on — is almost never captured correctly. You find out you missed the window the day your CA files the ITR.",
+      "Delivery photos arrive in a driver's WhatsApp thread. A signed POD gets emailed as a 2MB PDF. A GRN sits in the ERP with no link back to the supplier challan. The acceptance date, the line items, the stamp, the signature, all of it exists, scattered across channels the ERP cannot see. Nobody tells finance when the match is complete.",
   },
   {
     icon: ShieldCheck,
-    accent: "#10b981",
+    accent: "#059669",
+    accentBg: "bg-emerald-50",
+    accentBorder: "border-emerald-200",
+    accentText: "text-emerald-700",
     eyebrow: "TrustAudit",
-    title: "Every photo becomes a shield in under 15 seconds.",
+    title: "The decision layer for invoice acceptance.",
     body:
-      "The driver sends the same photo to TrustAudit's WhatsApp bot. Our vision model extracts every field, the state machine routes it through VERIFYING → VERIFIED or NEEDS_INFO, and a filing-ready PDF drops into the CFO's dashboard. The 45-day timer starts the moment the photo lands — not three days later.",
+      "We ingest delivery and acceptance proof from every channel your suppliers already use, match it to the right invoice, and return one of three verdicts: clear to claim, disputed, or missing proof. AP gets a single queue to work. Finance gets an audit-ready bundle for every release.",
   },
 ];
 
@@ -57,38 +66,28 @@ export default function ProductPitchScroll() {
             >
               {/* Icon panel */}
               <div className="md:w-2/5 flex justify-center">
-                <div className="relative">
-                  <div
-                    className="absolute inset-0 rounded-3xl blur-3xl"
-                    style={{ background: `${beat.accent}22` }}
+                <div
+                  className={`relative w-40 h-40 md:w-52 md:h-52 rounded-2xl bg-white border ${beat.accentBorder} shadow-sm flex items-center justify-center`}
+                >
+                  <Icon
+                    size={56}
+                    strokeWidth={1.5}
+                    style={{ color: beat.accent }}
                   />
-                  <div
-                    className="relative w-40 h-40 md:w-52 md:h-52 rounded-3xl glass flex items-center justify-center"
-                    style={{
-                      boxShadow: `0 20px 60px -20px ${beat.accent}40, inset 0 0 0 1px rgba(255,255,255,0.05)`,
-                    }}
-                  >
-                    <Icon
-                      size={64}
-                      strokeWidth={1.4}
-                      style={{ color: beat.accent }}
-                    />
-                  </div>
                 </div>
               </div>
 
               {/* Copy */}
               <div className="md:w-3/5">
                 <p
-                  className="text-[11px] uppercase tracking-[0.3em] font-semibold mb-3"
-                  style={{ color: beat.accent }}
+                  className={`text-[11px] uppercase tracking-[0.3em] font-semibold mb-3 ${beat.accentText}`}
                 >
                   {beat.eyebrow}
                 </p>
-                <h3 className="text-[26px] md:text-[34px] font-bold text-white tracking-tight leading-[1.1] mb-4">
+                <h3 className="text-[26px] md:text-[34px] font-bold text-zinc-900 tracking-tight leading-[1.1] mb-4">
                   {beat.title}
                 </h3>
-                <p className="text-[14px] md:text-[15px] text-slate-400 leading-relaxed">
+                <p className="text-[14px] md:text-[15px] text-zinc-600 leading-relaxed">
                   {beat.body}
                 </p>
               </div>
@@ -103,9 +102,9 @@ export default function ProductPitchScroll() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.4 }}
-          className="mt-6 flex items-center justify-center gap-2 text-[13px] text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+          className="mt-6 flex items-center justify-center gap-2 text-[13px] text-emerald-700 hover:text-emerald-800 font-semibold transition-colors"
         >
-          See it for yourself
+          See a live session
           <ArrowRight size={14} />
         </motion.a>
       </div>

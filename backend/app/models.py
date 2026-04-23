@@ -7,6 +7,7 @@ domain model, and a challan event audit trail. All new columns on the existing
 compatibility with the existing ``routes.py`` endpoints.
 """
 from sqlalchemy import (
+    JSON,
     Boolean,
     Column,
     DateTime,
@@ -290,3 +291,34 @@ class RateLimit(Base):
 
     def __repr__(self) -> str:
         return f"<RateLimit {self.key} n={self.count}>"
+
+
+# ---------------------------------------------------------------------------
+# Pilot program intake
+# ---------------------------------------------------------------------------
+class PilotApplication(Base):
+    """Inbound "Request pilot" form submissions from the marketing site.
+
+    Stored in its own table so we can keep reviewer-form data entirely
+    separate from the auth/user surface. ``sectors`` and ``proof_channels``
+    are multi-select; we store them as JSON so they round-trip as real
+    Python lists in both SQLite (JSON1) and Postgres (JSONB).
+    """
+
+    __tablename__ = "pilot_applications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_name = Column(String(255), nullable=False)
+    contact_name = Column(String(255), nullable=False)
+    role = Column(String(120), nullable=False)
+    contact_email = Column(String(255), nullable=False, index=True)
+    phone = Column(String(40), nullable=True)
+    ap_volume_tier = Column(String(16), nullable=False)
+    sectors = Column(JSON, nullable=False)
+    proof_channels = Column(JSON, nullable=False)
+    biggest_blocker = Column(Text, nullable=False)
+    source_ip = Column(String(64), nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<PilotApplication {self.id} {self.company_name} {self.contact_email}>"
