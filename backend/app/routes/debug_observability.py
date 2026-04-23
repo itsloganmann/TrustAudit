@@ -27,15 +27,17 @@ router = APIRouter(tags=["debug"])
 def _require_admin(x_admin_token: str | None) -> None:
     expected = os.getenv("ADMIN_TOKEN", "").strip()
     supplied = (x_admin_token or "").strip()
+    # Single generic 401 detail for both "missing" and "wrong" cases to avoid
+    # a token-validity oracle (per Copilot review on PR #18).
     if not expected or not supplied:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="admin token required",
+            detail="unauthorized",
         )
     if not hmac.compare_digest(supplied.encode("utf-8"), expected.encode("utf-8")):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="admin token invalid",
+            detail="unauthorized",
         )
 
 
