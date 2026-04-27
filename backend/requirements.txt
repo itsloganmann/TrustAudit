@@ -2,7 +2,7 @@ fastapi>=0.115.0
 uvicorn[standard]>=0.27.0
 sqlalchemy>=2.0.25
 # Postgres driver (Render Postgres add-on) + migrations
-psycopg[binary]>=3.2
+psycopg[binary]>=3.3.3
 alembic>=1.13
 pydantic>=2.5.3
 # EmailStr validator for the pilot intake form (POST /api/pilot/applications)
